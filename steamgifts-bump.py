@@ -3,6 +3,7 @@
 # TODO: external config file with parser
 
 from time import sleep
+from datetime import datetime
 from bs4 import BeautifulSoup as bs
 from random import randint
 import requests
@@ -19,15 +20,15 @@ def timer():
     minStart = 3700
     randomstart = randint(minStart, maxStart)
     i = 0
-    while i <= randomstart:
+    while i < randomstart:
         i+=1
-        print(" -- Waiting {:d} seconds".format(randomstart-i), end="\r")
+        print("Waiting: {:4d} seconds".format(randomstart-i), end="\r")
         sleep(1)
 
 def bump():
     data = {}
 
-    print("Bumping now!")
+    print("Bumping now! {}".format(datetime.now()))
 
     for url in links:
         try:
