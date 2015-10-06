@@ -1,24 +1,37 @@
 #!/usr/bin/env python
 # Lara Maia <dev@lara.click> 2015
-# TODO: external config file with parser
 
 from time import sleep
 from datetime import datetime
 from bs4 import BeautifulSoup as bs
 from random import randint
 import requests
+import configparser
+import os
 
-#### CONFIG ####
+from gi.repository import Gtk
 
-cookie = {'PHPSESSID': '473824825792389534795236472374623568234'}
-links = [ "http://www.example.com/link1", "http://www.example.com/link2" ]
+config = configparser.ConfigParser()
+configfile = os.path.join(os.getenv('XDG_CONFIG_HOME'), 'steamgifts-bump.config')
 
-################
+if os.path.isfile(configfile):
+    config.read(configfile)
+else:
+    print("Configuration file not found at {}".format(configfile))
+    print("Please, copy the example file or create a new with your data.")
+    exit(1)
+
+try:
+    cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}
+    links = [l.strip() for l in config.get('CONFIG', 'Links').split(',')]
+    minTime = config.get('CONFIG', 'minTime')
+    maxTime = config.get('CONFIG', 'maxTime')
+except(configparser.NoOptionError):
+    print("Incorrect data. Please, check your config file.")
+    exit(1)
 
 def timer():
-    maxStart = 4100
-    minStart = 3700
-    randomstart = randint(minStart, maxStart)
+    randomstart = randint(minTime, maxTime)
     i = 0
     while i < randomstart:
         i+=1
@@ -47,7 +60,6 @@ def bump():
         requests.post(url, data=postData, cookies=cookie)
 
         print("Bumped {}".format(url))
-
 
 while True:
     bump()
