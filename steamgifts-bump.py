@@ -52,14 +52,18 @@ def bump():
             print("(Invalid cookie?)")
             exit(1)
 
-        form = bs(page, 'lxml').find('form')
-        for inputs in form.findAll('input'):
+        try:
+            form = bs(page, 'lxml').find('form')
+            for inputs in form.findAll('input'):
                 data.update({inputs['name']:inputs['value']})
 
-        postData = {'xsrf_token': data['xsrf_token'], 'do': 'bump_trade'}
-        requests.post(url, data=postData, cookies=cookie)
+            postData = {'xsrf_token': data['xsrf_token'], 'do': 'bump_trade'}
+            requests.post(url, data=postData, cookies=cookie)
 
-        print("Bumped {}".format(url))
+            print("Bumped {}".format(url))
+        except Exception:
+            print("An error occured for url {}".format(url))
+            print("Please, check if it's a valid url.")
 
 while True:
     bump()
