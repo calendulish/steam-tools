@@ -24,8 +24,8 @@ else:
 try:
     cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}
     links = [l.strip() for l in config.get('CONFIG', 'Links').split(',')]
-    minTime = config.get('CONFIG', 'minTime')
-    maxTime = config.get('CONFIG', 'maxTime')
+    minTime = config.getint('CONFIG', 'minTime')
+    maxTime = config.getint('CONFIG', 'maxTime')
 except(configparser.NoOptionError):
     print("Incorrect data. Please, check your config file.")
     exit(1)
