@@ -9,8 +9,6 @@ import requests
 import configparser
 import os
 
-from gi.repository import Gtk
-
 config = configparser.ConfigParser()
 configfile = os.path.join(os.getenv('XDG_CONFIG_HOME'), 'steamgifts-bump.config')
 
