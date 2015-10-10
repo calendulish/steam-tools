@@ -24,7 +24,7 @@ try:
     links = [l.strip() for l in config.get('CONFIG', 'Links').split(',')]
     minTime = config.getint('CONFIG', 'minTime')
     maxTime = config.getint('CONFIG', 'maxTime')
-except(configparser.NoOptionError):
+except(configparser.NoOptionError, configparser.NoSectionError):
     print("Incorrect data. Please, check your config file.")
     exit(1)
 

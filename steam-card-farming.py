@@ -22,7 +22,7 @@ try:
     cookies = {'sessionid': config.get('COOKIES', 'SessionID'), 'steamLogin': config.get('COOKIES', 'SteamLogin')}
     profile = "http://steamcommunity.com/id/" + config.get('UserInfo', 'ProfileName')
     sort = config.getboolean('CONFIG', 'MostValuableFirst')
-except(configparser.NoOptionError):
+except(configparser.NoOptionError, configparser.NoSectionError):
     print("Incorrect data. Please, check your config file.")
     exit(1)
 
