@@ -9,7 +9,7 @@ import requests
 import configparser
 import os
 
-config = configparser.ConfigParser()
+config = configparser.RawConfigParser()
 configfile = os.path.join(os.getenv('XDG_CONFIG_HOME'), 'steamgifts-bump.config')
 
 if os.path.isfile(configfile):
