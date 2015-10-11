@@ -81,10 +81,11 @@ for gameName, gameId, cardsCount, cardsValue in badgeSet:
         print("Checking if game have more cards drops...", end='\r')
         badge = requests.get(profile+"/gamecards/"+gameId, cookies=cookies).content
         cardsCount = bs(badge, 'lxml').find('span', class_="progress_info_bold")
-        cardsCount = int(cardsCount.text.split(' ', 3)[0])
-        if cardsCount < 1:
+        if not cardsCount or "No" in cardsCount.text:
             print("The game has no more cards to drop.{:8s}".format(' '), end='')
             break
+        else:
+            cardsCount = int(cardsCount.text.split(' ', 3)[0])
 
     print("\nClosing {}".format(gameName))
 
