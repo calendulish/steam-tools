@@ -96,7 +96,12 @@ for gameName, gameId, cardsCount, cardsValue in badgeSet:
 
     while True:
         print("{:2d} cards drop remaining. Waiting... {:7s}".format(cardsCount, ' '), end='\r')
-        sleep(60)
+        for i in range(0, 60):
+            if fakeApp.poll():
+                print("\n{}".format(fakeApp.communicate()[0].decode('utf-8')), end='')
+                exit(1)
+            sleep(1)
+
         print("Checking if game have more cards drops...", end='\r')
         badge = tryGet(profile+"/gamecards/"+gameId, cookies=cookies).content
         cardsCount = bs(badge, 'lxml').find('span', class_="progress_info_bold")
