@@ -107,6 +107,8 @@ for gameName, gameId, cardsCount, cardsValue in badgeSet:
             cardsCount = int(cardsCount.text.split(' ', 3)[0])
 
     print("\nClosing {}".format(gameName))
+    fakeApp.terminate()
+    fakeApp.wait()
 
 print("There's nothing else we can do. Leaving.")
 exit(0)
