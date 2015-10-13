@@ -28,6 +28,27 @@ except(configparser.NoOptionError, configparser.NoSectionError):
     print("Incorrect data. Please, check your config file.")
     exit(1)
 
+def tryConnect(url, cookies, data=False):
+    loops = 0
+    while True:
+        try:
+            if data:
+                return requests.post(url, data=data, cookies=cookies)
+            else:
+                return requests.get(url, cookies=cookies)
+        except requests.exceptions.TooManyRedirects:
+            print("Too many redirects. Please, check your configuration.")
+            print("(Invalid cookie?)")
+            exit(1)
+        except requests.exceptions.RequestException:
+            loops += 1
+            if loops > 3:
+                print("Cannot access the internet! Please, check your internet connection.")
+                exit(1)
+            else:
+                print("The connection is refused or fails. Trying again...")
+                sleep(3)
+
 def timer():
     randomstart = randint(minTime, maxTime)
     i = 0
@@ -42,13 +63,8 @@ def bump():
     print("Bumping now! {}".format(datetime.now()))
 
     for url in links:
-        try:
-            print("Connecting to the server", end="\r")
-            page = requests.get(url, cookies=cookie).content
-        except(requests.exceptions.TooManyRedirects):
-            print("Too many redirects. Please, check your configuration.")
-            print("(Invalid cookie?)")
-            exit(1)
+        print("Connecting to the server", end="\r")
+        page = tryConnect(url, cookies=cookie).content
 
         try:
             form = bs(page, 'lxml').find('form')
@@ -56,7 +72,7 @@ def bump():
                 data.update({inputs['name']:inputs['value']})
 
             postData = {'xsrf_token': data['xsrf_token'], 'do': 'bump_trade'}
-            requests.post(url, data=postData, cookies=cookie)
+            tryConnect(url, data=postData, cookies=cookie)
 
             print("Bumped {}".format(url))
         except Exception:

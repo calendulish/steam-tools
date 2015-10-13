@@ -26,14 +26,33 @@ except(configparser.NoOptionError, configparser.NoSectionError):
     print("Incorrect data. Please, check your config file.")
     exit(1)
 
+def tryGet(url, cookies):
+    loops = 0
+    while True:
+        try:
+            return requests.get(url, cookies=cookies)
+        except requests.exceptions.TooManyRedirects:
+            print("Too many redirects. Please, check your configuration.")
+            print("(Invalid cookie?)")
+            exit(1)
+        except requests.exceptions.RequestException:
+            loops += 1
+            if loops > 3:
+                print("Cannot access the internet! Please, check your internet connection.")
+                exit(1)
+            else:
+                print("The connection is refused or fails. Trying again...")
+                sleep(3)
+
+
 print("Digging your badge list...")
-fullPage = requests.get(profile+"/badges/", cookies=cookies).content
+fullPage = tryGet(profile+"/badges/", cookies=cookies).content
 pageCount = bs(fullPage, 'lxml').findAll('a', class_='pagelink')
 if pageCount:
     currentPage = 1
     badges = []
     while currentPage <= int(pages[-1].text):
-        page = requests.get(profile+"/badges/?p="+str(currentPage), cookies=cookies).content
+        page = tryGet(profile+"/badges/?p="+str(currentPage), cookies=cookies).content
         badges += bs(page, 'lxml').findAll('div', class_='badge_title_row')
         currentPage += 1
 else:
@@ -64,7 +83,7 @@ for badge in badges:
     gameName.span.unwrap()
     gameName = gameName.text.split('\t\t\t\t\t\t\t\t\t', 2)[1]
     if sort:
-        cardsValue = float(requests.get("http://api.enhancedsteam.com/market_data/average_card_price/?appid="+gameId+"&cur=usd").text)
+        cardsValue = float(tryGet("http://api.enhancedsteam.com/market_data/average_card_price/?appid="+gameId+"&cur=usd").text)
     badgeSet.append([gameName, gameId, cardsCount, cardsValue])
 
 if sort:
@@ -79,7 +98,7 @@ for gameName, gameId, cardsCount, cardsValue in badgeSet:
         print("{:2d} cards drop remaining. Waiting... {:7s}".format(cardsCount, ' '), end='\r')
         sleep(60)
         print("Checking if game have more cards drops...", end='\r')
-        badge = requests.get(profile+"/gamecards/"+gameId, cookies=cookies).content
+        badge = tryGet(profile+"/gamecards/"+gameId, cookies=cookies).content
         cardsCount = bs(badge, 'lxml').find('span', class_="progress_info_bold")
         if not cardsCount or "No" in cardsCount.text:
             print("The game has no more cards to drop.{:8s}".format(' '), end='')
