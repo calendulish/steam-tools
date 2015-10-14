@@ -2,7 +2,7 @@
 # Lara Maia <dev@lara.click> 2015
 
 from ctypes import CDLL
-from time import sleep
+import signal
 import os, sys
 
 if sys.maxsize > 2**32:
@@ -20,8 +20,7 @@ if STEAM_API.SteamAPI_IsSteamRunning():
     STEAM_API.SteamAPI_Init()
 
     print("Game started.")
-    while True:
-        sleep(1000*1000)
+    signal.pause()
 else:
     print("I cannot find a Steam instance.", file=sys.stderr)
     print("Please, check if your already start your steam client.", file=sys.stderr)
