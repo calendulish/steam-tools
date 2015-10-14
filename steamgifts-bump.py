@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup as bs
 from random import randint
 import requests
 import configparser
-import os
+import os, sys
 
 config = configparser.RawConfigParser()
 configfile = os.path.join(os.getenv('XDG_CONFIG_HOME'), 'steamgifts-bump.config')
@@ -15,8 +15,8 @@ configfile = os.path.join(os.getenv('XDG_CONFIG_HOME'), 'steamgifts-bump.config'
 if os.path.isfile(configfile):
     config.read(configfile)
 else:
-    print("Configuration file not found at {}".format(configfile))
-    print("Please, copy the example file or create a new with your data.")
+    print("Configuration file not found at {}".format(configfile), file=sys.stderr)
+    print("Please, copy the example file or create a new with your data.", file=sys.stderr)
     exit(1)
 
 try:
@@ -25,7 +25,7 @@ try:
     minTime = config.getint('CONFIG', 'minTime')
     maxTime = config.getint('CONFIG', 'maxTime')
 except(configparser.NoOptionError, configparser.NoSectionError):
-    print("Incorrect data. Please, check your config file.")
+    print("Incorrect data. Please, check your config file.", file=sys.stderr)
     exit(1)
 
 def tryConnect(url, cookies, data=False):
@@ -37,13 +37,13 @@ def tryConnect(url, cookies, data=False):
             else:
                 return requests.get(url, cookies=cookies)
         except requests.exceptions.TooManyRedirects:
-            print("Too many redirects. Please, check your configuration.")
-            print("(Invalid cookie?)")
+            print("Too many redirects. Please, check your configuration.", file=sys.stderr)
+            print("(Invalid cookie?)", file=sys.stderr)
             exit(1)
         except requests.exceptions.RequestException:
             loops += 1
             if loops > 3:
-                print("Cannot access the internet! Please, check your internet connection.")
+                print("Cannot access the internet! Please, check your internet connection.", file=sys.stderr)
                 exit(1)
             else:
                 print("The connection is refused or fails. Trying again...")
@@ -76,8 +76,8 @@ def bump():
 
             print("Bumped {}".format(url))
         except Exception:
-            print("An error occured for url {}".format(url))
-            print("Please, check if it's a valid url.")
+            print("An error occured for url {}".format(url), file=sys.stderr)
+            print("Please, check if it's a valid url.", file=sys.stderr)
 
 while True:
     bump()

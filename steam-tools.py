@@ -15,23 +15,24 @@ class Terminal:
         self.view = view
 
         self.sub_proc = subprocess.Popen(process, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.sub_outp = ""
-
         self.gosource = GObject.timeout_add(100, self.update_terminal)
 
 # FIXME: http://bugs.python.org/issue18823
-    def non_block_read(self, output):
-        fd = output.fileno()
-        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-        try:
-            return output.read().decode('utf-8')
-        except Exception:
-            return ''
+    def non_block_read(self):
+        ret = ""
+        for output in [self.sub_proc.stdout, self.sub_proc.stderr]:
+            fl = fcntl.fcntl(output.fileno(), fcntl.F_GETFL)
+            fcntl.fcntl(output.fileno(), fcntl.F_SETFL, fl | os.O_NONBLOCK)
+            try:
+                ret += output.read().decode('utf-8')
+            except(Exception):
+                pass
+
+        return ret
 
     def update_terminal(self):
         buffer = self.view.get_buffer()
-        buffer.insert_at_cursor(self.non_block_read(self.sub_proc.stdout))
+        buffer.insert_at_cursor(self.non_block_read())
         iter = buffer.get_end_iter()
         self.view.scroll_to_iter(iter, 0, False, 0.5, 0.5)
         return self.sub_proc.poll() is None

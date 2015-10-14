@@ -5,7 +5,7 @@ import configparser
 import requests
 from bs4 import BeautifulSoup as bs
 from time import sleep
-import os
+import os, sys
 import subprocess
 
 config = configparser.RawConfigParser()
@@ -14,8 +14,8 @@ configfile = os.path.join(os.getenv('XDG_CONFIG_HOME'), 'steam-card-farming.conf
 if os.path.isfile(configfile):
     config.read(configfile)
 else:
-    print("Configuration file not found at {}".format(configfile))
-    print("Please, copy the example file or create a new with your data.")
+    print("Configuration file not found at {}".format(configfile), file=sys.stderr)
+    print("Please, copy the example file or create a new with your data.", file=sys.stderr)
     exit(1)
 
 try:
@@ -23,7 +23,7 @@ try:
     profile = "http://steamcommunity.com/id/" + config.get('UserInfo', 'ProfileName')
     sort = config.getboolean('CONFIG', 'MostValuableFirst')
 except(configparser.NoOptionError, configparser.NoSectionError):
-    print("Incorrect data. Please, check your config file.")
+    print("Incorrect data. Please, check your config file.", file=sys.stderr)
     exit(1)
 
 def tryGet(url, cookies):
@@ -32,13 +32,13 @@ def tryGet(url, cookies):
         try:
             return requests.get(url, cookies=cookies)
         except requests.exceptions.TooManyRedirects:
-            print("Too many redirects. Please, check your configuration.")
-            print("(Invalid cookie?)")
+            print("Too many redirects. Please, check your configuration.", file=sys.stderr)
+            print("(Invalid cookie?)", file=sys.stderr)
             exit(1)
         except requests.exceptions.RequestException:
             loops += 1
             if loops > 3:
-                print("Cannot access the internet! Please, check your internet connection.")
+                print("Cannot access the internet! Please, check your internet connection.", file=sys.stderr)
                 exit(1)
             else:
                 print("The connection is refused or fails. Trying again...")
@@ -59,12 +59,12 @@ else:
     badges = bs(fullPage, 'lxml').findAll('div', class_='badge_title_row')
 
 if not badges:
-    print("Something is wrong! (Invalid profile name?)")
+    print("Something is wrong! (Invalid profile name?)", file=sys.stderr)
     exit(1)
 
 print("Checking if we are logged.")
 if not bs(fullPage, 'lxml').findAll('div', class_='profile_xp_block_right'):
-    print("You are not logged into steam! (Invalid cookies?)")
+    print("You are not logged into steam! (Invalid cookies?)", file=sys.stderr)
     exit(1)
 
 print("Gettings badges info...", end='\r')
@@ -98,7 +98,7 @@ for gameName, gameId, cardsCount, cardsValue in badgeSet:
         print("{:2d} cards drop remaining. Waiting... {:7s}".format(cardsCount, ' '), end='\r')
         for i in range(0, 60):
             if fakeApp.poll():
-                print("\n{}".format(fakeApp.communicate()[0].decode('utf-8')), end='')
+                print("\n{}".format(fakeApp.stderr.read().decode('utf-8)')), file=sys.stderr, end='')
                 exit(1)
             sleep(1)
 
