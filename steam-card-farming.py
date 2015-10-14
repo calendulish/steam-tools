@@ -27,8 +27,7 @@ except(configparser.NoOptionError, configparser.NoSectionError):
     exit(1)
 
 def tryGet(url, cookies):
-    loops = 0
-    while True:
+    for loops in range(0, 4):
         try:
             return requests.get(url, cookies=cookies)
         except requests.exceptions.TooManyRedirects:
@@ -36,7 +35,6 @@ def tryGet(url, cookies):
             print("(Invalid cookie?)", file=sys.stderr)
             exit(1)
         except requests.exceptions.RequestException:
-            loops += 1
             if loops > 3:
                 print("Cannot access the internet! Please, check your internet connection.", file=sys.stderr)
                 exit(1)
@@ -49,12 +47,10 @@ print("Digging your badge list...")
 fullPage = tryGet(profile+"/badges/", cookies=cookies).content
 pageCount = bs(fullPage, 'lxml').findAll('a', class_='pagelink')
 if pageCount:
-    currentPage = 1
     badges = []
-    while currentPage <= int(pages[-1].text):
+    for currentPage in range(1, int(pages[-1].text)):
         page = tryGet(profile+"/badges/?p="+str(currentPage), cookies=cookies).content
         badges += bs(page, 'lxml').findAll('div', class_='badge_title_row')
-        currentPage += 1
 else:
     badges = bs(fullPage, 'lxml').findAll('div', class_='badge_title_row')
 

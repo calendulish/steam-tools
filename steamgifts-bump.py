@@ -29,8 +29,7 @@ except(configparser.NoOptionError, configparser.NoSectionError):
     exit(1)
 
 def tryConnect(url, cookies, data=False):
-    loops = 0
-    while True:
+    for loops in range(0 , 4):
         try:
             if data:
                 return requests.post(url, data=data, cookies=cookies)
@@ -41,7 +40,6 @@ def tryConnect(url, cookies, data=False):
             print("(Invalid cookie?)", file=sys.stderr)
             exit(1)
         except requests.exceptions.RequestException:
-            loops += 1
             if loops > 3:
                 print("Cannot access the internet! Please, check your internet connection.", file=sys.stderr)
                 exit(1)
@@ -51,9 +49,7 @@ def tryConnect(url, cookies, data=False):
 
 def timer():
     randomstart = randint(minTime, maxTime)
-    i = 0
-    while i < randomstart:
-        i+=1
+    for i in range(0, randomstart):
         print("Waiting: {:4d} seconds".format(randomstart-i), end="\r")
         sleep(1)
 
