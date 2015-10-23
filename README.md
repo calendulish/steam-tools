@@ -1,6 +1,8 @@
 Steam Tools
 -----------
 
+![Steam Tools](http://downloads.lara.click/tmp/steam-tools-screen.png)
+
 Some useful Linux tools for use with steam client or compatible programs, websites.
 
 - **steamgifts-bump:** Automatically bumps your trades at steamgifts.com/trades
