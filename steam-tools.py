@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Lara Maia <dev@lara.click> 2015
 
-from gi.repository import Gtk, Vte, GLib
+from gi.repository import Gtk, Gdk, GLib, Vte
 from signal import SIGKILL
 import sys, os
 
@@ -12,6 +12,7 @@ class Terminal(Vte.Terminal):
     def __init__(self):
         Vte.Terminal.__init__(self)
         self.set_cursor_shape(Vte.CursorShape.UNDERLINE)
+        self.set_color_foreground(Gdk.RGBA(0, 1, 0, 1))
 
     def run(self, process):
         proc_info = self.spawn_sync(
@@ -57,7 +58,7 @@ class SteamTools(Gtk.Window):
         self.steamgifts_bump.set_border_width(10)
 
         self.sgb_start_button = Gtk.Button(label="Start")
-        self.sgb_stop_button = Gtk.Button(label="Stop")
+        self.sgb_stop_button = Gtk.Button(label="Stop", sensitive=False)
 
         self.sgb_terminal = Terminal()
         self.sgb_scroll = Gtk.ScrolledWindow(hexpand=True, vexpand=True)
@@ -72,7 +73,7 @@ class SteamTools(Gtk.Window):
         self.steam_card_farming.set_border_width(10)
 
         self.scf_start_button = Gtk.Button(label="Start")
-        self.scf_stop_button = Gtk.Button(label="Stop")
+        self.scf_stop_button = Gtk.Button(label="Stop", sensitive=False)
 
         self.scf_terminal = Terminal()
         self.scf_scroll = Gtk.ScrolledWindow(hexpand=True, vexpand=True)
@@ -104,17 +105,25 @@ class SteamTools(Gtk.Window):
         global sgb_process
         process = [sys.executable, '-u', os.path.join(os.getcwd(), 'steamgifts-bump.py')]
         sgb_process = self.sgb_terminal.run(process)
+        self.sgb_start_button.set_sensitive(False)
+        self.sgb_stop_button.set_sensitive(True)
 
     def sgb_stop_button_clicked(self, button):
         self.sgb_terminal.stop(self.sgb_terminal, sgb_process)
+        self.sgb_start_button.set_sensitive(True)
+        self.sgb_stop_button.set_sensitive(False)
 
     def scf_start_button_clicked(self, button):
         global scf_process
         process = [sys.executable, '-u', os.path.join(os.getcwd(), 'steam-card-farming.py')]
         scf_process = self.scf_terminal.run(process)
+        self.scf_start_button.set_sensitive(False)
+        self.scf_stop_button.set_sensitive(True)
 
     def scf_stop_button_clicked(self, button):
         self.scf_terminal.stop(self.scf_terminal, scf_process)
+        self.scf_start_button.set_sensitive(True)
+        self.scf_stop_button.set_sensitive(False)
 
     def terminal_child_exited(self, term, status):
         if status: term.write("Process Terminated.")
