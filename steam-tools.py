@@ -1,46 +1,41 @@
 #!/usr/bin/env python
 # Lara Maia <dev@lara.click> 2015
 
-from gi.repository import Gtk, GObject
-import subprocess
-import fcntl
-import os
+from gi.repository import Gtk, Vte, GLib
+from signal import SIGKILL
+import sys, os
 
 global sgb_process
 global scf_process
 
-class Terminal:
-    def __init__(self, process, view):
-        self.process = process
-        self.view = view
+class Terminal(Vte.Terminal):
+    def __init__(self):
+        Vte.Terminal.__init__(self)
+        self.set_cursor_shape(Vte.CursorShape.UNDERLINE)
 
-        self.sub_proc = subprocess.Popen(process, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.gosource = GObject.timeout_add(100, self.update_terminal)
+    def run(self, process):
+        proc_info = self.spawn_sync(
+            Vte.PtyFlags.DEFAULT,
+            os.getcwd(),
+            process,
+            [],
+            GLib.SpawnFlags.DO_NOT_REAP_CHILD,
+            None,
+            None,
+        )
+        return proc_info
 
-# FIXME: http://bugs.python.org/issue18823
-    def non_block_read(self):
-        ret = ""
-        for output in [self.sub_proc.stdout, self.sub_proc.stderr]:
-            fl = fcntl.fcntl(output.fileno(), fcntl.F_GETFL)
-            fcntl.fcntl(output.fileno(), fcntl.F_SETFL, fl | os.O_NONBLOCK)
-            try:
-                ret += output.read().decode('utf-8')
-            except(Exception):
-                pass
+# FIXME: I cannot append something to the widget without a
+# child process to handle the output. This is an ugly solution.
+    def write(self, text):
+        text = '\n *** '+text+' ***\n'
+        self.run(['/usr/bin/printf', text])
 
-        return ret
-
-    def update_terminal(self):
-        buffer = self.view.get_buffer()
-        buffer.insert_at_cursor(self.non_block_read())
-        iter = buffer.get_end_iter()
-        self.view.scroll_to_iter(iter, 0, False, 0.5, 0.5)
-        return self.sub_proc.poll() is None
-
-    def stop(self):
-        GObject.source_remove(self.gosource)
-        self.sub_proc.terminate()
-        self.sub_proc.wait()
+    def stop(self, term, info):
+        try:
+            os.kill(info[1], SIGKILL)
+        except(ProcessLookupError, NameError):
+            term.write("The process is not started.")
 
 class SteamTools(Gtk.Window):
     def __init__(self):
@@ -64,9 +59,9 @@ class SteamTools(Gtk.Window):
         self.sgb_start_button = Gtk.Button(label="Start")
         self.sgb_stop_button = Gtk.Button(label="Stop")
 
-        self.sgb_terminalView = Gtk.TextView()
+        self.sgb_terminal = Terminal()
         self.sgb_scroll = Gtk.ScrolledWindow(hexpand=True, vexpand=True)
-        self.sgb_scroll.add(self.sgb_terminalView)
+        self.sgb_scroll.add(self.sgb_terminal)
 
         self.steamgifts_bump.attach(self.sgb_start_button, 0, 0, 1, 1)
         self.steamgifts_bump.attach(self.sgb_stop_button, 1, 0, 1, 1)
@@ -79,9 +74,9 @@ class SteamTools(Gtk.Window):
         self.scf_start_button = Gtk.Button(label="Start")
         self.scf_stop_button = Gtk.Button(label="Stop")
 
-        self.scf_terminalView = Gtk.TextView()
+        self.scf_terminal = Terminal()
         self.scf_scroll = Gtk.ScrolledWindow(hexpand=True, vexpand=True)
-        self.scf_scroll.add(self.scf_terminalView)
+        self.scf_scroll.add(self.scf_terminal)
 
         self.steam_card_farming.attach(self.scf_start_button, 0, 0, 1, 1)
         self.steam_card_farming.attach(self.scf_stop_button, 1, 0, 1, 1)
@@ -92,9 +87,11 @@ class SteamTools(Gtk.Window):
 
         self.sgb_start_button.connect("clicked", self.sgb_start_button_clicked)
         self.sgb_stop_button.connect("clicked", self.sgb_stop_button_clicked)
+        self.sgb_terminal.connect("child-exited", self.terminal_child_exited)
 
         self.scf_start_button.connect("clicked", self.scf_start_button_clicked)
         self.scf_stop_button.connect("clicked", self.scf_stop_button_clicked)
+        self.scf_terminal.connect("child-exited", self.terminal_child_exited)
 
         self.status = Gtk.Statusbar()
         self.status_context = self.status.get_context_id("st")
@@ -105,21 +102,22 @@ class SteamTools(Gtk.Window):
 
     def sgb_start_button_clicked(self, button):
         global sgb_process
-        process = ['python', '-u', os.path.join(os.getcwd(), 'steamgifts-bump.py')]
-        sgb_process = Terminal(process, self.sgb_terminalView)
+        process = [sys.executable, '-u', os.path.join(os.getcwd(), 'steamgifts-bump.py')]
+        sgb_process = self.sgb_terminal.run(process)
 
     def sgb_stop_button_clicked(self, button):
-        global sgb_process
-        sgb_process.stop()
+        self.sgb_terminal.stop(self.sgb_terminal, sgb_process)
 
     def scf_start_button_clicked(self, button):
         global scf_process
-        process = ['python', '-u', os.path.join(os.getcwd(), 'steam-card-farming.py')]
-        scf_process = Terminal(process, self.scf_terminalView)
+        process = [sys.executable, '-u', os.path.join(os.getcwd(), 'steam-card-farming.py')]
+        scf_process = self.scf_terminal.run(process)
 
     def scf_stop_button_clicked(self, button):
-        global scf_process
-        scf_process.stop()
+        self.scf_terminal.stop(self.scf_terminal, scf_process)
+
+    def terminal_child_exited(self, term, status):
+        if status: term.write("Process Terminated.")
 
 if __name__ == "__main__":
     window = SteamTools()
