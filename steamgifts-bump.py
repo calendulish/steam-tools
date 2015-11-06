@@ -21,6 +21,7 @@ else:
 
 try:
     cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}
+    agent = {'user-agent': 'unknown/0.0.0'}
     links = [l.strip() for l in config.get('CONFIG', 'Links').split(',')]
     minTime = config.getint('CONFIG', 'minTime')
     maxTime = config.getint('CONFIG', 'maxTime')
@@ -32,9 +33,9 @@ def tryConnect(url, cookies, data=False):
     for loops in range(0 , 4):
         try:
             if data:
-                return requests.post(url, data=data, cookies=cookies, timeout=10)
+                return requests.post(url, data=data, cookies=cookies, headers=agent, timeout=10)
             else:
-                return requests.get(url, cookies=cookies, timeout=10)
+                return requests.get(url, cookies=cookies, headers=agent, timeout=10)
         except requests.exceptions.TooManyRedirects:
             print("Too many redirects. Please, check your configuration.", file=sys.stderr)
             print("(Invalid cookie?)", file=sys.stderr)
