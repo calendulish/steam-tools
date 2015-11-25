@@ -9,10 +9,12 @@ import os, sys
 import subprocess
 
 config = configparser.RawConfigParser()
-configfile = os.path.join(os.getenv('XDG_CONFIG_HOME'), 'steam-card-farming.config')
+configfile = os.path.join(os.getenv('XDG_CONFIG_HOME', os.path.expanduser('~/.config')), 'steam-card-farming.config')
 
 if os.path.isfile(configfile):
     config.read(configfile)
+elif os.path.isfile('steam-card-farming.config'):
+    config.read('steam-card-farming.config')
 else:
     print("Configuration file not found at {}".format(configfile), file=sys.stderr)
     print("Please, copy the example file or create a new with your data.", file=sys.stderr)

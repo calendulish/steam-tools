@@ -7,10 +7,12 @@ import configparser
 import os, sys
 
 config = configparser.RawConfigParser()
-configfile = os.path.join(os.getenv('XDG_CONFIG_HOME'), 'steamgifts-join.config')
+configfile = os.path.join(os.getenv('XDG_CONFIG_HOME', os.path.expanduser('~/.config')), 'steamgifts-join.config')
 
 if os.path.isfile(configfile):
     config.read(configfile)
+elif os.path.isfile('steamgifts-join.config'):
+    config.read('steamgifts-join.config')
 else:
     print("Configuration file not found at {}".format(configfile), file=sys.stderr)
     print("Please, copy the example file or create a new with your data.", file=sys.stderr)
