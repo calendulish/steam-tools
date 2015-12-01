@@ -46,21 +46,21 @@ def tryGet(url, cookies):
 
 print("Digging your badge list...")
 fullPage = tryGet(profile+"/badges/", cookies=cookies).content
-pageCount = bs(fullPage, 'lxml').findAll('a', class_='pagelink')
+pageCount = bs(fullPage, 'html.parser').findAll('a', class_='pagelink')
 if pageCount:
     badges = []
     for currentPage in range(1, int(pages[-1].text)):
         page = tryGet(profile+"/badges/?p="+str(currentPage), cookies=cookies).content
-        badges += bs(page, 'lxml').findAll('div', class_='badge_title_row')
+        badges += bs(page, 'html.parser').findAll('div', class_='badge_title_row')
 else:
-    badges = bs(fullPage, 'lxml').findAll('div', class_='badge_title_row')
+    badges = bs(fullPage, 'html.parser').findAll('div', class_='badge_title_row')
 
 if not badges:
     print("Something is wrong! (Invalid profile name?)", file=sys.stderr)
     exit(1)
 
 print("Checking if we are logged.")
-if not bs(fullPage, 'lxml').findAll('div', class_='profile_xp_block_right'):
+if not bs(fullPage, 'html.parser').findAll('div', class_='profile_xp_block_right'):
     print("You are not logged into steam! (Invalid cookies?)", file=sys.stderr)
     exit(1)
 
@@ -101,7 +101,7 @@ for gameName, gameId, cardsCount, cardsValue in badgeSet:
 
         print("Checking if game have more cards drops...", end='\r')
         badge = tryGet(profile+"/gamecards/"+gameId, cookies=cookies).content
-        cardsCount = bs(badge, 'lxml').find('span', class_="progress_info_bold")
+        cardsCount = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
         if not cardsCount or "No" in cardsCount.text:
             print("The game has no more cards to drop.{:8s}".format(' '), end='')
             break

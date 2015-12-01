@@ -5,10 +5,15 @@ from ctypes import CDLL
 from time import sleep
 import os, sys
 
-if sys.maxsize > 2**32:
-    STEAM_API = CDLL('lib64/libsteam_api.so')
+if os.name == 'nt':
+    ext = '.dll'
 else:
-    STEAM_API = CDLL('lib32/libsteam_api.so')
+    ext = '.so'
+
+if sys.maxsize > 2**32:
+    STEAM_API = CDLL('lib64/libsteam_api' + ext)
+else:
+    STEAM_API = CDLL('lib32/libsteam_api' + ext)
 
 if len(sys.argv) < 2:
     print("Hello~wooooo. Where is the game ID?", file=sys.stderr)

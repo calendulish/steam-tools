@@ -65,7 +65,7 @@ def bump():
         page = tryConnect(url, cookies=cookie).content
 
         try:
-            form = bs(page, 'lxml').find('form')
+            form = bs(page, 'html.parser').find('form')
             for inputs in form.findAll('input'):
                 data.update({inputs['name']:inputs['value']})
 

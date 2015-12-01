@@ -53,7 +53,7 @@ def join():
 
     try:
         giveawayList = []
-        container = bs(page, 'lxml').find('div', class_='widget-container')
+        container = bs(page, 'html.parser').find('div', class_='widget-container')
         for div in container.findAll('div', class_=None):
             if div.find('div', class_='giveaway__row-outer-wrap'):
                 giveawayList.append(div)
