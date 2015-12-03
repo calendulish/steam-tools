@@ -30,7 +30,7 @@ except(configparser.NoOptionError, configparser.NoSectionError):
     print("Incorrect data. Please, check your config file.", file=sys.stderr)
     exit(1)
 
-def tryGet(url, cookies):
+def tryGet(url, cookies=""):
     for loops in range(0, 4):
         try:
             return requests.get(url, cookies=cookies, timeout=10)
