@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup as bs
 import requests
 import stconfig
 import os, sys
+from signal import signal, SIGINT
 
 config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
@@ -32,6 +33,10 @@ def tryConnect(url, cookies, data=False):
 
     print("Cannot access the internet! Please, check your internet connection.", file=sys.stderr)
     exit(1)
+
+def signal_handler(signal, frame):
+    print("Exiting...")
+    exit(0)
 
 def join():
     data = {}
@@ -77,5 +82,7 @@ def join():
 
     except Exception as e:
         print(e, file=sys.stderr)
+
+signal(SIGINT, signal_handler)
 
 join()

@@ -4,6 +4,7 @@
 from ctypes import CDLL
 from time import sleep
 import os, sys
+from signal import signal, SIGINT
 
 if os.name == 'nt':
     ext = '.dll'
@@ -20,6 +21,12 @@ if len(sys.argv) < 2:
     exit(1)
 
 os.environ["SteamAppId"] = sys.argv[1]
+
+def signal_handler(signal, frame):
+    print("Exiting...")
+    exit(0)
+
+signal(SIGINT, signal_handler)
 
 if STEAM_API.SteamAPI_IsSteamRunning():
     STEAM_API.SteamAPI_Init()

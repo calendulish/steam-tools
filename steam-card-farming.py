@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 from time import sleep
 import os, sys
+from signal import signal, SIGINT
 import subprocess
 import stconfig
 
@@ -33,6 +34,11 @@ def tryGet(url, cookies=""):
     print("Cannot access the internet! Please, check your internet connection.", file=sys.stderr)
     exit(1)
 
+def signal_handler(signal, frame):
+    print("Exiting...")
+    exit(0)
+
+signal(SIGINT, signal_handler)
 
 print("Digging your badge list...")
 fullPage = tryGet(profile+"/badges/", cookies=cookies).content

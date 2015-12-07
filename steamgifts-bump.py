@@ -8,6 +8,7 @@ from random import randint
 import requests
 import stconfig
 import os, sys
+from signal import signal, SIGINT
 
 config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
@@ -45,6 +46,10 @@ def timer():
         print("Waiting: {:4d} seconds".format(randomstart-i), end="\r")
         sleep(1)
 
+def signal_handler(signal, frame):
+    print("Exiting...")
+    exit(0)
+
 def bump():
     data = {}
 
@@ -66,6 +71,8 @@ def bump():
         except Exception:
             print("An error occured for url {}".format(url), file=sys.stderr)
             print("Please, check if it's a valid url.", file=sys.stderr)
+
+signal(SIGINT, signal_handler)
 
 while True:
     bump()
