@@ -40,40 +40,36 @@ def tryConnect(url, cookies, data=False):
     print("Cannot access the internet! Please, check your internet connection.", file=sys.stderr)
     exit(1)
 
-def timer():
-    randomstart = randint(minTime, maxTime)
-    for i in range(0, randomstart):
-        print("Waiting: {:4d} seconds".format(randomstart-i), end="\r")
-        sleep(1)
-
 def signal_handler(signal, frame):
     print("Exiting...")
     exit(0)
 
-def bump():
-    data = {}
+if __name__ == "__main__":
+    signal(SIGINT, signal_handler)
 
-    print("Bumping now! {}".format(datetime.now()))
+    while True:
+        data = {}
 
-    for url in links:
-        print("Connecting to the server", end="\r")
-        page = tryConnect(url, cookies=cookie).content
+        print("Bumping now! {}".format(datetime.now()))
 
-        try:
-            form = bs(page, 'html.parser').find('form')
-            for inputs in form.findAll('input'):
-                data.update({inputs['name']:inputs['value']})
+        for url in links:
+            print("Connecting to the server", end="\r")
+            page = tryConnect(url, cookies=cookie).content
 
-            postData = {'xsrf_token': data['xsrf_token'], 'do': 'bump_trade'}
-            tryConnect(url, data=postData, cookies=cookie)
+            try:
+                form = bs(page, 'html.parser').find('form')
+                for inputs in form.findAll('input'):
+                    data.update({inputs['name']:inputs['value']})
 
-            print("Bumped {}".format(url))
-        except Exception:
-            print("An error occured for url {}".format(url), file=sys.stderr)
-            print("Please, check if it's a valid url.", file=sys.stderr)
+                postData = {'xsrf_token': data['xsrf_token'], 'do': 'bump_trade'}
+                tryConnect(url, data=postData, cookies=cookie)
 
-signal(SIGINT, signal_handler)
+                print("Bumped {}".format(url))
+            except Exception:
+                print("An error occured for url {}".format(url), file=sys.stderr)
+                print("Please, check if it's a valid url.", file=sys.stderr)
 
-while True:
-    bump()
-    timer()
+        randomstart = randint(minTime, maxTime)
+        for i in range(0, randomstart):
+            print("Waiting: {:4d} seconds".format(randomstart-i), end="\r")
+            sleep(1)

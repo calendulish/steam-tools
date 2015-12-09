@@ -20,21 +20,21 @@ if len(sys.argv) < 2:
     print("Hello~wooooo. Where is the game ID?", file=sys.stderr)
     exit(1)
 
-os.environ["SteamAppId"] = sys.argv[1]
-
 def signal_handler(signal, frame):
     print("Exiting...")
     exit(0)
 
-signal(SIGINT, signal_handler)
+if __name__ == "__main__":
+    signal(SIGINT, signal_handler)
+    os.environ["SteamAppId"] = sys.argv[1]
 
-if STEAM_API.SteamAPI_IsSteamRunning():
-    STEAM_API.SteamAPI_Init()
+    if STEAM_API.SteamAPI_IsSteamRunning():
+        STEAM_API.SteamAPI_Init()
 
-    print("Game started.")
-    while True:
-        sleep(1000*1000)
-else:
-    print("I cannot find a Steam instance.", file=sys.stderr)
-    print("Please, check if your already start your steam client.", file=sys.stderr)
-    exit(1)
+        print("Game started.")
+        while True:
+            sleep(1000*1000)
+    else:
+        print("I cannot find a Steam instance.", file=sys.stderr)
+        print("Please, check if your already start your steam client.", file=sys.stderr)
+        exit(1)

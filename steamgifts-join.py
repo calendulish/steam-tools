@@ -38,7 +38,9 @@ def signal_handler(signal, frame):
     print("Exiting...")
     exit(0)
 
-def join():
+if __name__ == "__main__":
+    signal(SIGINT, signal_handler)
+
     data = {}
 
     url = 'http://www.steamgifts.com/giveaways/search?type=wishlist'
@@ -82,7 +84,3 @@ def join():
 
     except Exception as e:
         print(e, file=sys.stderr)
-
-signal(SIGINT, signal_handler)
-
-join()
