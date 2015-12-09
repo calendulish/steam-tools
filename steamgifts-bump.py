@@ -5,39 +5,21 @@ from time import sleep
 from datetime import datetime
 from bs4 import BeautifulSoup as bs
 from random import randint
-import requests
-import stconfig
 import os, sys
 from signal import signal, SIGINT
+
+import stconfig
+from stnetwork import tryConnect
 
 config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
 try:
     cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}
-    agent = {'user-agent': 'unknown/0.0.0'}
     links = [l.strip() for l in config.get('CONFIG', 'Links').split(',')]
     minTime = config.getint('CONFIG', 'minTime')
     maxTime = config.getint('CONFIG', 'maxTime')
 except(configparser.NoOptionError, configparser.NoSectionError):
     print("Incorrect data. Please, check your config file.", file=sys.stderr)
-    exit(1)
-
-def tryConnect(url, cookies, data=False):
-    for loops in range(0 , 4):
-        try:
-            if data:
-                return requests.post(url, data=data, cookies=cookies, headers=agent, timeout=10)
-            else:
-                return requests.get(url, cookies=cookies, headers=agent, timeout=10)
-        except requests.exceptions.TooManyRedirects:
-            print("Too many redirects. Please, check your configuration.", file=sys.stderr)
-            print("(Invalid cookie?)", file=sys.stderr)
-            exit(1)
-        except requests.exceptions.RequestException:
-            print("The connection is refused or fails. Trying again...")
-            sleep(3)
-
-    print("Cannot access the internet! Please, check your internet connection.", file=sys.stderr)
     exit(1)
 
 def signal_handler(signal, frame):

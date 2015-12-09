@@ -7,7 +7,9 @@ from time import sleep
 import os, sys
 from signal import signal, SIGINT
 import subprocess
+
 import stconfig
+from stnetwork import tryConnect
 
 config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
@@ -19,21 +21,6 @@ except(configparser.NoOptionError, configparser.NoSectionError):
     print("Incorrect data. Please, check your config file.", file=sys.stderr)
     exit(1)
 
-def tryGet(url, cookies=""):
-    for loops in range(0, 4):
-        try:
-            return requests.get(url, cookies=cookies, timeout=10)
-        except requests.exceptions.TooManyRedirects:
-            print("Too many redirects. Please, check your configuration.", file=sys.stderr)
-            print("(Invalid cookie?)", file=sys.stderr)
-            exit(1)
-        except requests.exceptions.RequestException:
-            print("The connection is refused or fails. Trying again...")
-            sleep(3)
-
-    print("Cannot access the internet! Please, check your internet connection.", file=sys.stderr)
-    exit(1)
-
 def signal_handler(signal, frame):
     print("Exiting...")
     exit(0)
@@ -42,12 +29,12 @@ if __name__ == "__main__":
     signal(SIGINT, signal_handler)
 
     print("Digging your badge list...")
-    fullPage = tryGet(profile+"/badges/", cookies=cookies).content
+    fullPage = tryConnect(profile+"/badges/", cookies=cookies).content
     pageCount = bs(fullPage, 'html.parser').findAll('a', class_='pagelink')
     if pageCount:
         badges = []
         for currentPage in range(1, int(pages[-1].text)):
-            page = tryGet(profile+"/badges/?p="+str(currentPage), cookies=cookies).content
+            page = tryConnect(profile+"/badges/?p="+str(currentPage), cookies=cookies).content
             badges += bs(page, 'html.parser').findAll('div', class_='badge_title_row')
     else:
         badges = bs(fullPage, 'html.parser').findAll('div', class_='badge_title_row')
@@ -97,7 +84,7 @@ if __name__ == "__main__":
                 sleep(1)
 
             print("Checking if game have more cards drops...", end='\r')
-            badge = tryGet(profile+"/gamecards/"+gameId, cookies=cookies).content
+            badge = tryConnect(profile+"/gamecards/"+gameId, cookies=cookies).content
             cardsCount = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
             if not cardsCount or "No" in cardsCount.text:
                 print("The game has no more cards to drop.{:8s}".format(' '), end='')
