@@ -2,7 +2,10 @@
 # Lara Maia <dev@lara.click> 2015
 
 import os, sys
+import logging
 from configparser import RawConfigParser
+
+logger = logging.getLogger('root')
 
 def init(fileName):
     config = RawConfigParser()
@@ -17,9 +20,10 @@ def init(fileName):
     elif os.path.isfile(fileName):
         config.read(fileName)
     else:
-        print("Configuration file not found. These is the search paths:", file=sys.stderr)
-        print(" - {}\n - {}".format(os.path.join(os.getcwd(), 'steam-card-farming.config'), config_file), file=sys.stderr)
-        print("Please, copy the example file or create a new with your data.", file=sys.stderr)
+        logger.critical("Configuration file not found. These is the search paths:")
+        logger.critical(" - {}".format(os.path.join(os.getcwd(), 'steam-card-farming.config')))
+        logger.critical(" - {}".format(config_file))
+        logger.critical("Please, copy the example file or create a new with your data.")
         exit(1)
 
     return config

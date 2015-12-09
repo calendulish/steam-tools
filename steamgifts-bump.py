@@ -8,9 +8,11 @@ from random import randint
 import os, sys
 from signal import signal, SIGINT
 
+import stlogger
 import stconfig
 from stnetwork import tryConnect
 
+logger = stlogger.init(os.path.splitext(sys.argv[0])[0]+'.log')
 config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
 try:
@@ -19,11 +21,12 @@ try:
     minTime = config.getint('CONFIG', 'minTime')
     maxTime = config.getint('CONFIG', 'maxTime')
 except(configparser.NoOptionError, configparser.NoSectionError):
-    print("Incorrect data. Please, check your config file.", file=sys.stderr)
+    logger.critical("Incorrect data. Please, check your config file.")
     exit(1)
 
 def signal_handler(signal, frame):
-    print("Exiting...")
+    print("\n")
+    logger.info("Exiting...")
     exit(0)
 
 if __name__ == "__main__":
@@ -32,7 +35,7 @@ if __name__ == "__main__":
     while True:
         data = {}
 
-        print("Bumping now! {}".format(datetime.now()))
+        logger.info("Bumping now! {}".format(datetime.now()))
 
         for url in links:
             print("Connecting to the server", end="\r")
@@ -46,10 +49,10 @@ if __name__ == "__main__":
                 postData = {'xsrf_token': data['xsrf_token'], 'do': 'bump_trade'}
                 tryConnect(url, data=postData, cookies=cookie)
 
-                print("Bumped {}".format(url))
+                logger.info("Bumped {}".format(url))
             except Exception:
-                print("An error occured for url {}".format(url), file=sys.stderr)
-                print("Please, check if it's a valid url.", file=sys.stderr)
+                logger.error("An error occured for url {}".format(url))
+                logger.error("Please, check if it's a valid url.")
 
         randomstart = randint(minTime, maxTime)
         for i in range(0, randomstart):

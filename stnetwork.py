@@ -4,12 +4,14 @@
 import sys
 import requests
 from time import sleep
+import logging
 
 import gevent
 import gevent.monkey
 
 gevent.monkey.patch_socket()
 agent = {'user-agent': 'unknown/0.0.0'}
+logger = logging.getLogger('root')
 
 def spamConnect(rtype, url_list, cookies="", data=False):
     def fetch(url):
@@ -26,11 +28,12 @@ def spamConnect(rtype, url_list, cookies="", data=False):
                     elif rtype == "content":
                         return response.content
             except requests.exceptions.TooManyRedirects:
-                print("Too manu redirects. Please, check your configuration.", file=sys.stderr)
+                logger.critical("Too many redirects. Please, check your configuration.")
+                logger.critical("(Invalid cookie?)")
                 exit(1)
             except requests.exceptions.RequestException:
-                print("The connection is slow. Trying again in 5 secs...")
-                sleep(5)
+                logger.error("The connection is refused or fails. Trying again...")
+                sleep(3)
 
     greenlet = []
     for url in url_list:
@@ -47,12 +50,12 @@ def tryConnect(url, cookies="", data=False):
             else:
                 return requests.get(url, cookies=cookies, headers=agent, timeout=10)
         except requests.exceptions.TooManyRedirects:
-            print("Too many redirects. Please, check your configuration.", file=sys.stderr)
-            print("(Invalid cookie?)", file=sys.stderr)
+            logger.critical("Too many redirects. Please, check your configuration.")
+            logger.critical("(Invalid cookie?)")
             exit(1)
         except requests.exceptions.RequestException:
-            print("The connection is refused or fails. Trying again...")
+            logger.error("The connection is refused or fails. Trying again...")
             sleep(3)
 
-    print("Cannot access the internet! Please, check your internet connection.", file=sys.stderr)
+    logger.critical("Cannot access the internet! Please, check your internet connection.")
     exit(1)

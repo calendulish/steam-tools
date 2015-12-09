@@ -8,9 +8,11 @@ import os, sys
 from signal import signal, SIGINT
 import subprocess
 
+import stlogger
 import stconfig
 from stnetwork import tryConnect, spamConnect
 
+logger = stlogger.init(os.path.splitext(sys.argv[0])[0]+'.log')
 config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
 try:
@@ -18,17 +20,18 @@ try:
     profile = "http://steamcommunity.com/id/" + config.get('UserInfo', 'ProfileName')
     sort = config.getboolean('CONFIG', 'MostValuableFirst')
 except(configparser.NoOptionError, configparser.NoSectionError):
-    print("Incorrect data. Please, check your config file.", file=sys.stderr)
+    logger.critical("Incorrect data. Please, check your config file.")
     exit(1)
 
 def signal_handler(signal, frame):
-    print("Exiting...")
+    print("\n")
+    logger.info("Exiting...")
     exit(0)
 
 if __name__ == "__main__":
     signal(SIGINT, signal_handler)
 
-    print("Digging your badge list...")
+    logger.info("Digging your badge list...")
     fullPage = tryConnect(profile+"/badges/", cookies=cookies).content
     pageCount = bs(fullPage, 'html.parser').findAll('a', class_='pagelink')
     if pageCount:
@@ -40,15 +43,15 @@ if __name__ == "__main__":
         badges = bs(fullPage, 'html.parser').findAll('div', class_='badge_title_row')
 
     if not badges:
-        print("Something is wrong! (Invalid profile name?)", file=sys.stderr)
+        logger.critical("Something is wrong! (Invalid profile name?)")
         exit(1)
 
-    print("Checking if we are logged.")
+    logger.info("Checking if we are logged.")
     if not bs(fullPage, 'html.parser').findAll('div', class_='profile_xp_block_right'):
-        print("You are not logged into steam! (Invalid cookies?)", file=sys.stderr)
+        logger.critical("You are not logged into steam! (Invalid cookies?)")
         exit(1)
 
-    print("Getting badges info...")
+    logger.info("Getting badges info...")
     badgeSet = {}
     badgeSet['gameID'   ] = []
     badgeSet['gameName' ] = []
@@ -67,7 +70,7 @@ if __name__ == "__main__":
         badgeSet['gameName'].append(title.text.split('\t\t\t\t\t\t\t\t\t', 2)[1])
         badgeSet['cardURL'].append("http://api.enhancedsteam.com/market_data/average_card_price/?appid="+badgeSet['gameID'][-1]+"&cur=usd")
 
-    print("Getting cards values...")
+    logger.info("Getting cards values...")
     badgeSet['cardValue'] = [float(v) for v in spamConnect('text', badgeSet['cardURL'])]
 
     if sort:
@@ -75,16 +78,17 @@ if __name__ == "__main__":
         for item, value in badgeSet.items():
             badgeSet[item] = [value[i] for i in order]
 
-    print("Ready to start.")
+    logger.info("Ready to start.")
     for index in range(0, len(badgeSet['gameID'])):
-        print("Starting game {} ({})".format(badgeSet['gameName'][index], badgeSet['gameID'][index]))
+        logger.info("Starting game {} ({})".format(badgeSet['gameName'][index], badgeSet['gameID'][index]))
         fakeApp = subprocess.Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         while True:
             print("{:2d} cards drop remaining. Waiting... {:7s}".format(badgeSet['cardCount'][index], ' '), end='\r')
             for i in range(0, 60):
                 if fakeApp.poll():
-                    print("\n{}".format(fakeApp.stderr.read().decode('utf-8)')), file=sys.stderr, end='')
+                    print("\n")
+                    logger.critical(fakeApp.stderr.read().decode('utf-8'))
                     exit(1)
                 sleep(1)
 
@@ -92,13 +96,14 @@ if __name__ == "__main__":
             badge = tryConnect(profile+"/gamecards/"+badgeSet['gameID'][index], cookies=cookies).content
             badgeSet['cardCount'][index] = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
             if not badgeSet['cardCount'][index] or "No" in badgeSet['cardsCount'][index].text:
-                print("The game has no more cards to drop.{:8s}".format(' '), end='')
+                print("\n")
+                logger.info("The game has no more cards to drop.)
                 break
             else:
                 badgeSet['cardCount'][index] = int(badgeSet['cardCount'][index].text.split(' ', 3)[0])
 
-        print("\nClosing {}".format(badgeSet['gameName'][index]))
+        logger.info("Closing {}".format(badgeSet['gameName'][index]))
         fakeApp.terminate()
         fakeApp.wait()
 
-    print("There's nothing else we can do. Leaving.")
+    logger.info("There's nothing else we can do. Leaving.")

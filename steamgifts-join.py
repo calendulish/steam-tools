@@ -3,22 +3,26 @@
 
 from bs4 import BeautifulSoup as bs
 import requests
+
+import stlogger
 import stconfig
 import os, sys
 from signal import signal, SIGINT
 
 from stnetwork import tryConnect
 
+logger = stlogger.init(os.path.splitext(sys.argv[0])[0]+'.log')
 config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
 try:
     cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}
 except(configparser.NoOptionError, configparser.NoSectionError):
-    print("Incorrect data. Please, check your config file.", file=sys.stderr)
+    logger.critical("Incorrect data. Please, check your config file.")
     exit(1)
 
 def signal_handler(signal, frame):
-    print("Exiting...")
+    print("\n")
+    logger.info("Exiting...")
     exit(0)
 
 if __name__ == "__main__":
@@ -28,7 +32,7 @@ if __name__ == "__main__":
 
     url = 'http://www.steamgifts.com/giveaways/search?type=wishlist'
 
-    print("Connecting to the server")
+    logger.info("Connecting to the server")
     page = tryConnect(url, cookies=cookie).content
 
     try:
@@ -66,4 +70,5 @@ if __name__ == "__main__":
         ### STUB ###
 
     except Exception as e:
-        print(e, file=sys.stderr)
+        logger.critical(e)
+        exit(1)
