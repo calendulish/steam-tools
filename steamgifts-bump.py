@@ -6,22 +6,10 @@ from datetime import datetime
 from bs4 import BeautifulSoup as bs
 from random import randint
 import requests
-import configparser
+import stconfig
 import os, sys
 
-config = configparser.RawConfigParser()
-xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
-configfile = os.path.join(xdg_dir, 'steamgifts-bump.config')
-
-if os.path.isfile(configfile):
-    config.read(configfile)
-elif os.path.isfile('steamgifts-bump.config'):
-    config.read('steamgifts-bump.config')
-else:
-    print("Configuration file not found. These is the search paths:", file=sys.stderr)
-    print(" - {}\n - {}".format(os.path.join(os.getcwd(), 'steamgifts-bump.config'), configfile), file=sys.stderr)
-    print("Please, copy the example file or create a new with your data.", file=sys.stderr)
-    exit(1)
+config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
 try:
     cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}

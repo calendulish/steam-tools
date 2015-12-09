@@ -1,26 +1,14 @@
 #!/usr/bin/env python
 # Lara Maia <dev@lara.click> 2015
 
-import configparser
 import requests
 from bs4 import BeautifulSoup as bs
 from time import sleep
 import os, sys
 import subprocess
+import stconfig
 
-config = configparser.RawConfigParser()
-xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
-configfile = os.path.join(xdg_dir, 'steam-card-farming.config')
-
-if os.path.isfile(configfile):
-    config.read(configfile)
-elif os.path.isfile('steam-card-farming.config'):
-    config.read('steam-card-farming.config')
-else:
-    print("Configuration file not found. These is the search paths:", file=sys.stderr)
-    print(" - {}\n - {}".format(os.path.join(os.getcwd(), 'steam-card-farming.config'), configfile), file=sys.stderr)
-    print("Please, copy the example file or create a new with your data.", file=sys.stderr)
-    exit(1)
+config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
 try:
     cookies = {'sessionid': config.get('COOKIES', 'SessionID'), 'steamLogin': config.get('COOKIES', 'SteamLogin')}

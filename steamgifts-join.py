@@ -3,22 +3,10 @@
 
 from bs4 import BeautifulSoup as bs
 import requests
-import configparser
+import stconfig
 import os, sys
 
-config = configparser.RawConfigParser()
-xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
-configfile = os.path.join(xdg_dir, 'steamgifts-join.config')
-
-if os.path.isfile(configfile):
-    config.read(configfile)
-elif os.path.isfile('steamgifts-join.config'):
-    config.read('steamgifts-join.config')
-else:
-    print("Configuration file not found. These is the search paths:", file=sys.stderr)
-    print(" - {}\n - {}".format(os.path.join(os.getcwd(), 'steamgifts-join.config'), configfile), file=sys.stderr)
-    print("Please, copy the example file or create a new with your data.", file=sys.stderr)
-    exit(1)
+config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
 try:
     cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}
