@@ -48,29 +48,32 @@ if __name__ == "__main__":
         print("You are not logged into steam! (Invalid cookies?)", file=sys.stderr)
         exit(1)
 
-    print("Gettings badges info...", end='\r')
-    badgeSet = []
-    cardsCounts = []
-    cardsUrls = []
-    gamesId = []
-    gamesName = []
+    print("Getting badges info...")
+    badgeSet = {}
+    badgeSet['gameID'   ] = []
+    badgeSet['gameName' ] = []
+    badgeSet['cardCount'] = []
+    badgeSet['cardURL'  ] = []
+    badgeSet['cardValue'] = []
     for badge in badges:
-        cardsCount = badge.find('span', class_='progress_info_bold')
-        if not cardsCount or "No" in cardsCount.text: continue
-        cardsCount.append(int(cardsCount.text.split(' ', 3)[0]))
-        gameId = badge.find('a')['href'].split('/', 3)[3]
-        gamesId.append(gameId)
-        gameName = badge.find('div', class_='badge_title')
-        gameName.span.unwrap()
-        gamesName.append(gameName.text.split('\t\t\t\t\t\t\t\t\t', 2)[1])
-        cardsUrls.append("http://api.enhancedsteam.com/market_data/average_card_price/?appid="+gameId+"&cur=usd")
+        progress = badge.find('span', class_='progress_info_bold')
+        title = badge.find('div', class_='badge_title')
+        title.span.unwrap()
 
-    cardsValue = [float(v) for v in spamConnect('text', cardsUrls)]
-    for i in range(0, len(gamesId)):
-        badgeSet.append([gamesName[i], gamesId[i], cardsCounts[i], cardsValue[i]])
+        if not progress or "No" in progress.text: continue
+
+        badgeSet['cardCount'].append(int(progress.text.split(' ', 3)[0]))
+        badgeSet['gameID'].append(badge.find('a')['href'].split('/', 3)[3])
+        badgeSet['gameName'].append(title.text.split('\t\t\t\t\t\t\t\t\t', 2)[1])
+        badgeSet['cardURL'].append("http://api.enhancedsteam.com/market_data/average_card_price/?appid="+badgeSet['gameID'][-1]+"&cur=usd")
+
+    print("Getting cards values...")
+    badgeSet['cardValue'] = [float(v) for v in spamConnect('text', badgeSet['cardURL'])]
 
     if sort:
-        badgeSet = sorted(badgeSet, key=lambda badge: badge[3], reverse=True)
+        order = sorted(range(0, len(badgeSet['cardValue'])), key=lambda key: badgeSet['cardValue'][key], reverse=True)
+        for item, value in badgeSet.items():
+            badgeSet[item] = [value[i] for i in order]
 
     print("\nReady to start.")
     for gameName, gameId, cardsCount, cardsValue in badgeSet:
