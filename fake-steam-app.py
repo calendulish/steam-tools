@@ -30,7 +30,9 @@ if __name__ == "__main__":
     os.environ["SteamAppId"] = sys.argv[1]
 
     if STEAM_API.SteamAPI_IsSteamRunning():
-        STEAM_API.SteamAPI_Init()
+        if not STEAM_API.SteamAPI_Init():
+            print("I cannot find a game with that ID. Exiting.")
+            exit(1)
 
         print("Game started.")
         while True:
