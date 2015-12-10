@@ -75,13 +75,13 @@ if __name__ == "__main__":
         for item, value in badgeSet.items():
             badgeSet[item] = [value[i] for i in order]
 
-    print("\nReady to start.")
-    for gameName, gameId, cardsCount, cardsValue in badgeSet:
-        print("Starting game {} ({})".format(gameName, gameId))
-        fakeApp = subprocess.Popen(['python', 'fake-steam-app.py', gameId], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print("Ready to start.")
+    for index in range(0, len(badgeSet['gameID'])):
+        print("Starting game {} ({})".format(badgeSet['gameName'][index], badgeSet['gameID'][index]))
+        fakeApp = subprocess.Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         while True:
-            print("{:2d} cards drop remaining. Waiting... {:7s}".format(cardsCount, ' '), end='\r')
+            print("{:2d} cards drop remaining. Waiting... {:7s}".format(badgeSet['cardCount'][index], ' '), end='\r')
             for i in range(0, 60):
                 if fakeApp.poll():
                     print("\n{}".format(fakeApp.stderr.read().decode('utf-8)')), file=sys.stderr, end='')
@@ -89,15 +89,15 @@ if __name__ == "__main__":
                 sleep(1)
 
             print("Checking if game have more cards drops...", end='\r')
-            badge = tryConnect(profile+"/gamecards/"+gameId, cookies=cookies).content
-            cardsCount = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
-            if not cardsCount or "No" in cardsCount.text:
+            badge = tryConnect(profile+"/gamecards/"+badgeSet['gameID'][index], cookies=cookies).content
+            badgeSet['cardCount'][index] = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
+            if not badgeSet['cardCount'][index] or "No" in badgeSet['cardsCount'][index].text:
                 print("The game has no more cards to drop.{:8s}".format(' '), end='')
                 break
             else:
-                cardsCount = int(cardsCount.text.split(' ', 3)[0])
+                badgeSet['cardCount'][index] = int(badgeSet['cardCount'][index].text.split(' ', 3)[0])
 
-        print("\nClosing {}".format(gameName))
+        print("\nClosing {}".format(badgeSet['gameName'][index]))
         fakeApp.terminate()
         fakeApp.wait()
 
