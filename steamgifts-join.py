@@ -3,54 +3,36 @@
 
 from bs4 import BeautifulSoup as bs
 import requests
-import configparser
+
+import stlogger
+import stconfig
 import os, sys
+from signal import signal, SIGINT
 
-config = configparser.RawConfigParser()
-xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
-configfile = os.path.join(xdg_dir, 'steamgifts-join.config')
+from stnetwork import tryConnect
 
-if os.path.isfile(configfile):
-    config.read(configfile)
-elif os.path.isfile('steamgifts-join.config'):
-    config.read('steamgifts-join.config')
-else:
-    print("Configuration file not found. These is the search paths:", file=sys.stderr)
-    print(" - {}\n - {}".format(os.path.join(os.getcwd(), 'steamgifts-join.config'), configfile), file=sys.stderr)
-    print("Please, copy the example file or create a new with your data.", file=sys.stderr)
-    exit(1)
+logger = stlogger.init(os.path.splitext(sys.argv[0])[0]+'.log')
+config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
 try:
     cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}
-    agent = {'user-agent': 'unknown/0.0.0'}
 except(configparser.NoOptionError, configparser.NoSectionError):
-    print("Incorrect data. Please, check your config file.", file=sys.stderr)
+    logger.critical("Incorrect data. Please, check your config file.")
     exit(1)
 
-def tryConnect(url, cookies, data=False):
-    for loops in range(0 , 4):
-        try:
-            if data:
-                return requests.post(url, data=data, cookies=cookies, headers=agent, timeout=10)
-            else:
-                return requests.get(url, cookies=cookies, headers=agent, timeout=10)
-        except requests.exceptions.TooManyRedirects:
-            print("Too many redirects. Please, check your configuration.", file=sys.stderr)
-            print("(Invalid cookie?)", file=sys.stderr)
-            exit(1)
-        except requests.exceptions.RequestException:
-            print("The connection is refused or fails. Trying again...")
-            sleep(3)
+def signal_handler(signal, frame):
+    print("\n")
+    logger.info("Exiting...")
+    exit(0)
 
-    print("Cannot access the internet! Please, check your internet connection.", file=sys.stderr)
-    exit(1)
+if __name__ == "__main__":
+    signal(SIGINT, signal_handler)
 
-def join():
     data = {}
 
     url = 'http://www.steamgifts.com/giveaways/search?type=wishlist'
 
-    print("Connecting to the server")
+    logger.info("Connecting to the server")
     page = tryConnect(url, cookies=cookie).content
 
     try:
@@ -88,6 +70,5 @@ def join():
         ### STUB ###
 
     except Exception as e:
-        print(e, file=sys.stderr)
-
-join()
+        logger.critical(e)
+        exit(1)
