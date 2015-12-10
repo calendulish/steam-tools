@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
         print("Game started.")
         while True:
-            sleep(1000*1000)
+            sleep(1)
     else:
         print("I cannot find a Steam instance.", file=sys.stderr)
         print("Please, check if your already start your steam client.", file=sys.stderr)
