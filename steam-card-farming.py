@@ -9,7 +9,7 @@ from signal import signal, SIGINT
 import subprocess
 
 import stconfig
-from stnetwork import tryConnect
+from stnetwork import tryConnect, spamGet
 
 config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
@@ -50,22 +50,24 @@ if __name__ == "__main__":
 
     print("Gettings badges info...", end='\r')
     badgeSet = []
-    cardsValue = 0.0
-    count = 0
+    cardsCounts = []
+    cardsUrls = []
+    gamesId = []
+    gamesName = []
     for badge in badges:
-        count += 1
-        if sort:
-            print("Getting badges info and cards values... {} %".format(int((count/len(badges))*100)), end='\r')
         cardsCount = badge.find('span', class_='progress_info_bold')
         if not cardsCount or "No" in cardsCount.text: continue
-        cardsCount = int(cardsCount.text.split(' ', 3)[0])
+        cardsCount.append(int(cardsCount.text.split(' ', 3)[0]))
         gameId = badge.find('a')['href'].split('/', 3)[3]
+        gamesId.append(gameId)
         gameName = badge.find('div', class_='badge_title')
         gameName.span.unwrap()
-        gameName = gameName.text.split('\t\t\t\t\t\t\t\t\t', 2)[1]
-        if sort:
-            cardsValue = float(tryGet("http://api.enhancedsteam.com/market_data/average_card_price/?appid="+gameId+"&cur=usd").text)
-        badgeSet.append([gameName, gameId, cardsCount, cardsValue])
+        gamesName.append(gameName.text.split('\t\t\t\t\t\t\t\t\t', 2)[1])
+        cardsUrls.append("http://api.enhancedsteam.com/market_data/average_card_price/?appid="+gameId+"&cur=usd")
+
+    cardsValue = spamGet(cardsUrls)
+    for i in range(0, len(gamesId)):
+        badgeSet.append([gamesName[i], gamesId[i], cardsCounts[i], cardsValue[i]])
 
     if sort:
         badgeSet = sorted(badgeSet, key=lambda badge: badge[3], reverse=True)
