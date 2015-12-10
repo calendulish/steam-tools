@@ -114,11 +114,11 @@ if __name__ == "__main__":
 
             print("Checking if game have more cards drops...", end='\r')
             logger.debug("Updating cards count")
-            if icheck: logger.debug("OLD: {}".format(badgeSet['cardsCount'][index]))
+            if icheck: logger.debug("OLD: {}".format(badgeSet['cardCount'][index]))
             badge = tryConnect(profile+"/gamecards/"+badgeSet['gameID'][index], cookies=cookies).content
             badgeSet['cardCount'][index] = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
-            if icheck: logger.debug("NEW: {}".format(badgeSet['cardsCount'][index]))
-            if not badgeSet['cardCount'][index] or "No" in badgeSet['cardsCount'][index].text:
+            if icheck: logger.debug("NEW: {}".format(badgeSet['cardCount'][index]))
+            if not badgeSet['cardCount'][index] or "No" in badgeSet['cardCount'][index].text:
                 print("\n")
                 logger.info("The game has no more cards to drop.")
                 break
