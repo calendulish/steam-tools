@@ -9,7 +9,7 @@ from signal import signal, SIGINT
 import subprocess
 
 import stconfig
-from stnetwork import tryConnect, spamGet
+from stnetwork import tryConnect, spamConnect
 
 config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         gamesName.append(gameName.text.split('\t\t\t\t\t\t\t\t\t', 2)[1])
         cardsUrls.append("http://api.enhancedsteam.com/market_data/average_card_price/?appid="+gameId+"&cur=usd")
 
-    cardsValue = spamGet(cardsUrls)
+    cardsValue = [float(v) for v in spamConnect('text', cardsUrls)]
     for i in range(0, len(gamesId)):
         badgeSet.append([gamesName[i], gamesId[i], cardsCounts[i], cardsValue[i]])
 
