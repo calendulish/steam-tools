@@ -6,7 +6,7 @@ import logging
 
 def init(fileName):
     xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
-    path = os.path.join('xdg_dir', 'steam-tools')
+    path = os.path.join(xdg_dir, 'steam-tools')
 
     if not os.path.isdir(path):
         os.mkdir(path)
