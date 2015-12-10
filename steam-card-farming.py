@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # Lara Maia <dev@lara.click> 2015
 
-import requests
-from bs4 import BeautifulSoup as bs
-from time import sleep
-import os, sys
-from signal import signal, SIGINT
+import os
+from sys import argv
 import subprocess
+from time import sleep
+from signal import signal, SIGINT
+from bs4 import BeautifulSoup as bs
 
 import stlogger
 import stconfig
 from stnetwork import tryConnect, spamConnect
 
-logger = stlogger.init(os.path.splitext(sys.argv[0])[0]+'.log')
-config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
+logger = stlogger.init(os.path.splitext(argv[0])[0]+'.log')
+config = stconfig.init(os.path.splitext(argv[0])[0]+'.config')
 
 try:
     cookies = {'sessionid': config.get('COOKIES', 'SessionID'), 'steamLogin': config.get('COOKIES', 'SteamLogin')}

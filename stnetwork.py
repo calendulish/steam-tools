@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 # Lara Maia <dev@lara.click> 2015
 
-import sys
-import requests
 from time import sleep
-import logging
+from logging import getLogger
 
+import requests
 import gevent
 import gevent.monkey
 
 gevent.monkey.patch_socket()
 agent = {'user-agent': 'unknown/0.0.0'}
-logger = logging.getLogger('root')
+logger = getLogger('root')
 
 def spamConnect(rtype, url_list, cookies="", data=False):
     def fetch(url):

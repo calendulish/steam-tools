@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # Lara Maia <dev@lara.click> 2015
 
-from ctypes import CDLL
-from time import sleep
 import os, sys
+from time import sleep
 from signal import signal, SIGINT
+
+from ctypes import CDLL
 
 if os.name == 'nt':
     ext = '.dll'

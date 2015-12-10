@@ -1,22 +1,22 @@
 #!/usr/bin/env python
 # Lara Maia <dev@lara.click> 2015
 
+import os
+from sys import argv
+from signal import signal, SIGINT
+from configparser import NoOptionError, NoSectionError
 from bs4 import BeautifulSoup as bs
-import requests
 
 import stlogger
 import stconfig
-import os, sys
-from signal import signal, SIGINT
-
 from stnetwork import tryConnect
 
-logger = stlogger.init(os.path.splitext(sys.argv[0])[0]+'.log')
-config = stconfig.init(os.path.splitext(sys.argv[0])[0]+'.config')
+logger = stlogger.init(os.path.splitext(argv[0])[0]+'.log')
+config = stconfig.init(os.path.splitext(argv[0])[0]+'.config')
 
 try:
     cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}
-except(configparser.NoOptionError, configparser.NoSectionError):
+except(NoOptionError, NoSectionError):
     logger.critical("Incorrect data. Please, check your config file.")
     exit(1)
 

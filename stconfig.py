@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # Lara Maia <dev@lara.click> 2015
 
-import os, sys
-import logging
+import os
+from logging import getLogger
 from configparser import RawConfigParser
 
-logger = logging.getLogger('root')
+logger = getLogger('root')
 
 def init(fileName):
     config = RawConfigParser()
