@@ -106,7 +106,7 @@ if __name__ == "__main__":
             print("{:2d} cards drop remaining. Waiting... {:7s}".format(badgeSet['cardCount'][index], ' '), end='\r')
             logger.debug("Waiting cards drop loop")
             if icheck: logger.debug("Current: {}".format([badgeSet[i][index] for i,v in badgeSet.items()]))
-            for i in range(0, 60):
+            for i in range(0, 30):
                 if fakeApp.poll():
                     print("")
                     logger.critical(fakeApp.stderr.read().decode('utf-8'))
