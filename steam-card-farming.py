@@ -19,7 +19,8 @@ try:
     cookies = {'sessionid': config.get('COOKIES', 'SessionID'), 'steamLogin': config.get('COOKIES', 'SteamLogin')}
     profile = "http://steamcommunity.com/id/" + config.get('UserInfo', 'ProfileName')
     sort = config.getboolean('CONFIG', 'MostValuableFirst')
-    icheck = config.getboolean('CONFIG', "IntegrityCheck")
+    icheck = config.getboolean('DEBUG', "IntegrityCheck")
+    dryrun = config.getboolean('DEBUG', "DryRun")
 except(configparser.NoOptionError, configparser.NoSectionError):
     logger.critical("Incorrect data. Please, check your config file.")
     exit(1)
@@ -100,14 +101,15 @@ if __name__ == "__main__":
     for index in range(0, len(badgeSet['gameID'])):
         print("")
         logger.info("Starting game {} ({})".format(badgeSet['gameName'][index], badgeSet['gameID'][index]))
-        fakeApp = subprocess.Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if not dryrun:
+            fakeApp = subprocess.Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         while True:
             print("{:2d} cards drop remaining. Waiting... {:7s}".format(badgeSet['cardCount'][index], ' '), end='\r')
             logger.debug("Waiting cards drop loop")
             if icheck: logger.debug("Current: {}".format([badgeSet[i][index] for i,v in badgeSet.items()]))
             for i in range(0, 30):
-                if fakeApp.poll():
+                if not dryrun and fakeApp.poll():
                     print("")
                     logger.critical(fakeApp.stderr.read().decode('utf-8'))
                     exit(1)
@@ -119,6 +121,7 @@ if __name__ == "__main__":
             badge = tryConnect(profile+"/gamecards/"+badgeSet['gameID'][index], cookies=cookies).content
             badgeSet['cardCount'][index] = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
             if icheck: logger.debug("NEW: {}".format(badgeSet['cardCount'][index]))
+            if dryrun: badgeSet['cardCount'][index] = ""
             if not badgeSet['cardCount'][index] or "No" in badgeSet['cardCount'][index].text:
                 print("")
                 logger.info("The game has no more cards to drop.")
@@ -127,7 +130,8 @@ if __name__ == "__main__":
                 badgeSet['cardCount'][index] = int(badgeSet['cardCount'][index].text.split(' ', 3)[0])
 
         logger.info("Closing {}".format(badgeSet['gameName'][index]))
-        fakeApp.terminate()
-        fakeApp.wait()
+        if not dryrun:
+            fakeApp.terminate()
+            fakeApp.wait()
 
     logger.info("There's nothing else we can do. Leaving.")
