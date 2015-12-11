@@ -98,6 +98,7 @@ if __name__ == "__main__":
 
     logger.info("Ready to start.")
     for index in range(0, len(badgeSet['gameID'])):
+        print("")
         logger.info("Starting game {} ({})".format(badgeSet['gameName'][index], badgeSet['gameID'][index]))
         fakeApp = subprocess.Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -107,7 +108,7 @@ if __name__ == "__main__":
             if icheck: logger.debug("Current: {}".format([badgeSet[i][index] for i,v in badgeSet.items()]))
             for i in range(0, 60):
                 if fakeApp.poll():
-                    print("\n")
+                    print("")
                     logger.critical(fakeApp.stderr.read().decode('utf-8'))
                     exit(1)
                 sleep(1)
@@ -119,7 +120,7 @@ if __name__ == "__main__":
             badgeSet['cardCount'][index] = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
             if icheck: logger.debug("NEW: {}".format(badgeSet['cardCount'][index]))
             if not badgeSet['cardCount'][index] or "No" in badgeSet['cardCount'][index].text:
-                print("\n")
+                print("")
                 logger.info("The game has no more cards to drop.")
                 break
             else:
