@@ -27,8 +27,7 @@ def init(fileName):
     xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
     config_file = os.path.join(xdg_dir, 'steam-tools', fileName)
 
-    if not os.path.isdir(os.path.dirname(config_file)):
-        os.mkdir(os.path.dirname(config_file))
+    os.makedirs(os.path.dirname(config_file), exist_ok=True)
 
     if os.path.isfile(config_file):
         config.read(config_file)
