@@ -18,6 +18,7 @@
 
 import os
 import logging
+import logging.handlers
 
 def init(fileName):
     xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
@@ -29,9 +30,10 @@ def init(fileName):
     logger = logging.getLogger("root")
     logger.setLevel(logging.DEBUG)
 
-    file = logging.FileHandler(os.path.join(path, fileName))
+    file = logging.handlers.RotatingFileHandler(os.path.join(path, fileName), backupCount=1)
     file.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     file.setLevel(logging.DEBUG)
+    file.doRollover()
     logger.addHandler(file)
 
     console = logging.StreamHandler()
@@ -39,9 +41,10 @@ def init(fileName):
     console.setLevel(logging.INFO)
     logger.addHandler(console)
 
-    httpfile = logging.FileHandler(os.path.join(path, 'requests_'+fileName))
+    httpfile = logging.handlers.RotatingFileHandler(os.path.join(path, 'requests_'+fileName), backupCount=1)
     httpfile.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     httpfile.setLevel(logging.DEBUG)
+    httpfile.doRollover()
 
     requests = logging.getLogger("requests.packages.urllib3")
     requests.setLevel(logging.DEBUG)
