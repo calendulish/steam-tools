@@ -22,9 +22,9 @@ from signal import signal, SIGINT
 from configparser import NoOptionError, NoSectionError
 from bs4 import BeautifulSoup as bs
 
-import stlogger
-import stconfig
-from stnetwork import tryConnect
+from stlib import stlogger
+from stlib import stconfig
+from stlib.stnetwork import tryConnect
 
 logger = stlogger.init(os.path.splitext(argv[0])[0]+'.log')
 config = stconfig.init(os.path.splitext(argv[0])[0]+'.config')

@@ -23,9 +23,9 @@ from time import sleep
 from signal import signal, SIGINT
 from bs4 import BeautifulSoup as bs
 
-import stlogger
-import stconfig
-from stnetwork import tryConnect, spamConnect
+from stlib import stlogger
+from stlib import stconfig
+from stlib.stnetwork import tryConnect, spamConnect
 
 logger = stlogger.init(os.path.splitext(argv[0])[0]+'.log')
 config = stconfig.init(os.path.splitext(argv[0])[0]+'.config')
