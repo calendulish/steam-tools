@@ -17,7 +17,6 @@
 #
 
 import os
-from sys import argv
 import subprocess
 from time import sleep
 from signal import signal, SIGINT
@@ -27,8 +26,8 @@ from stlib import stlogger
 from stlib import stconfig
 from stlib.stnetwork import tryConnect, spamConnect
 
-logger = stlogger.init(os.path.splitext(argv[0])[0]+'.log')
-config = stconfig.init(os.path.splitext(argv[0])[0]+'.config')
+logger = stlogger.init(os.path.splitext(os.path.basename(__file__))[0]+'.log')
+config = stconfig.init(os.path.splitext(os.path.basename(__file__))[0]+'.config')
 
 try:
     cookies = {'sessionid': config.get('COOKIES', 'SessionID'), 'steamLogin': config.get('COOKIES', 'SteamLogin')}

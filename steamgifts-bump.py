@@ -17,7 +17,6 @@
 #
 
 import os
-from sys import argv
 from time import sleep
 from datetime import datetime
 from random import randint
@@ -29,8 +28,8 @@ from stlib import stlogger
 from stlib import stconfig
 from stlib.stnetwork import tryConnect
 
-logger = stlogger.init(os.path.splitext(argv[0])[0]+'.log')
-config = stconfig.init(os.path.splitext(argv[0])[0]+'.config')
+logger = stlogger.init(os.path.splitext(os.path.basename(__file__))[0]+'.log')
+config = stconfig.init(os.path.splitext(os.path.basename(__file__))[0]+'.config')
 
 try:
     cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}
