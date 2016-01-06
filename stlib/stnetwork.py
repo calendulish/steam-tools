@@ -29,7 +29,7 @@ logger = getLogger('root')
 
 def spamConnect(rtype, url_list, cookies="", data=False):
     def fetch(url):
-        for loops in range(0, 4):
+        while True:
             try:
                 if data:
                     response = requests.post(url, data=data, cookies=cookies, headers=agent, timeout=10)
@@ -60,7 +60,7 @@ def spamConnect(rtype, url_list, cookies="", data=False):
     return [v.value for v in greenlet]
 
 def tryConnect(url, cookies="", data=False):
-    for loops in range(0 , 4):
+    while True:
         try:
             if data:
                 response = requests.post(url, data=data, cookies=cookies, headers=agent, timeout=10)
