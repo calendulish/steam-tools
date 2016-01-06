@@ -32,9 +32,12 @@ def spamConnect(rtype, url_list, cookies="", data=False):
         for loops in range(0, 4):
             try:
                 if data:
-                    return requests.post(url, data=data, cookies=cookies, headers=agent, timeout=10)
+                    response = requests.post(url, data=data, cookies=cookies, headers=agent, timeout=10)
+                    response.raise_for_status()
+                    return response
                 else:
                     response = requests.get(url, cookies=cookies, headers=agent, timeout=10)
+                    response.raise_for_status()
                     if rtype == "response":
                         return response
                     elif rtype == "text":
@@ -45,7 +48,7 @@ def spamConnect(rtype, url_list, cookies="", data=False):
                 logger.critical("Too many redirects. Please, check your configuration.")
                 logger.critical("(Invalid cookie?)")
                 exit(1)
-            except requests.exceptions.RequestException:
+            except(requests.exceptions.RequestException, requests.exceptions.HTTPError):
                 logger.error("The connection is refused or fails. Trying again...")
                 sleep(3)
 
@@ -60,14 +63,18 @@ def tryConnect(url, cookies="", data=False):
     for loops in range(0 , 4):
         try:
             if data:
-                return requests.post(url, data=data, cookies=cookies, headers=agent, timeout=10)
+                response = requests.post(url, data=data, cookies=cookies, headers=agent, timeout=10)
+                response.raise_for_status()
+                return response
             else:
-                return requests.get(url, cookies=cookies, headers=agent, timeout=10)
+                response = requests.get(url, cookies=cookies, headers=agent, timeout=10)
+                response.raise_for_status()
+                return response
         except requests.exceptions.TooManyRedirects:
             logger.critical("Too many redirects. Please, check your configuration.")
             logger.critical("(Invalid cookie?)")
             exit(1)
-        except requests.exceptions.RequestException:
+        except(requests.exceptions.RequestException, requests.exceptions.HTTPError):
             logger.error("The connection is refused or fails. Trying again...")
             sleep(3)
 
