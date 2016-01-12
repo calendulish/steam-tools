@@ -90,8 +90,11 @@ if __name__ == "__main__":
         badgeSet['gameName'].append(title.text.split('\t\t\t\t\t\t\t\t\t', 2)[1])
         badgeSet['cardURL'].append("http://api.enhancedsteam.com/market_data/average_card_price/?appid="+badgeSet['gameID'][-1]+"&cur=usd")
 
-    logger.info("Getting cards values...")
-    badgeSet['cardValue'] = spamConnect('text', badgeSet['cardURL'])
+    if sort:
+        logger.info("Getting cards values...")
+        badgeSet['cardValue'] = spamConnect('text', badgeSet['cardURL'])
+    else:
+        badgeSet['cardValue'] = [ 0 for _ in badgeSet['gameID'] ]
 
     if icheck:
         logger.debug("Checking consistency of dictionaries...")
