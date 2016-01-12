@@ -48,6 +48,13 @@ def spamConnect(rtype, url_list, cookies="", data=False):
                 logger.critical("Too many redirects. Please, check your configuration.")
                 logger.critical("(Invalid cookie?)")
                 exit(1)
+            except requests.exceptions.ReadTimeout:
+                logger.critical("A problem occurred when trying to connect.")
+                logger.critical("This is a problem with the remote server.")
+                logger.critical("(enhancedsteam API offline?)")
+                logger.critical("You can try to disable MostValuableFirst option in")
+                logger.critical("config file for bypass the API while they don't fix it.")
+                exit(1)
             except(requests.exceptions.RequestException, requests.exceptions.HTTPError):
                 logger.error("The connection is refused or fails. Trying again...")
                 sleep(3)
