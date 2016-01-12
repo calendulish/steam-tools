@@ -57,7 +57,7 @@ def spamConnect(rtype, url_list, cookies="", data=False):
                 exit(1)
             except(requests.exceptions.RequestException, requests.exceptions.HTTPError):
                 logger.error("The connection is refused or fails. Trying again...")
-                sleep(3)
+                sleep(1)
 
     greenlets = []
     for url in url_list:
