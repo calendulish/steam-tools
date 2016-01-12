@@ -59,12 +59,12 @@ def spamConnect(rtype, url_list, cookies="", data=False):
                 logger.error("The connection is refused or fails. Trying again...")
                 sleep(3)
 
-    greenlet = []
+    greenlets = []
     for url in url_list:
-        greenlet.append(gevent.spawn(fetch, url))
+        greenlets.append(gevent.spawn(fetch, url))
 
-    gevent.joinall(greenlet)
-    return [v.value for v in greenlet]
+    gevent.joinall(greenlets)
+    return [float(greenlet.value) for greenlet in greenlets]
 
 def tryConnect(url, cookies="", data=False):
     while True:

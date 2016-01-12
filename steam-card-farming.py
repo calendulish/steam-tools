@@ -91,7 +91,7 @@ if __name__ == "__main__":
         badgeSet['cardURL'].append("http://api.enhancedsteam.com/market_data/average_card_price/?appid="+badgeSet['gameID'][-1]+"&cur=usd")
 
     logger.info("Getting cards values...")
-    badgeSet['cardValue'] = [float(v) for v in spamConnect('text', badgeSet['cardURL'])]
+    badgeSet['cardValue'] = spamConnect('text', badgeSet['cardURL'])
 
     if icheck:
         logger.debug("Checking consistency of dictionaries...")
