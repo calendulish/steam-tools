@@ -69,12 +69,15 @@ def tryConnect(url, cookies="", data=False):
             else:
                 response = requests.get(url, cookies=cookies, headers=agent, timeout=10)
                 response.raise_for_status()
+                # Check if the cookies remains valid.
+                if str(response.content).find('https://steamcommunity.com/login/home/?goto=id') != -1:
+                    raise requests.exceptions.TooManyRedirects
                 return response
         except requests.exceptions.TooManyRedirects:
             logger.critical("Too many redirects. Please, check your configuration.")
-            logger.critical("(Invalid cookie?)")
+            logger.critical("(Invalid or expired cookie?)")
             exit(1)
-        except(requests.exceptions.RequestException, requests.exceptions.HTTPError):
+        except(requests.exceptions.HTTPError, requests.exceptions.RequestException):
             logger.error("The connection is refused or fails. Trying again...")
             sleep(3)
 
