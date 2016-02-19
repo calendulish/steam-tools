@@ -73,6 +73,8 @@ if __name__ == "__main__":
 
             try:
                 giveawayList = []
+                myPoints = int(bs(page, 'html.parser').find('span', class_="nav__points").text)
+                myLevel = int(''.join(filter(str.isdigit, bs(page, 'html.parser').find('span', class_=None).text)))
 
                 container = bs(page, 'html.parser').find('div', class_='widget-container')
                 for div in container.findAll('div', class_=None):
@@ -80,8 +82,6 @@ if __name__ == "__main__":
                         giveawayList.append(div)
 
                 for giveaway in giveawayList[1].findAll('div', class_='giveaway__row-outer-wrap'):
-                    myPoints = int(bs(page, 'html.parser').find('span', class_="nav__points").text)
-                    myLevel = int(''.join(filter(str.isdigit, bs(page, 'html.parser').find('span', class_=None).text)))
                     if myPoints == 0:
                         break
 
@@ -105,6 +105,7 @@ if __name__ == "__main__":
                         formData = {'xsrf_token': data['xsrf_token'], 'do': 'entry_insert', 'code': data['code']}
                         logger.debug("formData: {}".format(formData))
                         tryConnect("http://www.steamgifts.com/ajax.php", data=formData, cookies=cookie)
+                        myPoints -= gamePoints
 
                         logger.info("Spent {} points in the giveaway of {}".format(gamePoints, gameName))
                     else:
