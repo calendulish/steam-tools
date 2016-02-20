@@ -93,7 +93,16 @@ if __name__ == "__main__":
 
                     gameName = giveaway.find('a', class_='giveaway__heading__name').text
                     gameQuery = giveaway.find('a', class_='giveaway__heading__name')['href']
-                    gamePoints = int(''.join(filter(lambda x: x.isdigit(), giveaway.find('span', class_='giveaway__heading__thin').text)))
+                    gvHeader = giveaway.find('span', class_='giveaway__heading__thin')
+
+                    if "Copies" in gvHeader.text:
+                        logger.debug("The giveaway has more than 1 copy. Counting and fixing gvHeader.")
+                        gameCopies = int(''.join(filter(lambda x: x.isdigit(), gvHeader.text)))
+                        gvHeader = gvHeader.findNext('span', class_='giveaway__heading__thin')
+                    else:
+                        gameCopies = 1
+
+                    gamePoints = int(''.join(filter(lambda x: x.isdigit(), gvHeader.text)))
 
                     try:
                         gameLevel = int(''.join(filter(lambda x: x.isdigit(), giveaway.find('div', class_='giveaway__column--contributor-level').text)))
@@ -113,11 +122,11 @@ if __name__ == "__main__":
                         tryConnect("http://www.steamgifts.com/ajax.php", data=formData, cookies=cookie)
                         myPoints -= gamePoints
 
-                        logger.info("Spent {} points in the giveaway of {}".format(gamePoints, gameName))
+                        logger.info("Spent {} points in the giveaway of {} (Copies: {})".format(gamePoints, gameName, gameCopies))
                     else:
                         logger.debug("Ignoring {} bacause the account don't have the requirements to enter.".format(gameName))
 
-                    logger.debug("L({}) ML({}) P({}) MP({}) Q({})".format(gameLevel, myLevel, gamePoints, myPoints, gameQuery))
+                    logger.debug("C({}) L({}) ML({}) P({}) MP({}) Q({})".format(gameCopies, gameLevel, myLevel, gamePoints, myPoints, gameQuery))
 
             except Exception as e:
                 logger.error("An error occured for url {}".format(url))
