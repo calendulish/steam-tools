@@ -81,6 +81,12 @@ if __name__ == "__main__":
                     if div.find('div', class_='giveaway__row-outer-wrap'):
                         giveawayList.append(div)
 
+                try:
+                    giveawayList[1]
+                except IndexError:
+                    logger.debug("No giveaways found at {}".format(url))
+                    continue
+
                 for giveaway in giveawayList[1].findAll('div', class_='giveaway__row-outer-wrap'):
                     if myPoints == 0:
                         break
@@ -116,7 +122,7 @@ if __name__ == "__main__":
             except Exception as e:
                 logger.error("An error occured for url {}".format(url))
                 logger.error("Please, check if it's a valid url.")
-                logger.warning(e)
+                logger.debug(e)
 
             print('')
 
