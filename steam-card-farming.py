@@ -24,7 +24,7 @@ from bs4 import BeautifulSoup as bs
 
 from stlib import stlogger
 from stlib import stconfig
-from stlib.stnetwork import tryConnect, spamConnect
+from stlib.stnetwork import tryConnect
 
 logger = stlogger.init(os.path.splitext(os.path.basename(__file__))[0]+'.log')
 config = stconfig.init(os.path.splitext(os.path.basename(__file__))[0]+'.config')
@@ -74,7 +74,6 @@ if __name__ == "__main__":
     badgeSet['gameID'   ] = []
     badgeSet['gameName' ] = []
     badgeSet['cardCount'] = []
-    badgeSet['cardURL'  ] = []
     badgeSet['cardValue'] = []
     for badge in badges:
         progress = badge.find('span', class_='progress_info_bold')
@@ -88,11 +87,19 @@ if __name__ == "__main__":
         badgeSet['cardCount'].append(int(progress.text.split(' ', 3)[0]))
         badgeSet['gameID'].append(badge.find('a')['href'].split('/', 3)[3])
         badgeSet['gameName'].append(title.text.split('\t\t\t\t\t\t\t\t\t', 2)[1])
-        badgeSet['cardURL'].append("http://api.enhancedsteam.com/market_data/average_card_price/?appid="+badgeSet['gameID'][-1]+"&cur=usd")
 
     if sort:
         logger.info("Getting cards values...")
-        badgeSet['cardValue'] = spamConnect('text', badgeSet['cardURL'])
+        pricesSet = {}
+        pricesSet['game'] = []
+        pricesSet['avg'] = []
+        pricesPage = tryConnect("http://www.steamcardexchange.net/index.php?badgeprices").content
+        for game in bs(pricesPage, 'html.parser').findAll('tr')[1:]:
+            pricesSet['game'].append(game.find('a').text)
+            pricesSet['avg'].append(float(game.find('td').findNext('td').findNext('td').text[1:]))
+
+        for game in badgeSet['gameName']:
+            badgeSet['cardValue'].append(pricesSet['avg'][pricesSet['game'].index(game)])
     else:
         badgeSet['cardValue'] = [ 0 for _ in badgeSet['gameID'] ]
 
