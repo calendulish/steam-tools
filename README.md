@@ -17,7 +17,6 @@ Dependencies
 - Python 3+
 - Beautiful Soup 4+
 - Requests
-- gevent
 
 #### A little help for Windows 'users'
 
@@ -26,7 +25,6 @@ Dependencies
 - Open the cmd (win+R -> ```cmd``` -> Enter)
 - install the requests with the command ```pip install requests```
 - install the Beautiful Soup with the command ```pip install beautifulsoup4```
-- install the gevent with the command ```pip install gevent==1.1rc1```
 - Go to the folder where the steam-tools files is located (with ```cd <folder>``` on cmd)
 - Copy the configurations files from example folder and edit them.
 - and finally run: ```python <script>```

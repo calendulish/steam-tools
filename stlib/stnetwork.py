@@ -20,51 +20,9 @@ from time import sleep
 from logging import getLogger
 
 import requests
-import gevent
-import gevent.monkey
 
-gevent.monkey.patch_socket()
 agent = {'user-agent': 'unknown/0.0.0'}
 logger = getLogger('root')
-
-def spamConnect(rtype, url_list, cookies="", data=False):
-    def fetch(url):
-        while True:
-            try:
-                if data:
-                    response = requests.post(url, data=data, cookies=cookies, headers=agent, timeout=10)
-                    response.raise_for_status()
-                    return response
-                else:
-                    response = requests.get(url, cookies=cookies, headers=agent, timeout=10)
-                    response.raise_for_status()
-                    if rtype == "response":
-                        return response
-                    elif rtype == "text":
-                        return response.text
-                    elif rtype == "content":
-                        return response.content
-            except requests.exceptions.TooManyRedirects:
-                logger.critical("Too many redirects. Please, check your configuration.")
-                logger.critical("(Invalid cookie?)")
-                exit(1)
-            except requests.exceptions.ReadTimeout:
-                logger.critical("A problem occurred when trying to connect.")
-                logger.critical("This is a problem with the remote server.")
-                logger.critical("(enhancedsteam API offline?)")
-                logger.critical("You can try to disable MostValuableFirst option in")
-                logger.critical("config file for bypass the API while they don't fix it.")
-                exit(1)
-            except(requests.exceptions.RequestException, requests.exceptions.HTTPError):
-                logger.error("The connection is refused or fails. Trying again...")
-                sleep(1)
-
-    greenlets = []
-    for url in url_list:
-        greenlets.append(gevent.spawn(fetch, url))
-
-    gevent.joinall(greenlets)
-    return [float(greenlet.value) for greenlet in greenlets]
 
 def tryConnect(url, cookies="", data=False):
     while True:
