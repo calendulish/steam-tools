@@ -9,7 +9,6 @@ Some useful tools for use with steam client or compatible programs, websites.
 - **steamgifts-join:** Automatically join on giveways at steamgifts.com
 - **steam-card-farming:** Checks if you have cards remaining to drop. Automatically starts a fake app and waits until all cards drop.
 - **fake-steam-app.py:** Create a fake steam app with the gameID param.
-- **steam-tools.py:** A graphical manager (not finished, wait)
 
 Dependencies
 ------------
