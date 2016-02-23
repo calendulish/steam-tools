@@ -124,7 +124,7 @@ if __name__ == "__main__":
     logger.info("Ready to start.")
     for index in range(0, len(badgeSet['gameID'])):
         print("")
-        logger.info("Starting game %s (%d)", badgeSet['gameName'][index], badgeSet['gameID'][index])
+        logger.info("Starting game %s (%s)", badgeSet['gameName'][index], badgeSet['gameID'][index])
         if not dryrun:
             fakeApp = subprocess.Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
