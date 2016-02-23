@@ -16,9 +16,12 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import os
+import os, sys
+import codecs
 import logging
 import logging.handlers
+
+sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
 
 def init(fileName):
     if os.name == 'nt':
@@ -34,18 +37,18 @@ def init(fileName):
     logger = logging.getLogger("root")
     logger.setLevel(logging.DEBUG)
 
-    file = logging.handlers.RotatingFileHandler(os.path.join(path, fileName), backupCount=1)
+    file = logging.handlers.RotatingFileHandler(os.path.join(path, fileName), backupCount=1, encoding='utf-8')
     file.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     file.setLevel(logging.DEBUG)
     file.doRollover()
     logger.addHandler(file)
 
-    console = logging.StreamHandler()
+    console = logging.StreamHandler(sys.stdout)
     console.setFormatter(logging.Formatter('%(message)s'))
     console.setLevel(logging.INFO)
     logger.addHandler(console)
 
-    httpfile = logging.handlers.RotatingFileHandler(os.path.join(path, 'requests_'+fileName), backupCount=1)
+    httpfile = logging.handlers.RotatingFileHandler(os.path.join(path, 'requests_'+fileName), backupCount=1, encoding='utf-8')
     httpfile.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     httpfile.setLevel(logging.DEBUG)
     httpfile.doRollover()
