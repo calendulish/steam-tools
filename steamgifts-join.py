@@ -52,14 +52,14 @@ def steamgifts_config():
     form = bs(sgconfig, 'html.parser').find('form')
     for inputs in form.findAll('input'):
         data.update({inputs['name']:inputs['value']})
-    logger.debug("configData(page): {}".format(data))
+    logger.debug("configData(page): %s", data)
     configData = {
                 'xsrf_token': data['xsrf_token'],
                 'filter_giveaways_exist_in_account': 1,
                 'filter_giveaways_missing_base_game': 1,
                 'filter_giveaways_level': 1
                 }
-    logger.debug("configData(post): {}".format(configData))
+    logger.debug("configData(post): %s", configData)
     tryConnect(sgconfigURL, data=configData, cookies=cookie)
 
 if __name__ == "__main__":
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     while True:
         for url in links:
-            logger.info("Connecting to {}".format(url))
+            logger.info("Connecting to %s", url)
             page = tryConnect(url, cookies=cookie).content
 
             try:
@@ -84,7 +84,7 @@ if __name__ == "__main__":
                 try:
                     giveawayList[1]
                 except IndexError:
-                    logger.debug("No giveaways found at {}".format(url))
+                    logger.debug("No giveaways found at %s", url)
                     continue
 
                 for giveaway in giveawayList[1].findAll('div', class_='giveaway__row-outer-wrap'):
@@ -116,26 +116,26 @@ if __name__ == "__main__":
                         form = bs(gvpage, 'html.parser').find('form')
                         for inputs in form.findAll('input'):
                             data.update({inputs['name']:inputs['value']})
-                        logger.debug("pageData: {}".format(data))
+                        logger.debug("pageData: %s", data)
                         formData = {'xsrf_token': data['xsrf_token'], 'do': 'entry_insert', 'code': data['code']}
-                        logger.debug("formData: {}".format(formData))
+                        logger.debug("formData: %s", formData)
                         tryConnect("http://www.steamgifts.com/ajax.php", data=formData, cookies=cookie)
                         myPoints -= gamePoints
 
-                        logger.info("Spent {} points in the giveaway of {} (Copies: {})".format(gamePoints, gameName, gameCopies))
+                        logger.info("Spent %d points in the giveaway of %s (Copies: %d)", gamePoints, gameName, gameCopies)
                     else:
-                        logger.debug("Ignoring {} bacause the account don't have the requirements to enter.".format(gameName))
+                        logger.debug("Ignoring %s bacause the account don't have the requirements to enter.", gameName)
 
-                    logger.debug("C({}) L({}) ML({}) P({}) MP({}) Q({})".format(gameCopies, gameLevel, myLevel, gamePoints, myPoints, gameQuery))
+                    logger.debug("C(%d) L(%d) ML(%d) P(%d) MP(%d) Q(%s)", gameCopies, gameLevel, myLevel, gamePoints, myPoints, gameQuery)
 
-            except Exception as e:
-                logger.error("An error occured for url {}".format(url))
+            except Exception:
+                logger.error("An error occured for url %s", url)
                 logger.error("Please, check if it's a valid url.")
-                logger.debug(e)
+                logger.debug('', exc_info=True)
 
             print('')
 
-        logger.debug("Remaining points: {}".format(myPoints))
+        logger.debug("Remaining points: %d", myPoints)
         randomstart = randint(minTime, maxTime)
         for i in range(0, randomstart):
             print("Waiting: {:4d} seconds".format(randomstart-i), end="\r")

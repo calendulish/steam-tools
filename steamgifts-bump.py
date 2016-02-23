@@ -38,6 +38,7 @@ try:
     maxTime = config.getint('CONFIG', 'maxTime')
 except(NoOptionError, NoSectionError):
     logger.critical("Incorrect data. Please, check your config file.")
+    logger.debug('', exc_info=True)
     exit(1)
 
 def signal_handler(signal, frame):
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     while True:
         data = {}
 
-        logger.info("Bumping now! {}".format(datetime.now()))
+        logger.info("Bumping now! %s", datetime.now())
 
         for url in links:
             print("Connecting to the server", end="\r")
@@ -65,10 +66,11 @@ if __name__ == "__main__":
                 postData = {'xsrf_token': data['xsrf_token'], 'do': 'bump_trade'}
                 tryConnect(url, data=postData, cookies=cookie)
 
-                logger.info("Bumped {}".format(url))
+                logger.info("Bumped %s", url)
             except Exception:
-                logger.error("An error occured for url {}".format(url))
+                logger.error("An error occured for url %s", url)
                 logger.error("Please, check if it's a valid url.")
+                logger.debug('', exc_info=True)
 
         randomstart = randint(minTime, maxTime)
         for i in range(0, randomstart):

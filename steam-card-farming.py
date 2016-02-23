@@ -37,6 +37,7 @@ try:
     dryrun = config.getboolean('DEBUG', "DryRun")
 except(configparser.NoOptionError, configparser.NoSectionError):
     logger.critical("Incorrect data. Please, check your config file.")
+    logger.debug('', exc_info=True)
     exit(1)
 
 def signal_handler(signal, frame):
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     fullPage = tryConnect(profile+"/badges/", cookies=cookies).content
     pageCount = bs(fullPage, 'html.parser').findAll('a', class_='pagelink')
     if pageCount:
-        logger.debug("I found {} pages of badges".format(pages[-1].text))
+        logger.debug("I found %d pages of badges", pages[-1].text)
         badges = []
         for currentPage in range(1, int(pages[-1].text)):
             page = tryConnect(profile+"/badges/?p="+str(currentPage), cookies=cookies).content
@@ -81,7 +82,7 @@ if __name__ == "__main__":
         title.span.unwrap()
 
         if not progress or "No" in progress.text:
-            logger.debug("{} have no cards to drop. Ignoring.".format(title.text.split('\t\t\t\t\t\t\t\t\t', 2)[1]))
+            logger.debug("%s have no cards to drop. Ignoring.", title.text.split('\t\t\t\t\t\t\t\t\t', 2)[1])
             continue
 
         badgeSet['cardCount'].append(int(progress.text.split(' ', 3)[0]))
@@ -108,29 +109,29 @@ if __name__ == "__main__":
         if len(set(rtest)) == 1:
             logger.debug("Looks good.")
         else:
-            logger.debug("Very strange: {}".format(rtest))
+            logger.debug("Very strange: %s", rtest)
             exit(1)
 
     if sort:
         logger.info("Getting highest card value...")
-        if icheck: logger.debug("OLD: {}".format(badgeSet))
+        if icheck: logger.debug("OLD: %s", badgeSet)
         order = sorted(range(0, len(badgeSet['cardValue'])), key=lambda key: badgeSet['cardValue'][key], reverse=True)
         for item, value in badgeSet.items():
             badgeSet[item] = [value[i] for i in order]
         if icheck:
-            logger.debug("NEW: {}".format(badgeSet))
+            logger.debug("NEW: %s", badgeSet)
 
     logger.info("Ready to start.")
     for index in range(0, len(badgeSet['gameID'])):
         print("")
-        logger.info("Starting game {} ({})".format(badgeSet['gameName'][index], badgeSet['gameID'][index]))
+        logger.info("Starting game %s (%d)", badgeSet['gameName'][index], badgeSet['gameID'][index])
         if not dryrun:
             fakeApp = subprocess.Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         while True:
             print("{:2d} cards drop remaining. Waiting... {:7s}".format(badgeSet['cardCount'][index], ' '), end='\r')
             logger.debug("Waiting cards drop loop")
-            if icheck: logger.debug("Current: {}".format([badgeSet[i][index] for i,v in badgeSet.items()]))
+            if icheck: logger.debug("Current: %s", [badgeSet[i][index] for i,v in badgeSet.items()])
             for i in range(0, 30):
                 if not dryrun and fakeApp.poll():
                     print("")
@@ -140,10 +141,10 @@ if __name__ == "__main__":
 
             print("Checking if game have more cards drops...", end='\r')
             logger.debug("Updating cards count")
-            if icheck: logger.debug("OLD: {}".format(badgeSet['cardCount'][index]))
+            if icheck: logger.debug("OLD: %d", badgeSet['cardCount'][index])
             badge = tryConnect(profile+"/gamecards/"+badgeSet['gameID'][index], cookies=cookies).content
             badgeSet['cardCount'][index] = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
-            if icheck: logger.debug("NEW: {}".format(badgeSet['cardCount'][index]))
+            if icheck: logger.debug("NEW: %d", badgeSet['cardCount'][index])
             if dryrun: badgeSet['cardCount'][index] = ""
             if not badgeSet['cardCount'][index] or "No" in badgeSet['cardCount'][index].text:
                 print("")
@@ -152,7 +153,7 @@ if __name__ == "__main__":
             else:
                 badgeSet['cardCount'][index] = int(badgeSet['cardCount'][index].text.split(' ', 3)[0])
 
-        logger.info("Closing {}".format(badgeSet['gameName'][index]))
+        logger.info("Closing %s", badgeSet['gameName'][index])
         if not dryrun:
             fakeApp.terminate()
             fakeApp.wait()

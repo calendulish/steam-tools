@@ -41,8 +41,8 @@ def init(fileName):
         config.read(fileName)
     else:
         logger.critical("Configuration file not found. These is the search paths:")
-        logger.critical(" - {}".format(os.path.join(os.getcwd(), 'steam-card-farming.config')))
-        logger.critical(" - {}".format(config_file))
+        logger.critical(" - %s", config_file)
+        logger.critical(" - %s", os.path.join(os.getcwd(), 'steam-card-farming.config'))
         logger.critical("Please, copy the example file or create a new with your data.")
         exit(1)
 

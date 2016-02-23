@@ -41,9 +41,11 @@ def tryConnect(url, cookies="", data=False):
         except requests.exceptions.TooManyRedirects:
             logger.critical("Too many redirects. Please, check your configuration.")
             logger.critical("(Invalid or expired cookie?)")
+            logger.debug('', exc_info=True)
             exit(1)
         except(requests.exceptions.HTTPError, requests.exceptions.RequestException):
             logger.error("The connection is refused or fails. Trying again...")
+            logger.debug('', exc_info=True)
             sleep(3)
 
     logger.critical("Cannot access the internet! Please, check your internet connection.")
