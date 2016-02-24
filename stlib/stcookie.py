@@ -81,6 +81,7 @@ def get_steam_cookies(domain):
     cookies_list = []
     connection = sqlite3.connect(temp_COOKIES_PATH)
     for key, value, evalue in connection.execute(query, (domain,)):
+        if key == '_ga': continue
         if evalue[:3] != b'v10' and evalue[:3] != b'\x01\x00\x00':
             if value:
                 cookies_list.append((key, value))
