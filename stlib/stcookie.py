@@ -28,7 +28,7 @@ if os.name == 'nt':
     memcpy = cdll.msvcrt.memcpy
     CryptUnprotectData = windll.crypt32.CryptUnprotectData
 
-    XDG_DIR = os.envrion['LOCALAPPDATA']
+    XDG_DIR = os.getenv('LOCALAPPDATA')
     COOKIES_DIR = os.path.join(XDG_DIR, 'Google/Chrome/User data/Default')
 
     class DATA_BLOB(Structure):
