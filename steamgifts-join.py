@@ -24,17 +24,21 @@ from configparser import NoOptionError, NoSectionError
 from bs4 import BeautifulSoup as bs
 
 from stlib import stlogger
-from stlib import stconfig
+from stlib.stconfig import read_config
 from stlib.stnetwork import tryConnect
 
-logger = stlogger.init(os.path.splitext(os.path.basename(__file__))[0]+'.log')
-config = stconfig.init(os.path.splitext(os.path.basename(__file__))[0]+'.config')
+loggerFile = os.path.basename(__file__)[:-3]+'.log'
+configFile = os.path.basename(__file__)[:-3]+'.config'
+
+logger = stlogger.init(loggerFile)
+config = read_config(configFile)
 
 try:
-    cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}
-    links = [l.strip() for l in config.get('CONFIG', 'Links').split(',')]
-    minTime = config.getint('CONFIG', 'minTime')
-    maxTime = config.getint('CONFIG', 'maxTime')
+    cookie = dict(config.items('Cookies'))
+    links = [l.strip() for l in config.get('Config', 'Links').split(',')]
+    minTime = config.getint('Config', 'minTime')
+    maxTime = config.getint('Config', 'maxTime')
+    icheck = config.getboolean('Debug', 'IntegrityCheck')
 except(NoOptionError, NoSectionError):
     logger.critical("Incorrect data. Please, check your config file.")
     exit(1)
@@ -48,7 +52,7 @@ def steamgifts_config():
     logger.info("Initializing...")
     data = {}
     sgconfigURL = "http://www.steamgifts.com/account/settings/giveaways"
-    sgconfig = tryConnect(sgconfigURL, cookies=cookie).content
+    sgconfig = tryConnect(configFile, sgconfigURL).content
     form = bs(sgconfig, 'html.parser').find('form')
     for inputs in form.findAll('input'):
         data.update({inputs['name']:inputs['value']})
@@ -60,7 +64,7 @@ def steamgifts_config():
                 'filter_giveaways_level': 1
                 }
     logger.debug("configData(post): %s", configData)
-    tryConnect(sgconfigURL, data=configData, cookies=cookie)
+    tryConnect(configFile, sgconfigURL, data=configData)
 
 if __name__ == "__main__":
     signal(SIGINT, signal_handler)
@@ -69,7 +73,7 @@ if __name__ == "__main__":
     while True:
         for url in links:
             logger.info("Connecting to %s", url)
-            page = tryConnect(url, cookies=cookie).content
+            page = tryConnect(configFile, url).content
 
             try:
                 giveawayList = []
@@ -112,14 +116,14 @@ if __name__ == "__main__":
                     # Check for points, and if we already enter.
                     if myPoints >= gamePoints and not giveaway.find('div', class_='is-faded'):
                         data = {}
-                        gvpage = tryConnect("http://steamgifts.com"+gameQuery, cookies=cookie).content
+                        gvpage = tryConnect(configFile, "http://steamgifts.com"+gameQuery).content
                         form = bs(gvpage, 'html.parser').find('form')
                         for inputs in form.findAll('input'):
                             data.update({inputs['name']:inputs['value']})
                         logger.debug("pageData: %s", data)
                         formData = {'xsrf_token': data['xsrf_token'], 'do': 'entry_insert', 'code': data['code']}
                         logger.debug("formData: %s", formData)
-                        tryConnect("http://www.steamgifts.com/ajax.php", data=formData, cookies=cookie)
+                        tryConnect(configFile, "http://www.steamgifts.com/ajax.php", data=formData)
                         myPoints -= gamePoints
 
                         logger.info("Spent %d points in the giveaway of %s (Copies: %d)", gamePoints, gameName, gameCopies)

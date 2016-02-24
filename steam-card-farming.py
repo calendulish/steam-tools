@@ -26,15 +26,18 @@ from stlib import stlogger
 from stlib import stconfig
 from stlib.stnetwork import tryConnect
 
-logger = stlogger.init(os.path.splitext(os.path.basename(__file__))[0]+'.log')
-config = stconfig.init(os.path.splitext(os.path.basename(__file__))[0]+'.config')
+loggerFile = os.path.basename(__file__)[:-3]+'.log'
+configFile = os.path.basename(__file__)[:-3]+'.config'
+
+logger = stlogger.init(loggerFile)
+config = read_config(configFile)
 
 try:
-    cookies = {'sessionid': config.get('COOKIES', 'SessionID'), 'steamLogin': config.get('COOKIES', 'SteamLogin')}
+    cookies = dict(config.items('Cookies'))
     profile = "http://steamcommunity.com/id/" + config.get('UserInfo', 'ProfileName')
-    sort = config.getboolean('CONFIG', 'MostValuableFirst')
-    icheck = config.getboolean('DEBUG', "IntegrityCheck")
-    dryrun = config.getboolean('DEBUG', "DryRun")
+    sort = config.getboolean('Config', 'MostValuableFirst')
+    icheck = config.getboolean('Debug', "IntegrityCheck")
+    dryrun = config.getboolean('Debug', "DryRun")
 except(configparser.NoOptionError, configparser.NoSectionError):
     logger.critical("Incorrect data. Please, check your config file.")
     logger.debug('', exc_info=True)
@@ -49,13 +52,13 @@ if __name__ == "__main__":
     signal(SIGINT, signal_handler)
 
     logger.info("Digging your badge list...")
-    fullPage = tryConnect(profile+"/badges/", cookies=cookies).content
+    fullPage = tryConnect(configFile, profile+"/badges/").content
     pageCount = bs(fullPage, 'html.parser').findAll('a', class_='pagelink')
     if pageCount:
         logger.debug("I found %d pages of badges", pages[-1].text)
         badges = []
         for currentPage in range(1, int(pages[-1].text)):
-            page = tryConnect(profile+"/badges/?p="+str(currentPage), cookies=cookies).content
+            page = tryConnect(configFile, profile+"/badges/?p="+str(currentPage)).content
             badges += bs(page, 'html.parser').findAll('div', class_='badge_title_row')
     else:
         logger.debug("I found only 1 pages of badges")
@@ -94,7 +97,7 @@ if __name__ == "__main__":
         pricesSet = {}
         pricesSet['game'] = []
         pricesSet['avg'] = []
-        pricesPage = tryConnect("http://www.steamcardexchange.net/index.php?badgeprices").content
+        pricesPage = tryConnect(configFile, "http://www.steamcardexchange.net/index.php?badgeprices").content
         for game in bs(pricesPage, 'html.parser').findAll('tr')[1:]:
             pricesSet['game'].append(game.find('a').text)
             pricesSet['avg'].append(float(game.find('td').findNext('td').findNext('td').text[1:]))
@@ -142,7 +145,7 @@ if __name__ == "__main__":
             print("Checking if game have more cards drops...", end='\r')
             logger.debug("Updating cards count")
             if icheck: logger.debug("OLD: %d", badgeSet['cardCount'][index])
-            badge = tryConnect(profile+"/gamecards/"+badgeSet['gameID'][index], cookies=cookies).content
+            badge = tryConnect(configFile, profile+"/gamecards/"+badgeSet['gameID'][index]).content
             badgeSet['cardCount'][index] = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
             if icheck: logger.debug("NEW: %d", badgeSet['cardCount'][index])
             if dryrun: badgeSet['cardCount'][index] = ""
