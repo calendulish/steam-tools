@@ -62,7 +62,7 @@ def tryConnect(config_file, url, data=False):
             logger.debug('', exc_info=True)
             if not autorecovery:
                 site = url.split('//', 1)[1].split('/', 1)[0].split('.')
-                if site[-3] == 'www':
+                if len(site) > 2 and site[-3] == 'www':
                     domain = '.'+'.'.join(site[-2:])
                 else:
                     domain = '.'.join(site[-2:])
