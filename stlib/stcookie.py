@@ -71,7 +71,7 @@ def chrome_decrypt(evalue):
         decrypted = cipher.decrypt(evalue[3:])
         return decrypted[:-decrypted[-1]].decode('utf-8')
 
-def get_steam_cookies():
+def get_steam_cookies(domain):
     query = 'SELECT name, value, encrypted_value FROM cookies WHERE host_key LIKE ?'
 
     tempdir = tempfile.mkdtemp()
@@ -80,7 +80,7 @@ def get_steam_cookies():
 
     cookies_list = []
     connection = sqlite3.connect(temp_COOKIES_PATH)
-    for key, value, evalue in connection.execute(query, ('steamcommunity.com',)):
+    for key, value, evalue in connection.execute(query, (domain,)):
         if evalue[:3] != b'v10' and evalue[:3] != b'\x01\x00\x00':
             if value:
                 cookies_list.append((key, value))
