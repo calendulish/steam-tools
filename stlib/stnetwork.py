@@ -21,28 +21,59 @@ from logging import getLogger
 
 import requests
 
+from stlib.stconfig import read_config, write_config
+from stlib.stcookie import get_steam_cookies
+
 agent = {'user-agent': 'unknown/0.0.0'}
 logger = getLogger('root')
+steamLoginPage = 'https://steamcommunity.com/login/home/?goto=id'
 
-def tryConnect(url, cookies="", data=False):
+def tryConnect(config_file, url, data=False):
+    config = read_config(config_file)
+    autorecovery = False
     while True:
         try:
             if data:
-                response = requests.post(url, data=data, cookies=cookies, headers=agent, timeout=10)
+                response = requests.post(url, data=data, cookies=dict(config.items('Cookies')), headers=agent, timeout=10)
                 response.raise_for_status()
+                # If steam login page is found in response, throw exception.
+                if str(response.content).find(steamLoginPage) != -1:
+                    raise requests.exceptions.TooManyRedirects
+                if autorecovery:
+                    logger.info("[WITH POWERS] Success!!!")
+                    logger.info("POWERS... DESACTIVATE!")
+                autorecovery = False
                 return response
             else:
-                response = requests.get(url, cookies=cookies, headers=agent, timeout=10)
+                response = requests.get(url, cookies=dict(config.items('Cookies')), headers=agent, timeout=10)
                 response.raise_for_status()
-                # Check if the cookies remains valid.
-                if str(response.content).find('https://steamcommunity.com/login/home/?goto=id') != -1:
+                # If steam login page is found in response, throw exception.
+                if str(response.content).find(steamLoginPage) != -1:
                     raise requests.exceptions.TooManyRedirects
+                if autorecovery:
+                    logger.info("[WITH POWERS] Success!!!")
+                    logger.info("Google powers desactivated!")
+                autorecovery = False
                 return response
         except requests.exceptions.TooManyRedirects:
-            logger.critical("Too many redirects. Please, check your configuration.")
-            logger.critical("(Invalid or expired cookie?)")
+            logger.error("Invalid or expired cookies.")
+            logger.info("POWERS... ACTIVATE!")
+            logger.info("[WITH POWERS] Trying to automagically recovery...")
             logger.debug('', exc_info=True)
-            exit(1)
+            if not autorecovery:
+                site = url.split('//', 1)[1].split('/', 1)[0].split('.')
+                if site[-3] == 'www':
+                    domain = '.'+'.'.join(site[-2:])
+                else:
+                    domain = '.'.join(site[-2:])
+                config['Cookies'] = dict(get_steam_cookies(domain))
+                write_config(config_file)
+                autorecovery = True
+            else:
+                logger.critical("I cannot recover D: (Chrome profile not found?)")
+                logger.critical("Please, check your configuration and update your cookies.")
+                logger.debug('', exc_info=True)
+                exit(1)
         except(requests.exceptions.HTTPError, requests.exceptions.RequestException):
             logger.error("The connection is refused or fails. Trying again...")
             logger.debug('', exc_info=True)
