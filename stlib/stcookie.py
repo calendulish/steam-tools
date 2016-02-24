@@ -51,14 +51,20 @@ def get_steam_cookies():
     tempdir = tempfile.mkdtemp()
     temp_COOKIES_PATH = os.path.join(tempdir, os.path.basename(COOKIES_PATH))
     copy(COOKIES_PATH, temp_COOKIES_PATH)
-    with sqlite3.connect(temp_COOKIES_PATH) as connection:
-        cookies_list = []
-        for key, value, evalue in connection.execute(query, ('steamcommunity.com',)):
-            if value or (evalue[:3] != b'v10'):
+
+    cookies_list = []
+    connection = sqlite3.connect(temp_COOKIES_PATH)
+    for key, value, evalue in connection.execute(query, ('steamcommunity.com',)):
+        if evalue[:3] != b'v10' and evalue[:3] != b'\x01\x00\x00':
+            if value:
                 cookies_list.append((key, value))
             else:
-                decrypted_t = (key, chrome_decrypt(evalue))
-                cookies_list.append(decrypted_t)
+                cookies_list.append((key, evalue))
+        else:
+            decrypted_t = (key, chrome_decrypt(evalue))
+            cookies_list.append(decrypted_t)
+    connection.close()
+
     rmtree(tempdir)
 
     return cookies_list
