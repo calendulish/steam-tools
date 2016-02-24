@@ -20,10 +20,11 @@ import os
 import subprocess
 from time import sleep
 from signal import signal, SIGINT
+from configparser import NoOptionError, NoSectionError
 from bs4 import BeautifulSoup as bs
 
 from stlib import stlogger
-from stlib import stconfig
+from stlib.stconfig import read_config
 from stlib.stnetwork import tryConnect
 
 loggerFile = os.path.basename(__file__)[:-3]+'.log'
@@ -38,8 +39,9 @@ try:
     sort = config.getboolean('Config', 'MostValuableFirst')
     icheck = config.getboolean('Debug', "IntegrityCheck")
     dryrun = config.getboolean('Debug', "DryRun")
-except(configparser.NoOptionError, configparser.NoSectionError):
-    logger.critical("Incorrect data. Please, check your config file.")
+except(NoOptionError, NoSectionError):
+    logger.critical("Incorrect data. (Updated with the new options?)")
+    logger.critical("Please, check your config file.")
     logger.debug('', exc_info=True)
     exit(1)
 

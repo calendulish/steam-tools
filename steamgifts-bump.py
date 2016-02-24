@@ -25,7 +25,7 @@ from configparser import NoOptionError, NoSectionError
 from bs4 import BeautifulSoup as bs
 
 from stlib import stlogger
-from stlib import stconfig
+from stlib.stconfig import read_config
 from stlib.stnetwork import tryConnect
 
 loggerFile = os.path.basename(__file__)[:-3]+'.log'
@@ -41,7 +41,8 @@ try:
     maxTime = config.getint('Config', 'maxTime')
     icheck = config.getboolean('Debug', 'IntegrityCheck')
 except(NoOptionError, NoSectionError):
-    logger.critical("Incorrect data. Please, check your config file.")
+    logger.critical("Incorrect data. (Updated with the new options?)")
+    logger.critical("Please, check your config file.")
     logger.debug('', exc_info=True)
     exit(1)
 

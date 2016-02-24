@@ -40,7 +40,9 @@ try:
     maxTime = config.getint('Config', 'maxTime')
     icheck = config.getboolean('Debug', 'IntegrityCheck')
 except(NoOptionError, NoSectionError):
-    logger.critical("Incorrect data. Please, check your config file.")
+    logger.critical("Incorrect data. (Updated with the new options?)")
+    logger.critical("Please, check your config file.")
+    logger.debug('', exc_info=True)
     exit(1)
 
 def signal_handler(signal, frame):
