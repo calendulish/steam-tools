@@ -22,10 +22,37 @@ import sqlite3
 from shutil import copy, rmtree
 
 if os.name == 'nt':
-    import win32crypt
+    from ctypes import *
+    from ctypes.wintypes import DWORD
+    localfree = windll.kernel32.LocalFree
+    memcpy = cdll.msvcrt.memcpy
+    CryptUnprotectData = windll.crypt32.CryptUnprotectData
 
     XDG_DIR = os.envrion['LOCALAPPDATA']
     COOKIES_DIR = os.path.join(XDG_DIR, 'Google/Chrome/User data/Default')
+
+    class DATA_BLOB(Structure):
+        _fields_ = [
+                ("cbData", DWORD),
+                ("pbData", POINTER(c_char))
+            ]
+
+    # Thanks to Crusher Joe (crusherjoe <at> eudoramail.com)
+    # Adapted from here: http://article.gmane.org/gmane.comp.python.ctypes/420
+    def win32CryptUnprotectData(evalue):
+        bufferIn = c_buffer(evalue, len(evalue))
+        blobIn = DATA_BLOB(len(evalue), bufferIn)
+        blobOut = DATA_BLOB()
+
+        if CryptUnprotectData(byref(blobIn), None, None, None, None, 0x01, byref(blobOut)):
+            cbData = int(blobOut.cbData)
+            pbData = blobOut.pbData
+            buffer = c_buffer(cbData)
+            memcpy(buffer, pbData, cbData)
+            localfree(pbData);
+            return buffer.raw
+        else:
+            return ""
 else:
     # pycrypto
     from Crypto.Protocol.KDF import PBKDF2
@@ -38,8 +65,7 @@ COOKIES_PATH = os.path.join(COOKIES_DIR, "Cookies")
 
 def chrome_decrypt(evalue):
     if os.name == 'nt':
-        _, decrypted = win32crypt.CryptUnprotectData(evalue, None, None, None, 0)
-        return decrypted.decode('utf-8')
+        return win32CryptUnprotectData(evalue)
     else:
         cipher = AES.new(PBKDF2(b'peanuts', b'saltysalt', 16, 1), AES.MODE_CBC, IV=b' '*16)
         decrypted = cipher.decrypt(evalue[3:])
