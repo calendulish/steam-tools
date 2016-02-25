@@ -65,7 +65,7 @@ COOKIES_PATH = os.path.join(COOKIES_DIR, "Cookies")
 
 def chrome_decrypt(evalue):
     if os.name == 'nt':
-        return win32CryptUnprotectData(evalue)
+        return win32CryptUnprotectData(evalue).decode('utf-8')
     else:
         cipher = AES.new(PBKDF2(b'peanuts', b'saltysalt', 16, 1), AES.MODE_CBC, IV=b' '*16)
         decrypted = cipher.decrypt(evalue[3:])

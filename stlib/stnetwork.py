@@ -71,7 +71,10 @@ def tryConnect(config_file, url, data=False):
                 if len(site) > 2 and site[-3] == 'www':
                     domain = '.'+'.'.join(site[-2:])
                 else:
-                    domain = '.'.join(site[-2:])
+                    if len(site) > 2:
+                        domain = '.'.join(site[-3:])
+                    else:
+                        domain = '.'.join(site[-2:])
                 config['Cookies'] = dict(get_steam_cookies(domain))
                 write_config(config_file)
                 autorecovery = True
