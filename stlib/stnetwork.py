@@ -33,6 +33,9 @@ def tryConnect(config_file, url, data=False):
     autorecovery = False
     while True:
         try:
+            if config.get('Debug', 'IntegrityCheck'):
+                logger.debug("Current cookies: ", dict(config.items('Cookies')))
+
             if data:
                 response = requests.post(url, data=data, cookies=dict(config.items('Cookies')), headers=agent, timeout=10)
                 response.raise_for_status()
