@@ -35,7 +35,6 @@ config = read_config(configFile)
 
 try:
     cookies = dict(config.items('Cookies'))
-    profile = "http://steamcommunity.com/id/" + config.get('UserInfo', 'ProfileName')
     sort = config.getboolean('Config', 'MostValuableFirst')
     icheck = config.getboolean('Debug', "IntegrityCheck")
     dryrun = config.getboolean('Debug', "DryRun")
@@ -53,6 +52,12 @@ def signal_handler(signal, frame):
 if __name__ == "__main__":
     signal(SIGINT, signal_handler)
 
+    logger.info("Searching for your username...")
+    loginPage = tryConnect(configFile, 'http://store.steampowered.com/about/').content
+    username = bs(loginPage, 'html.parser').find('a', class_='username').text.strip()
+    profile = "http://steamcommunity.com/id/"+username
+    logger.info("Hello %s", username)
+
     logger.info("Digging your badge list...")
     fullPage = tryConnect(configFile, profile+"/badges/").content
     pageCount = bs(fullPage, 'html.parser').findAll('a', class_='pagelink')
@@ -67,12 +72,8 @@ if __name__ == "__main__":
         badges = bs(fullPage, 'html.parser').findAll('div', class_='badge_title_row')
 
     if not badges:
-        logger.critical("Something is wrong! (Invalid profile name?)")
-        exit(1)
-
-    logger.info("Checking if we are logged.")
-    if not bs(fullPage, 'html.parser').findAll('div', class_='profile_xp_block_right'):
-        logger.critical("You are not logged into steam! (Invalid cookies?)")
+        logger.critical("Something is very wrong! Please report with the log file")
+        logger.debug(fullPage)
         exit(1)
 
     logger.info("Getting badges info...")
