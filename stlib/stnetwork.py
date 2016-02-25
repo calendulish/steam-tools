@@ -58,7 +58,7 @@ def tryConnect(config_file, url, data=False):
                     raise requests.exceptions.TooManyRedirects
                 if autorecovery:
                     logger.info("[WITH POWERS] Success!!!")
-                    logger.info("Google powers desactivated!")
+                    logger.info("POWERS... DESACTIVATE!")
                 autorecovery = False
                 return response
         except requests.exceptions.TooManyRedirects:
