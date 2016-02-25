@@ -20,23 +20,27 @@ import os
 import subprocess
 from time import sleep
 from signal import signal, SIGINT
+from configparser import NoOptionError, NoSectionError
 from bs4 import BeautifulSoup as bs
 
 from stlib import stlogger
-from stlib import stconfig
+from stlib.stconfig import read_config
 from stlib.stnetwork import tryConnect
 
-logger = stlogger.init(os.path.splitext(os.path.basename(__file__))[0]+'.log')
-config = stconfig.init(os.path.splitext(os.path.basename(__file__))[0]+'.config')
+loggerFile = os.path.basename(__file__)[:-3]+'.log'
+configFile = os.path.basename(__file__)[:-3]+'.config'
+
+logger = stlogger.init(loggerFile)
+config = read_config(configFile)
 
 try:
-    cookies = {'sessionid': config.get('COOKIES', 'SessionID'), 'steamLogin': config.get('COOKIES', 'SteamLogin')}
-    profile = "http://steamcommunity.com/id/" + config.get('UserInfo', 'ProfileName')
-    sort = config.getboolean('CONFIG', 'MostValuableFirst')
-    icheck = config.getboolean('DEBUG', "IntegrityCheck")
-    dryrun = config.getboolean('DEBUG', "DryRun")
-except(configparser.NoOptionError, configparser.NoSectionError):
-    logger.critical("Incorrect data. Please, check your config file.")
+    cookies = dict(config.items('Cookies'))
+    sort = config.getboolean('Config', 'MostValuableFirst')
+    icheck = config.getboolean('Debug', "IntegrityCheck")
+    dryrun = config.getboolean('Debug', "DryRun")
+except(NoOptionError, NoSectionError):
+    logger.critical("Incorrect data. (Updated with the new options?)")
+    logger.critical("Please, check your config file.")
     logger.debug('', exc_info=True)
     exit(1)
 
@@ -48,26 +52,28 @@ def signal_handler(signal, frame):
 if __name__ == "__main__":
     signal(SIGINT, signal_handler)
 
+    logger.info("Searching for your username...")
+    loginPage = tryConnect(configFile, 'http://store.steampowered.com/about/').content
+    username = bs(loginPage, 'html.parser').find('a', class_='username').text.strip()
+    profile = "http://steamcommunity.com/id/"+username
+    logger.info("Hello %s", username)
+
     logger.info("Digging your badge list...")
-    fullPage = tryConnect(profile+"/badges/", cookies=cookies).content
+    fullPage = tryConnect(configFile, profile+"/badges/").content
     pageCount = bs(fullPage, 'html.parser').findAll('a', class_='pagelink')
     if pageCount:
         logger.debug("I found %d pages of badges", pages[-1].text)
         badges = []
         for currentPage in range(1, int(pages[-1].text)):
-            page = tryConnect(profile+"/badges/?p="+str(currentPage), cookies=cookies).content
+            page = tryConnect(configFile, profile+"/badges/?p="+str(currentPage)).content
             badges += bs(page, 'html.parser').findAll('div', class_='badge_title_row')
     else:
         logger.debug("I found only 1 pages of badges")
         badges = bs(fullPage, 'html.parser').findAll('div', class_='badge_title_row')
 
     if not badges:
-        logger.critical("Something is wrong! (Invalid profile name?)")
-        exit(1)
-
-    logger.info("Checking if we are logged.")
-    if not bs(fullPage, 'html.parser').findAll('div', class_='profile_xp_block_right'):
-        logger.critical("You are not logged into steam! (Invalid cookies?)")
+        logger.critical("Something is very wrong! Please report with the log file")
+        logger.debug(fullPage)
         exit(1)
 
     logger.info("Getting badges info...")
@@ -94,7 +100,7 @@ if __name__ == "__main__":
         pricesSet = {}
         pricesSet['game'] = []
         pricesSet['avg'] = []
-        pricesPage = tryConnect("http://www.steamcardexchange.net/index.php?badgeprices").content
+        pricesPage = tryConnect(configFile, "http://www.steamcardexchange.net/index.php?badgeprices").content
         for game in bs(pricesPage, 'html.parser').findAll('tr')[1:]:
             pricesSet['game'].append(game.find('a').text)
             pricesSet['avg'].append(float(game.find('td').findNext('td').findNext('td').text[1:]))
@@ -142,7 +148,7 @@ if __name__ == "__main__":
             print("Checking if game have more cards drops...", end='\r')
             logger.debug("Updating cards count")
             if icheck: logger.debug("OLD: %d", badgeSet['cardCount'][index])
-            badge = tryConnect(profile+"/gamecards/"+badgeSet['gameID'][index], cookies=cookies).content
+            badge = tryConnect(configFile, profile+"/gamecards/"+badgeSet['gameID'][index]).content
             badgeSet['cardCount'][index] = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
             if icheck: logger.debug("NEW: %d", badgeSet['cardCount'][index])
             if dryrun: badgeSet['cardCount'][index] = ""

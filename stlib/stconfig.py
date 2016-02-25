@@ -21,10 +21,10 @@ from logging import getLogger
 from configparser import RawConfigParser
 
 logger = getLogger('root')
+config = RawConfigParser()
+config.optionxform=str
 
-def init(fileName):
-    config = RawConfigParser()
-
+def get_config_path(fileName):
     if os.name == 'nt':
         conf_dir = 'APPDATA'
     else:
@@ -36,9 +36,9 @@ def init(fileName):
     os.makedirs(os.path.dirname(config_file), exist_ok=True)
 
     if os.path.isfile(config_file):
-        config.read(config_file)
+        return config_file
     elif os.path.isfile(fileName):
-        config.read(fileName)
+        return fileName
     else:
         logger.critical("Configuration file not found. These is the search paths:")
         logger.critical(" - %s", config_file)
@@ -46,4 +46,10 @@ def init(fileName):
         logger.critical("Please, copy the example file or create a new with your data.")
         exit(1)
 
+def read_config(fileName):
+    config.read(get_config_path(fileName))
     return config
+
+def write_config(fileName):
+    with open(get_config_path(fileName), 'w') as fp:
+        config.write(fp)

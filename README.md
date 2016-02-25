@@ -16,6 +16,7 @@ Dependencies
 - Python 3+
 - Beautiful Soup 4+
 - Requests
+- Linux Only: PyCrypto
 
 #### A little help for Windows 'users'
 

@@ -25,19 +25,24 @@ from configparser import NoOptionError, NoSectionError
 from bs4 import BeautifulSoup as bs
 
 from stlib import stlogger
-from stlib import stconfig
+from stlib.stconfig import read_config
 from stlib.stnetwork import tryConnect
 
-logger = stlogger.init(os.path.splitext(os.path.basename(__file__))[0]+'.log')
-config = stconfig.init(os.path.splitext(os.path.basename(__file__))[0]+'.config')
+loggerFile = os.path.basename(__file__)[:-3]+'.log'
+configFile = os.path.basename(__file__)[:-3]+'.config'
+
+logger = stlogger.init(loggerFile)
+config = read_config(configFile)
 
 try:
-    cookie = {'PHPSESSID': config.get('CONFIG', 'Cookie')}
-    links = [l.strip() for l in config.get('CONFIG', 'Links').split(',')]
-    minTime = config.getint('CONFIG', 'minTime')
-    maxTime = config.getint('CONFIG', 'maxTime')
+    cookie = dict(config.items('Cookies'))
+    links = [l.strip() for l in config.get('Config', 'Links').split(',')]
+    minTime = config.getint('Config', 'minTime')
+    maxTime = config.getint('Config', 'maxTime')
+    icheck = config.getboolean('Debug', 'IntegrityCheck')
 except(NoOptionError, NoSectionError):
-    logger.critical("Incorrect data. Please, check your config file.")
+    logger.critical("Incorrect data. (Updated with the new options?)")
+    logger.critical("Please, check your config file.")
     logger.debug('', exc_info=True)
     exit(1)
 
@@ -56,7 +61,7 @@ if __name__ == "__main__":
 
         for url in links:
             print("Connecting to the server", end="\r")
-            page = tryConnect(url, cookies=cookie).content
+            page = tryConnect(configFile, url).content
 
             try:
                 form = bs(page, 'html.parser').find('form')
@@ -64,7 +69,7 @@ if __name__ == "__main__":
                     data.update({inputs['name']:inputs['value']})
 
                 postData = {'xsrf_token': data['xsrf_token'], 'do': 'bump_trade'}
-                tryConnect(url, data=postData, cookies=cookie)
+                tryConnect(configFile, url, data=postData)
 
                 logger.info("Bumped %s", url)
             except Exception:
