@@ -26,7 +26,8 @@ from stlib.stcookie import get_steam_cookies
 
 agent = {'user-agent': 'unknown/0.0.0'}
 logger = getLogger('root')
-steamLoginPage = 'https://steamcommunity.com/login/home/?goto=id'
+steamLoginPage = 'https://steamcommunity.com/login/home/'
+steamLoginPage2 = 'https://store.steampowered.com//login/'
 
 def tryConnect(config_file, url, data=False):
     config = read_config(config_file)
@@ -40,7 +41,8 @@ def tryConnect(config_file, url, data=False):
                 response = requests.post(url, data=data, cookies=dict(config.items('Cookies')), headers=agent, timeout=10)
                 response.raise_for_status()
                 # If steam login page is found in response, throw exception.
-                if str(response.content).find(steamLoginPage) != -1:
+                if str(response.content).find(steamLoginPage) != -1 \
+                    or str(response.content).find(steamLoginPage2) != -1:
                     raise requests.exceptions.TooManyRedirects
                 if autorecovery:
                     logger.info("[WITH POWERS] Success!!!")
@@ -51,7 +53,8 @@ def tryConnect(config_file, url, data=False):
                 response = requests.get(url, cookies=dict(config.items('Cookies')), headers=agent, timeout=10)
                 response.raise_for_status()
                 # If steam login page is found in response, throw exception.
-                if str(response.content).find(steamLoginPage) != -1:
+                if str(response.content).find(steamLoginPage) != -1 \
+                    or str(response.content).find(steamLoginPage2) != -1:
                     raise requests.exceptions.TooManyRedirects
                 if autorecovery:
                     logger.info("[WITH POWERS] Success!!!")
