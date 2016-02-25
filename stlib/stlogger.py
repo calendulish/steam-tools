@@ -23,6 +23,12 @@ import logging.handlers
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
 
+def cfixer():
+    print('', flush=True)
+
+def cmsg(*objs, sep='', end='\n', out=sys.stdout):
+    print(*objs, sep=sep, end=end, file=out, flush=True)
+
 def init(fileName):
     if os.name == 'nt':
         conf_dir = 'APPDATA'

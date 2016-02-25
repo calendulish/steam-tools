@@ -47,7 +47,7 @@ except(NoOptionError, NoSectionError):
     exit(1)
 
 def signal_handler(signal, frame):
-    print("\n")
+    stlogger.cfixer()
     logger.info("Exiting...")
     exit(0)
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         logger.info("Bumping now! %s", datetime.now())
 
         for url in links:
-            print("Connecting to the server", end="\r")
+            stlogger.cmsg("Connecting to the server", end='\r')
             page = tryConnect(configFile, url).content
 
             try:
@@ -79,5 +79,5 @@ if __name__ == "__main__":
 
         randomstart = randint(minTime, maxTime)
         for i in range(0, randomstart):
-            print("Waiting: {:4d} seconds".format(randomstart-i), end="\r")
+            stlogger.cmsg("Waiting: {:4d} seconds".format(randomstart-i), end='\r')
             sleep(1)

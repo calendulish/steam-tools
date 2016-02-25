@@ -45,18 +45,19 @@ except(NoOptionError, NoSectionError):
     exit(1)
 
 def signal_handler(signal, frame):
-    print("\n")
+    stlogger.cfixer()
     logger.info("Exiting...")
     exit(0)
 
 if __name__ == "__main__":
     signal(SIGINT, signal_handler)
 
-    logger.info("Searching for your username...")
+    stlogger.cmsg("Searching for your username...", end='\r')
     loginPage = tryConnect(configFile, 'http://store.steampowered.com/about/').content
     username = bs(loginPage, 'html.parser').find('a', class_='username').text.strip()
     profile = "http://steamcommunity.com/id/"+username
-    logger.info("Hello %s", username)
+    stlogger.cmsg("Hello {}!{:25s}!".format(username, ''), end='\r')
+    stlogger.cfixer()
 
     logger.info("Digging your badge list...")
     fullPage = tryConnect(configFile, profile+"/badges/").content
@@ -129,23 +130,23 @@ if __name__ == "__main__":
 
     logger.info("Ready to start.")
     for index in range(0, len(badgeSet['gameID'])):
-        print("")
+        stlogger.cfixer()
         logger.info("Starting game %s (%s)", badgeSet['gameName'][index], badgeSet['gameID'][index])
         if not dryrun:
             fakeApp = subprocess.Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         while True:
-            print("{:2d} cards drop remaining. Waiting... {:7s}".format(badgeSet['cardCount'][index], ' '), end='\r')
+            stlogger.cmsg("{:2d} cards drop remaining. Waiting... {:7s}".format(badgeSet['cardCount'][index], ' '), end='\r')
             logger.debug("Waiting cards drop loop")
             if icheck: logger.debug("Current: %s", [badgeSet[i][index] for i,v in badgeSet.items()])
             for i in range(0, 30):
                 if not dryrun and fakeApp.poll():
-                    print("")
+                    stlogger.cfixer()
                     logger.critical(fakeApp.stderr.read().decode('utf-8'))
                     exit(1)
                 sleep(1)
 
-            print("Checking if game have more cards drops...", end='\r')
+            stlogger.cmsg("Checking if game have more cards drops...", end='\r')
             logger.debug("Updating cards count")
             if icheck: logger.debug("OLD: %d", badgeSet['cardCount'][index])
             badge = tryConnect(configFile, profile+"/gamecards/"+badgeSet['gameID'][index]).content
@@ -153,7 +154,7 @@ if __name__ == "__main__":
             if icheck: logger.debug("NEW: %d", badgeSet['cardCount'][index])
             if dryrun: badgeSet['cardCount'][index] = ""
             if not badgeSet['cardCount'][index] or "No" in badgeSet['cardCount'][index].text:
-                print("")
+                stlogger.cfixer()
                 logger.info("The game has no more cards to drop.")
                 break
             else:

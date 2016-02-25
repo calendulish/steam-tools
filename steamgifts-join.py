@@ -46,7 +46,7 @@ except(NoOptionError, NoSectionError):
     exit(1)
 
 def signal_handler(signal, frame):
-    print("\n")
+    stlogger.cfixer()
     logger.info("Exiting...")
     exit(0)
 
@@ -139,10 +139,10 @@ if __name__ == "__main__":
                 logger.error("Please, check if it's a valid url.")
                 logger.debug('', exc_info=True)
 
-            print('')
+            stlogger.cfixer()
 
         logger.debug("Remaining points: %d", myPoints)
         randomstart = randint(minTime, maxTime)
         for i in range(0, randomstart):
-            print("Waiting: {:4d} seconds".format(randomstart-i), end="\r")
+            stlogger.cmsg("Waiting: {:4d} seconds".format(randomstart-i), end='\r')
             sleep(1)
