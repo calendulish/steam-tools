@@ -34,7 +34,7 @@ def tryConnect(config_file, url, data=False):
     autorecovery = False
     while True:
         try:
-            if config.get('Debug', 'IntegrityCheck'):
+            if config.getboolean('Debug', 'IntegrityCheck'):
                 logger.debug("Current cookies: ", dict(config.items('Cookies')))
 
             if data:
