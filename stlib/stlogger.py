@@ -31,13 +31,11 @@ def cmsg(*objs, sep='', end='\n', out=sys.stdout):
 
 def init(fileName):
     if os.name == 'nt':
-        conf_dir = 'APPDATA'
+        xdg_dir = os.getenv('LOCALAPPDATA')
     else:
-        conf_dir = '.config'
+        xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
 
-    xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), conf_dir))
     path = os.path.join(xdg_dir, 'steam-tools')
-
     os.makedirs(path, exist_ok=True)
 
     logger = logging.getLogger("root")
