@@ -18,16 +18,19 @@
 
 import os, sys
 import codecs
+import locale
 import logging
 import logging.handlers
 
-sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
+def encoder(buffer, error='replace'):
+    writer = codecs.getwriter(locale.getpreferredencoding())
+    return writer(buffer, error)
 
 def cfixer():
     print('', flush=True)
 
 def cmsg(*objs, sep='', end='\n', out=sys.stdout):
-    print(*objs, sep=sep, end=end, file=out, flush=True)
+    print(*objs, sep=sep, end=end, file=encoder(out.buffer), flush=True)
 
 def init(fileName):
     if os.name == 'nt':
@@ -47,7 +50,7 @@ def init(fileName):
     file.doRollover()
     logger.addHandler(file)
 
-    console = logging.StreamHandler(sys.stdout)
+    console = logging.StreamHandler(encoder(sys.stdout.buffer))
     console.setFormatter(logging.Formatter('%(message)s'))
     console.setLevel(logging.INFO)
     logger.addHandler(console)
