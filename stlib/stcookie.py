@@ -78,20 +78,19 @@ def get_steam_cookies(domain):
     temp_COOKIES_PATH = os.path.join(tempdir, os.path.basename(COOKIES_PATH))
     copy(COOKIES_PATH, temp_COOKIES_PATH)
 
-    cookies_list = []
+    cookies = {}
     connection = sqlite3.connect(temp_COOKIES_PATH)
     for key, value, evalue in connection.execute(query, (domain,)):
         if key == '_ga': continue
         if evalue[:3] != b'v10' and evalue[:3] != b'\x01\x00\x00':
             if value:
-                cookies_list.append((key, value))
+                cookies[key] = value
             else:
-                cookies_list.append((key, evalue))
+                cookies[key] = evalue
         else:
-            decrypted_t = (key, chrome_decrypt(evalue))
-            cookies_list.append(decrypted_t)
+            cookies[key] = chrome_decrypt(evalue)
     connection.close()
 
     rmtree(tempdir)
 
-    return cookies_list
+    return cookies

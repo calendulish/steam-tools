@@ -34,7 +34,7 @@ logger = stlogger.init(loggerFile)
 config = read_config(configFile)
 
 try:
-    cookie = dict(config.items('Cookies'))
+    cookie = config._sections['Cookies']
     links = [l.strip() for l in config.get('Config', 'Links').split(',')]
     minTime = config.getint('Config', 'minTime')
     maxTime = config.getint('Config', 'maxTime')

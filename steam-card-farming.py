@@ -34,7 +34,7 @@ logger = stlogger.init(loggerFile)
 config = read_config(configFile)
 
 try:
-    cookies = dict(config.items('Cookies'))
+    cookies = config._sections['Cookies']
     sort = config.getboolean('Config', 'MostValuableFirst')
     icheck = config.getboolean('Debug', "IntegrityCheck")
     dryrun = config.getboolean('Debug', "DryRun")
