@@ -35,6 +35,7 @@ config = read_config(configFile)
 
 try:
     cookie = config._sections['Cookies']
+    chromeProfile = config.get('Config', 'chromeProfile')
     links = [l.strip() for l in config.get('Config', 'Links').split(',')]
     minTime = config.getint('Config', 'minTime')
     maxTime = config.getint('Config', 'maxTime')

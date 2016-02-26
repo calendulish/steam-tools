@@ -35,7 +35,7 @@ def tryConnect(config_file, url, data=False):
     while True:
         try:
             if config.getboolean('Debug', 'IntegrityCheck'):
-                logger.debug("Current cookies: ", config._sections['Cookies'])
+                logger.debug("Current cookies: %s", config._sections['Cookies'])
 
             if not len(config._sections['Cookies']):
                 logger.debug("I found no cookie in the config sections.")
@@ -79,7 +79,7 @@ def tryConnect(config_file, url, data=False):
                         domain = '.'.join(site[-3:])
                     else:
                         domain = '.'.join(site[-2:])
-                config['Cookies'] = get_steam_cookies(domain)
+                config['Cookies'] = get_steam_cookies(config_file, domain)
                 write_config(config_file)
                 autorecovery = True
             else:

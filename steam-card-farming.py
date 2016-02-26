@@ -35,6 +35,7 @@ config = read_config(configFile)
 
 try:
     cookies = config._sections['Cookies']
+    chromeProfile = config.get('Config', 'chromeProfile')
     sort = config.getboolean('Config', 'MostValuableFirst')
     icheck = config.getboolean('Debug', "IntegrityCheck")
     dryrun = config.getboolean('Debug', "DryRun")
