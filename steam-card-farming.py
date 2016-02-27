@@ -151,15 +151,15 @@ if __name__ == "__main__":
             logger.debug("Updating cards count")
             if icheck: logger.debug("OLD: %d", badgeSet['cardCount'][index])
             badge = tryConnect(configFile, profile+"/gamecards/"+badgeSet['gameID'][index]).content
-            badgeSet['cardCount'][index] = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
-            if icheck: logger.debug("NEW: %d", badgeSet['cardCount'][index])
-            if dryrun: badgeSet['cardCount'][index] = ""
-            if not badgeSet['cardCount'][index] or "No" in badgeSet['cardCount'][index].text:
+            progress = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
+            if dryrun: progress = ''
+            if not progress or "No" in progress.text:
                 stlogger.cfixer()
                 logger.info("The game has no more cards to drop.")
                 break
             else:
-                badgeSet['cardCount'][index] = int(badgeSet['cardCount'][index].text.split(' ', 3)[0])
+                badgeSet['cardCount'][index] = int(progress.text.split(' ', 3)[0])
+                if icheck: logger.debug("NEW: %d", badgeSet['cardCount'][index])
 
         logger.info("Closing %s", badgeSet['gameName'][index])
         if not dryrun:
