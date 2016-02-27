@@ -57,7 +57,7 @@ if __name__ == "__main__":
     loginPage = tryConnect(configFile, 'http://store.steampowered.com/about/').content
     username = bs(loginPage, 'html.parser').find('a', class_='username').text.strip()
     profile = "http://steamcommunity.com/id/"+username
-    stlogger.cmsg("Hello {}!{:25s}!".format(username, ''), end='\r')
+    stlogger.cmsg("Hello {}!{:25s}".format(username, ''), end='\r')
     stlogger.cfixer()
 
     logger.info("Digging your badge list...")
