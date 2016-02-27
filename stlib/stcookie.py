@@ -19,7 +19,13 @@
 import os
 import tempfile
 import sqlite3
+import json
 from shutil import copy, rmtree
+from logging import getLogger
+
+from stlib.stconfig import read_config, write_config
+
+logger = getLogger('root')
 
 if os.name == 'nt':
     from ctypes import *
@@ -27,9 +33,6 @@ if os.name == 'nt':
     localfree = windll.kernel32.LocalFree
     memcpy = cdll.msvcrt.memcpy
     CryptUnprotectData = windll.crypt32.CryptUnprotectData
-
-    XDG_DIR = os.getenv('LOCALAPPDATA')
-    COOKIES_DIR = os.path.join(XDG_DIR, 'Google/Chrome/User data/Default')
 
     class DATA_BLOB(Structure):
         _fields_ = [
@@ -58,10 +61,57 @@ else:
     from Crypto.Protocol.KDF import PBKDF2
     from Crypto.Cipher import AES
 
-    XDG_DIR = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
-    COOKIES_DIR = os.path.join(XDG_DIR, 'google-chrome/Profile 1')
+def find_chrome_profile(config):
+    if os.name == 'nt':
+        xdg_dir = os.getenv('LOCALAPPDATA')
+        chrome_dir = os.path.join(xdg_dir, 'Google/Chrome/User Data')
+        # Fallback to Chromium
+        if not os.path.isdir(chrome_dir):
+            chrome_dir = os.path.join(xdg_dir, 'Chromium/User Data')
+    else:
+        xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
+        chrome_dir = os.path.join(xdg_dir, 'google-chrome')
+        # Fallback to Chromium
+        if not os.path.isdir(chrome_dir):
+            chrome_dir = os.path.join(xdg_dir, 'chromium')
 
-COOKIES_PATH = os.path.join(COOKIES_DIR, "Cookies")
+    profiles = []
+    for dirname in sorted(os.listdir(chrome_dir)):
+        if 'Profile' in dirname or 'Default' in dirname:
+            if os.path.isfile(os.path.join(chrome_dir, dirname, 'Cookies')):
+                profiles.append(os.path.join(chrome_dir, dirname))
+
+    if not len(profiles):
+        logger.error("[WITH POWERS] I cannot find your Chrome/Chromium profile")
+        return None
+    elif len(profiles) == 1:
+        return profiles[0]
+    else:
+        profile = os.path.join(chrome_dir, config.get('Config', 'chromeProfile'))
+        if os.path.isfile(os.path.join(profile, 'Cookies')):
+            return profile
+
+        logger.info(" Who are you?")
+        for i in range(len(profiles)):
+            with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
+                prefs = json.load(prefs_file)
+            logger.info('  - [%d] %s (%s)',
+                        i+1,
+                        prefs['account_info'][0]['full_name'],
+                        os.path.basename(profiles[i]))
+
+        while True:
+            try:
+                opc = int(input("Please, input an number [1-{}]:".format(len(profiles))))
+                if opc > len(profiles) or opc < 1:
+                    raise(ValueError)
+            except ValueError:
+                logger.info('Please, choose an valid option.')
+                continue
+            logger.info("Okay, I'm remember that.")
+            break
+
+        return profiles[opc-1]
 
 def chrome_decrypt(evalue):
     if os.name == 'nt':
@@ -71,27 +121,36 @@ def chrome_decrypt(evalue):
         decrypted = cipher.decrypt(evalue[3:])
         return decrypted[:-decrypted[-1]].decode('utf-8')
 
-def get_steam_cookies(domain):
+def get_steam_cookies(config_file, domain):
+    config = read_config(config_file)
+
+    cookies = {}
+    profile = find_chrome_profile(config)
     query = 'SELECT name, value, encrypted_value FROM cookies WHERE host_key LIKE ?'
 
-    tempdir = tempfile.mkdtemp()
-    temp_COOKIES_PATH = os.path.join(tempdir, os.path.basename(COOKIES_PATH))
-    copy(COOKIES_PATH, temp_COOKIES_PATH)
+    if profile:
+        config['Config']['chromeProfile'] = os.path.basename(profile)
+        write_config(config_file)
+    else:
+        return cookies
 
-    cookies_list = []
-    connection = sqlite3.connect(temp_COOKIES_PATH)
+    tempdir = tempfile.mkdtemp()
+    cookies_path = os.path.join(profile, 'Cookies')
+    temp_cookies_path = os.path.join(tempdir, os.path.basename(cookies_path))
+    copy(cookies_path, temp_cookies_path)
+
+    connection = sqlite3.connect(temp_cookies_path)
     for key, value, evalue in connection.execute(query, (domain,)):
         if key == '_ga': continue
         if evalue[:3] != b'v10' and evalue[:3] != b'\x01\x00\x00':
             if value:
-                cookies_list.append((key, value))
+                cookies[key] = value
             else:
-                cookies_list.append((key, evalue))
+                cookies[key] = evalue
         else:
-            decrypted_t = (key, chrome_decrypt(evalue))
-            cookies_list.append(decrypted_t)
+            cookies[key] = chrome_decrypt(evalue)
     connection.close()
 
     rmtree(tempdir)
 
-    return cookies_list
+    return cookies

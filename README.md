@@ -1,7 +1,7 @@
 Steam Tools
 -----------
 
-#### Now is working on Linux and Windows too!
+#### \*\* Now the configurations will be updated automatically with your cookies if you use Google Chrome or Chromium. Just copy the examples and run. \*\*
 
 Some useful tools for use with steam client or compatible programs, websites.
 

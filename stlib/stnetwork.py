@@ -35,10 +35,14 @@ def tryConnect(config_file, url, data=False):
     while True:
         try:
             if config.getboolean('Debug', 'IntegrityCheck'):
-                logger.debug("Current cookies: ", dict(config.items('Cookies')))
+                logger.debug("Current cookies: %s", config._sections['Cookies'])
+
+            if not len(config._sections['Cookies']):
+                logger.debug("I found no cookie in the config sections.")
+                raise requests.exceptions.TooManyRedirects
 
             if data:
-                response = requests.post(url, data=data, cookies=dict(config.items('Cookies')), headers=agent, timeout=10)
+                response = requests.post(url, data=data, cookies=config._sections['Cookies'], headers=agent, timeout=10)
                 response.raise_for_status()
                 # If steam login page is found in response, throw exception.
                 if str(response.content).find(steamLoginPage) != -1 \
@@ -50,7 +54,7 @@ def tryConnect(config_file, url, data=False):
                 autorecovery = False
                 return response
             else:
-                response = requests.get(url, cookies=dict(config.items('Cookies')), headers=agent, timeout=10)
+                response = requests.get(url, cookies=config._sections['Cookies'], headers=agent, timeout=10)
                 response.raise_for_status()
                 # If steam login page is found in response, throw exception.
                 if str(response.content).find(steamLoginPage) != -1 \
@@ -75,11 +79,12 @@ def tryConnect(config_file, url, data=False):
                         domain = '.'.join(site[-3:])
                     else:
                         domain = '.'.join(site[-2:])
-                config['Cookies'] = dict(get_steam_cookies(domain))
+                config['Cookies'] = get_steam_cookies(config_file, domain)
                 write_config(config_file)
                 autorecovery = True
             else:
-                logger.critical("I cannot recover D: (Chrome profile not found?)")
+                logger.critical("I cannot recover D:")
+                logger.critical("(Chrome/Chromium profile not found? Cookies not found?)")
                 logger.critical("Please, check your configuration and update your cookies.")
                 logger.debug('', exc_info=True)
                 exit(1)

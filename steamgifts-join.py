@@ -34,8 +34,9 @@ logger = stlogger.init(loggerFile)
 config = read_config(configFile)
 
 try:
-    cookie = dict(config.items('Cookies'))
-    links = [l.strip() for l in config.get('Config', 'Links').split(',')]
+    cookie = config._sections['Cookies']
+    chromeProfile = config.get('Config', 'chromeProfile')
+    typeList = [l.strip() for l in config.get('Config', 'typeList').split(',')]
     minTime = config.getint('Config', 'minTime')
     maxTime = config.getint('Config', 'maxTime')
     icheck = config.getboolean('Debug', 'IntegrityCheck')
@@ -73,8 +74,18 @@ if __name__ == "__main__":
     steamgifts_config()
 
     while True:
-        for url in links:
-            logger.info("Connecting to %s", url)
+        for type in typeList:
+            stlogger.cmsg("Connecting to the server", end='\r')
+            domain = "http://www.steamgifts.com/giveaways/search?type="
+            if type == 'main':
+                url = domain
+            elif type == 'wishlist':
+                url = domain+'wishlist'
+            elif type == 'new':
+                url = domain+'new'
+            else:
+                url = domain+'&q='+type
+
             page = tryConnect(configFile, url).content
 
             try:
@@ -139,10 +150,8 @@ if __name__ == "__main__":
                 logger.error("Please, check if it's a valid url.")
                 logger.debug('', exc_info=True)
 
-            stlogger.cfixer()
-
         logger.debug("Remaining points: %d", myPoints)
         randomstart = randint(minTime, maxTime)
         for i in range(0, randomstart):
-            stlogger.cmsg("Waiting: {:4d} seconds".format(randomstart-i), end='\r')
+            stlogger.cmsg("Waiting: {:4d} seconds {:5}".format(randomstart-i, ''), end='\r')
             sleep(1)

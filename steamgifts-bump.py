@@ -35,8 +35,9 @@ logger = stlogger.init(loggerFile)
 config = read_config(configFile)
 
 try:
-    cookie = dict(config.items('Cookies'))
-    links = [l.strip() for l in config.get('Config', 'Links').split(',')]
+    cookie = config._sections['Cookies']
+    chromeProfile = config.get('Config', 'chromeProfile')
+    tradeID = [l.strip() for l in config.get('Config', 'tradeID').split(',')]
     minTime = config.getint('Config', 'minTime')
     maxTime = config.getint('Config', 'maxTime')
     icheck = config.getboolean('Debug', 'IntegrityCheck')
@@ -59,9 +60,13 @@ if __name__ == "__main__":
 
         logger.info("Bumping now! %s", datetime.now())
 
-        for url in links:
+        for id in tradeID:
             stlogger.cmsg("Connecting to the server", end='\r')
-            page = tryConnect(configFile, url).content
+            url = "http://www.steamgifts.com/trade/"+id+'/'
+            response = tryConnect(configFile, url)
+            page = response.content
+            url = response.url
+            title = os.path.basename(url).replace('-', ' ')
 
             try:
                 form = bs(page, 'html.parser').find('form')
@@ -69,12 +74,18 @@ if __name__ == "__main__":
                     data.update({inputs['name']:inputs['value']})
 
                 postData = {'xsrf_token': data['xsrf_token'], 'do': 'bump_trade'}
-                tryConnect(configFile, url, data=postData)
-
-                logger.info("Bumped %s", url)
+                ret = tryConnect(configFile, url, data=postData).content
+                if 'Please wait' in ret.decode('utf-8'):
+                    logger.warning('%s (%s) Already bumped. Please wait. %12s', id, title, '')
+                else:
+                    tradePage = tryConnect(configFile, 'http://www.steamgifts.com/trades').content
+                    if id in tradePage.decode('utf-8'):
+                        logger.info("%s (%s) Bumped! %12s", id, title, '')
+                    else:
+                        raise Exception
             except Exception:
-                logger.error("An error occured for url %s", url)
-                logger.error("Please, check if it's a valid url.")
+                logger.error("An error occured for ID %s %12s", id, '')
+                logger.error("Please, check if it's a valid ID.")
                 logger.debug('', exc_info=True)
 
         randomstart = randint(minTime, maxTime)
