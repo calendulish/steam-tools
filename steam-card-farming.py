@@ -105,7 +105,9 @@ if __name__ == "__main__":
         pricesPage = tryConnect(configFile, "http://www.steamcardexchange.net/index.php?badgeprices").content
         for game in bs(pricesPage, 'html.parser').findAll('tr')[1:]:
             pricesSet['game'].append(game.find('a').text)
-            pricesSet['avg'].append(float(game.find('td').findNext('td').findNext('td').text[1:]))
+            cardCount = int(game.findAll('td')[1].text)
+            price = float(game.findAll('td')[2].text[1:])
+            pricesSet['avg'].append(price / cardCount)
 
         badgeSet['cardValue'] = [ pricesSet['avg'][pricesSet['game'].index(game)] for game in badgeSet['gameName'] ]
     else:
