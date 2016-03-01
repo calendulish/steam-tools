@@ -109,7 +109,11 @@ if __name__ == "__main__":
             price = float(game.findAll('td')[2].text[1:])
             pricesSet['avg'].append(price / cardCount)
 
-        badgeSet['cardValue'] = [ pricesSet['avg'][pricesSet['game'].index(game)] for game in badgeSet['gameName'] ]
+        for game in badgeSet['gameName']:
+            try:
+                badgeSet['cardValue'].append(pricesSet['avg'][pricesSet['game'].index(game)])
+            except ValueError:
+                badgeSet['cardValue'].append(0)
     else:
         badgeSet['cardValue'] = [ 0 for _ in badgeSet['gameID'] ]
 
