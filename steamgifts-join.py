@@ -114,15 +114,15 @@ if __name__ == "__main__":
 
                     if "Copies" in gvHeader.text:
                         logger.debug("The giveaway has more than 1 copy. Counting and fixing gvHeader.")
-                        gameCopies = int(''.join(filter(lambda x: x.isdigit(), gvHeader.text)))
+                        gameCopies = int(''.join(filter(str.isdigit, gvHeader.text)))
                         gvHeader = gvHeader.findNext('span', class_='giveaway__heading__thin')
                     else:
                         gameCopies = 1
 
-                    gamePoints = int(''.join(filter(lambda x: x.isdigit(), gvHeader.text)))
+                    gamePoints = int(''.join(filter(str.isdigit, gvHeader.text)))
 
                     try:
-                        gameLevel = int(''.join(filter(lambda x: x.isdigit(), giveaway.find('div', class_='giveaway__column--contributor-level').text)))
+                        gameLevel = int(''.join(filter(str.isdigit, giveaway.find('div', class_='giveaway__column--contributor-level').text)))
                     except AttributeError:
                         gameLevel = 0
 
