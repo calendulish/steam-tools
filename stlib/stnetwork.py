@@ -66,11 +66,11 @@ def tryConnect(config_file, url, data=False):
                 autorecovery = False
                 return response
         except requests.exceptions.TooManyRedirects:
-            logger.error("Invalid or expired cookies.")
-            logger.info("POWERS... ACTIVATE!")
-            logger.info("[WITH POWERS] Trying to automagically recovery...")
-            logger.debug('', exc_info=True)
             if not autorecovery:
+                logger.error("Invalid or expired cookies.")
+                logger.info("POWERS... ACTIVATE!")
+                logger.info("[WITH POWERS] Trying to automagically recovery...")
+
                 site = url.split('//', 1)[1].split('/', 1)[0].split('.')
                 if len(site) > 2 and site[-3] == 'www':
                     domain = '.'+'.'.join(site[-2:])
