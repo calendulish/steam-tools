@@ -33,16 +33,17 @@ def get_config_path(fileName):
     config_file = os.path.join(xdg_dir, 'steam-tools', fileName)
     os.makedirs(os.path.dirname(config_file), exist_ok=True)
 
-    if os.path.isfile(config_file):
-        return config_file
-    elif os.path.isfile(fileName):
+    if os.path.isfile(fileName):
         return fileName
     else:
-        logger.critical("Configuration file not found. These is the search paths:")
-        logger.critical(" - %s", config_file)
-        logger.critical(" - %s", os.path.join(os.getcwd(), 'steam-card-farming.config'))
-        logger.critical("Please, copy the example file or create a new with your data.")
-        exit(1)
+        if not os.path.isfile(config_file):
+            logger.warn("No config file found.")
+            logger.warn("Creating a new at %s", config_file)
+            config.add_section('Config')
+            with open(config_file, 'w') as fp:
+                config.write(fp)
+            
+        return config_file
 
 def read_config(fileName):
     config.read(get_config_path(fileName))

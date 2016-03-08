@@ -34,11 +34,14 @@ def tryConnect(config_file, url, data=False):
     autorecovery = False
     while True:
         try:
-            if config.getboolean('Debug', 'IntegrityCheck'):
+            if config.getboolean('Debug', 'IntegrityCheck', fallback=False):
                 logger.debug("Current cookies: %s", config._sections['Cookies'])
 
-            if not len(config._sections['Cookies']):
-                logger.debug("I found no cookie in the config sections.")
+            try:
+                if not len(config._sections['Cookies']):
+                    raise KeyError
+            except KeyError:
+                logger.debug("I found no cookies in the Cookies section.")
                 raise requests.exceptions.TooManyRedirects
 
             if data:

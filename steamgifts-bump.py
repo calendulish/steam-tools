@@ -35,17 +35,12 @@ logger = stlogger.init(loggerFile)
 config = read_config(configFile)
 
 try:
-    cookie = config._sections['Cookies']
-    chromeProfile = config.get('Config', 'chromeProfile')
     tradeID = [l.strip() for l in config.get('Config', 'tradeID').split(',')]
-    minTime = config.getint('Config', 'minTime')
-    maxTime = config.getint('Config', 'maxTime')
-    icheck = config.getboolean('Debug', 'IntegrityCheck')
 except(NoOptionError, NoSectionError):
-    logger.critical("Incorrect data. (Updated with the new options?)")
-    logger.critical("Please, check your config file.")
-    logger.debug('', exc_info=True)
-    exit(1)
+    tradeID = [ 'EXAMPLEID1', 'EXAMPLEID2' ]
+    config.set('Config', 'tradeID', "EXAMPLEID1, EXAMPLEID2")
+    logger.warn("No tradeID found in the config file. Using EXAMPLEID's.")
+    logger.warn("Please, edit the auto-generated config file after this run.")
 
 def signal_handler(signal, frame):
     stlogger.cfixer()
@@ -88,7 +83,7 @@ if __name__ == "__main__":
                 logger.error("Please, check if it's a valid ID.")
                 logger.debug('', exc_info=True)
 
-        randomstart = randint(minTime, maxTime)
+        randomstart = randint(config.getint('Config', 'minTime', fallback=3700), config.getint('Config', 'maxTime', fallback=4100))
         for i in range(0, randomstart):
             stlogger.cmsg("Waiting: {:4d} seconds".format(randomstart-i), end='\r')
             sleep(1)

@@ -33,17 +33,9 @@ configFile = os.path.basename(__file__)[:-3]+'.config'
 logger = stlogger.init(loggerFile)
 config = read_config(configFile)
 
-try:
-    cookies = config._sections['Cookies']
-    chromeProfile = config.get('Config', 'chromeProfile')
-    sort = config.getboolean('Config', 'MostValuableFirst')
-    icheck = config.getboolean('Debug', "IntegrityCheck")
-    dryrun = config.getboolean('Debug', "DryRun")
-except(NoOptionError, NoSectionError):
-    logger.critical("Incorrect data. (Updated with the new options?)")
-    logger.critical("Please, check your config file.")
-    logger.debug('', exc_info=True)
-    exit(1)
+sort = config.getboolean('Config', 'MostValuableFirst', fallback=True)
+icheck = config.getboolean('Debug', "IntegrityCheck", fallback=False)
+dryrun = config.getboolean('Debug', "DryRun", fallback=False)
 
 def signal_handler(signal, frame):
     stlogger.cfixer()
