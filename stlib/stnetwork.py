@@ -26,12 +26,15 @@ from stlib.stcookie import get_steam_cookies
 
 agent = {'user-agent': 'unknown/0.0.0'}
 logger = getLogger('root')
-steamLoginPage = 'https://steamcommunity.com/login/home/'
-steamLoginPage2 = 'https://store.steampowered.com//login/'
+steamLoginPages = [
+                    'https://steamcommunity.com/login/home/',
+                    'https://store.steampowered.com//login/',
+                ]
 
 def tryConnect(config_file, url, data=False):
     config = read_config(config_file)
     autorecovery = False
+
     while True:
         try:
             if config.getboolean('Debug', 'IntegrityCheck'):
@@ -43,28 +46,21 @@ def tryConnect(config_file, url, data=False):
 
             if data:
                 response = requests.post(url, data=data, cookies=config._sections['Cookies'], headers=agent, timeout=10)
-                response.raise_for_status()
-                # If steam login page is found in response, throw exception.
-                if str(response.content).find(steamLoginPage) != -1 \
-                    or str(response.content).find(steamLoginPage2) != -1:
-                    raise requests.exceptions.TooManyRedirects
-                if autorecovery:
-                    logger.info("[WITH POWERS] Success!!!")
-                    logger.info("POWERS... DESACTIVATE!")
-                autorecovery = False
-                return response
             else:
                 response = requests.get(url, cookies=config._sections['Cookies'], headers=agent, timeout=10)
-                response.raise_for_status()
-                # If steam login page is found in response, throw exception.
-                if str(response.content).find(steamLoginPage) != -1 \
-                    or str(response.content).find(steamLoginPage2) != -1:
-                    raise requests.exceptions.TooManyRedirects
-                if autorecovery:
-                    logger.info("[WITH POWERS] Success!!!")
-                    logger.info("POWERS... DESACTIVATE!")
-                autorecovery = False
-                return response
+
+            response.raise_for_status()
+
+            # If steam login page is found in response, throw exception.
+            if any(p in str(response.content) for p in steamLoginPages):
+                raise requests.exceptions.TooManyRedirects
+
+            if autorecovery:
+                logger.info("[WITH POWERS] Success!!!")
+                logger.info("POWERS... DESACTIVATE!")
+
+            autorecovery = False
+            return response
         except requests.exceptions.TooManyRedirects:
             if not autorecovery:
                 logger.error("Invalid or expired cookies.")
