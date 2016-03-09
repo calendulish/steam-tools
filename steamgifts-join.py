@@ -34,17 +34,12 @@ logger = stlogger.init(loggerFile)
 config = read_config(configFile)
 
 try:
-    cookie = config._sections['Cookies']
-    chromeProfile = config.get('Config', 'chromeProfile')
     typeList = [l.strip() for l in config.get('Config', 'typeList').split(',')]
-    minTime = config.getint('Config', 'minTime')
-    maxTime = config.getint('Config', 'maxTime')
-    icheck = config.getboolean('Debug', 'IntegrityCheck')
 except(NoOptionError, NoSectionError):
-    logger.critical("Incorrect data. (Updated with the new options?)")
-    logger.critical("Please, check your config file.")
-    logger.debug('', exc_info=True)
-    exit(1)
+    typeList = [ 'wishlist', 'main', 'new' ]
+    config.set('Config', 'typeList', "wishlist, main, new")
+    logger.warn("No typeList found in the config file.")
+    logger.warn("Using the default: wishlist, main, new. You can edit these values.")
 
 def signal_handler(signal, frame):
     stlogger.cfixer()
@@ -151,7 +146,7 @@ if __name__ == "__main__":
                 logger.debug('', exc_info=True)
 
         logger.debug("Remaining points: %d", myPoints)
-        randomstart = randint(minTime, maxTime)
+        randomstart = randint(config.getint('Config', 'minTime', fallback=7000), config.getint('Config', 'maxTime', fallback=7300))
         for i in range(0, randomstart):
             stlogger.cmsg("Waiting: {:4d} seconds {:5}".format(randomstart-i, ''), end='\r')
             sleep(1)

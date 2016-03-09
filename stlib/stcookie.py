@@ -87,7 +87,7 @@ def find_chrome_profile(config):
     elif len(profiles) == 1:
         return profiles[0]
     else:
-        profile = os.path.join(chrome_dir, config.get('Config', 'chromeProfile'))
+        profile = os.path.join(chrome_dir, config.get('Config', 'chromeProfile', fallback='Default'))
         if os.path.isfile(os.path.join(profile, 'Cookies')):
             return profile
 
@@ -139,7 +139,7 @@ def get_steam_cookies(config_file, url):
     query = 'SELECT name, value, encrypted_value FROM cookies WHERE host_key LIKE ?'
 
     if profile:
-        config['Config']['chromeProfile'] = os.path.basename(profile)
+        config.set('Config', 'chromeProfile', os.path.basename(profile))
         write_config(config_file)
     else:
         return cookies
