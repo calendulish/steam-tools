@@ -92,6 +92,8 @@ def tryConnect(config_file, url, data=False):
                 logger.debug('', exc_info=True)
                 exit(1)
         except(requests.exceptions.HTTPError, requests.exceptions.RequestException):
+            # Report to steamgifts-bump if the tradeID is incorrect"
+            if "/trade/" in url: return ""
             logger.error("The connection is refused or fails. Trying again...")
             logger.debug('', exc_info=True)
             sleep(3)

@@ -25,7 +25,7 @@ from configparser import NoOptionError, NoSectionError
 from bs4 import BeautifulSoup as bs
 
 from stlib import stlogger
-from stlib.stconfig import read_config
+from stlib.stconfig import get_config_path, read_config
 from stlib.stnetwork import tryConnect
 
 loggerFile = os.path.basename(__file__)[:-3]+'.log'
@@ -59,7 +59,14 @@ if __name__ == "__main__":
             stlogger.cmsg("Connecting to the server", end='\r')
             url = "http://www.steamgifts.com/trade/"+id+'/'
             response = tryConnect(configFile, url)
-            page = response.content
+
+            try:
+                page = response.content
+            except AttributeError:
+                logger.error("tradeID %s is incorrect. Ignoring.", id)
+                logger.error("Please, update your config file at %s", get_config_path(configFile))
+                continue
+
             url = response.url
             title = os.path.basename(url).replace('-', ' ')
 
