@@ -1,12 +1,13 @@
 Steam Tools
 -----------
 
-#### \*\* Now the configurations will be updated automatically with your cookies if you use Google Chrome or Chromium. Just copy the examples and run. \*\*
+#### \*\* Now the configurations will be updated automatically with your cookies if you use Google Chrome or Chromium. \*\*
 
 Some useful tools for use with steam client or compatible programs, websites.
 
 - **steamgifts-bump:** Automatically bumps your trades at steamgifts.com/trades
 - **steamgifts-join:** Automatically join on giveways at steamgifts.com
+- **steamcompanion-join:** (Coming Soon)
 - **steam-card-farming:** Checks if you have cards remaining to drop. Automatically starts a fake app and waits until all cards drop.
 - **fake-steam-app.py:** Create a fake steam app with the gameID param.
 
@@ -29,9 +30,7 @@ Dependencies
 - Copy the configurations files from example folder and edit them.
 - and finally run: ```python <script>```
 
-        If you still unable to use even with this tutorial, so you don't really deserve.
         I'll not provide binary or any facilitator for windows in matter of instalation.
-
 ___________________________________________________________________________________________
 
 This is an work in progress. You can request new features.
