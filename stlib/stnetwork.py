@@ -70,16 +70,7 @@ def tryConnect(config_file, url, data=False):
                 logger.error("Invalid or expired cookies.")
                 logger.info("POWERS... ACTIVATE!")
                 logger.info("[WITH POWERS] Trying to automagically recovery...")
-
-                site = url.split('//', 1)[1].split('/', 1)[0].split('.')
-                if len(site) > 2 and site[-3] == 'www':
-                    domain = '.'+'.'.join(site[-2:])
-                else:
-                    if len(site) > 2:
-                        domain = '.'.join(site[-3:])
-                    else:
-                        domain = '.'.join(site[-2:])
-                config['Cookies'] = get_steam_cookies(config_file, domain)
+                config['Cookies'] = get_steam_cookies(config_file, url)
                 write_config(config_file)
                 autorecovery = True
             else:

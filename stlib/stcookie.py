@@ -121,7 +121,17 @@ def chrome_decrypt(evalue):
         decrypted = cipher.decrypt(evalue[3:])
         return decrypted[:-decrypted[-1]].decode('utf-8')
 
-def get_steam_cookies(config_file, domain):
+def get_domain_name(url):
+    site = url.split('//', 1)[1].split('/', 1)[0].split('.')
+    if len(site) > 2 and site[-3] == 'www':
+        return '.'+'.'.join(site[-2:])
+    else:
+        if len(site) > 2:
+            return '.'.join(site[-3:])
+        else:
+            return '.'.join(site[-2:])
+
+def get_steam_cookies(config_file, url):
     config = read_config(config_file)
 
     cookies = {}
@@ -140,7 +150,7 @@ def get_steam_cookies(config_file, domain):
     copy(cookies_path, temp_cookies_path)
 
     connection = sqlite3.connect(temp_cookies_path)
-    for key, value, evalue in connection.execute(query, (domain,)):
+    for key, value, evalue in connection.execute(query, (get_domain_name(url),)):
         if key == '_ga': continue
         if evalue[:3] != b'v10' and evalue[:3] != b'\x01\x00\x00':
             if value:
