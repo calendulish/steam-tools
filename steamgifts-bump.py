@@ -25,72 +25,68 @@ from configparser import NoOptionError, NoSectionError
 from bs4 import BeautifulSoup as bs
 
 from stlib import stlogger
-from stlib.stconfig import get_config_path, read_config
-from stlib.stnetwork import tryConnect
+from stlib import stconfig
+from stlib import stnetwork
 
-loggerFile = os.path.basename(__file__)[:-3]+'.log'
-configFile = os.path.basename(__file__)[:-3]+'.config'
-
-logger = stlogger.init(loggerFile)
-config = read_config(configFile)
+LOGGER = stlogger.getLogger()
+CONFIG = stconfig.getParser()
 
 try:
-    tradeID = [l.strip() for l in config.get('Config', 'tradeID').split(',')]
+    TRADEID = [l.strip() for l in CONFIG.get('Config', 'tradeID').split(',')]
 except(NoOptionError, NoSectionError):
-    tradeID = [ 'EXAMPLEID1', 'EXAMPLEID2' ]
-    config.set('Config', 'tradeID', "EXAMPLEID1, EXAMPLEID2")
-    logger.warn("No tradeID found in the config file. Using EXAMPLEID's.")
-    logger.warn("Please, edit the auto-generated config file after this run.")
+    TRADEID = [ 'EXAMPLEID1', 'EXAMPLEID2' ]
+    CONFIG.set('Config', 'tradeID', "EXAMPLEID1, EXAMPLEID2")
+    LOGGER.warn("No tradeID found in the config file. Using EXAMPLEID's.")
+    LOGGER.warn("Please, edit the auto-generated config file after this run.")
 
 def signal_handler(signal, frame):
     stlogger.cfixer()
-    logger.info("Exiting...")
+    LOGGER.info("Exiting...")
     exit(0)
+
+def bumpTrade(id, response):
+    try:
+        page = response.content
+    except AttributeError:
+        LOGGER.error("tradeID %s is incorrect. Ignoring.", id)
+        LOGGER.error("Please, update your config file at %s", stconfig.getPath())
+        return
+
+    url = response.url
+    title = os.path.basename(url).replace('-', ' ')
+    form = bs(page, 'html.parser').find('form')
+    data = dict([ (inputs['name'], inputs['value']) for inputs in form.findAll('input') ])
+    postData = {'xsrf_token': data['xsrf_token'], 'do': 'bump_trade'}
+
+    try:
+        ret = stnetwork.tryConnect(url, data=postData).content
+        if 'Please wait' in ret.decode('utf-8'):
+            LOGGER.warning('%s (%s) Already bumped. Please wait. %12s', id, title, '')
+        else:
+            tradePage = stnetwork.tryConnect('http://www.steamgifts.com/trades').content
+            if id in tradePage.decode('utf-8'):
+                LOGGER.info("%s (%s) Bumped! %12s", id, title, '')
+            else:
+                raise Exception
+    except Exception:
+        LOGGER.error("An error occured for ID %s %12s", id, '')
+        LOGGER.error("Please, check if it's a valid ID.")
+        LOGGER.debug('', exc_info=True)
 
 if __name__ == "__main__":
     signal(SIGINT, signal_handler)
 
     while True:
-        data = {}
+        LOGGER.info("Bumping now! %s", datetime.now())
 
-        logger.info("Bumping now! %s", datetime.now())
-
-        for id in tradeID:
+        for id in TRADEID:
             stlogger.cmsg("Connecting to the server", end='\r')
             url = "http://www.steamgifts.com/trade/"+id+'/'
-            response = tryConnect(configFile, url)
+            response = stnetwork.tryConnect(url)
 
-            try:
-                page = response.content
-            except AttributeError:
-                logger.error("tradeID %s is incorrect. Ignoring.", id)
-                logger.error("Please, update your config file at %s", get_config_path(configFile))
-                continue
+            bumpTrade(id, response)
 
-            url = response.url
-            title = os.path.basename(url).replace('-', ' ')
-
-            try:
-                form = bs(page, 'html.parser').find('form')
-                for inputs in form.findAll('input'):
-                    data.update({inputs['name']:inputs['value']})
-
-                postData = {'xsrf_token': data['xsrf_token'], 'do': 'bump_trade'}
-                ret = tryConnect(configFile, url, data=postData).content
-                if 'Please wait' in ret.decode('utf-8'):
-                    logger.warning('%s (%s) Already bumped. Please wait. %12s', id, title, '')
-                else:
-                    tradePage = tryConnect(configFile, 'http://www.steamgifts.com/trades').content
-                    if id in tradePage.decode('utf-8'):
-                        logger.info("%s (%s) Bumped! %12s", id, title, '')
-                    else:
-                        raise Exception
-            except Exception:
-                logger.error("An error occured for ID %s %12s", id, '')
-                logger.error("Please, check if it's a valid ID.")
-                logger.debug('', exc_info=True)
-
-        randomstart = randint(config.getint('Config', 'minTime', fallback=3700), config.getint('Config', 'maxTime', fallback=4100))
+        randomstart = randint(CONFIG.getint('Config', 'minTime', fallback=3700), CONFIG.getint('Config', 'maxTime', fallback=4100))
         for i in range(0, randomstart):
             stlogger.cmsg("Waiting: {:4d} seconds".format(randomstart-i), end='\r')
             sleep(1)
