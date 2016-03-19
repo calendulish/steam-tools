@@ -17,151 +17,161 @@
 #
 
 import os
-import subprocess
+from subprocess import Popen, PIPE
 from time import sleep
 from signal import signal, SIGINT
 from configparser import NoOptionError, NoSectionError
 from bs4 import BeautifulSoup as bs
 
 from stlib import stlogger
-from stlib.stconfig import read_config
-from stlib.stnetwork import tryConnect
+from stlib import stconfig
+from stlib import stnetwork
 
-loggerFile = os.path.basename(__file__)[:-3]+'.log'
-configFile = os.path.basename(__file__)[:-3]+'.config'
+LOGGER = stlogger.getLogger()
+CONFIG = stconfig.getParser()
 
-logger = stlogger.init(loggerFile)
-config = read_config(configFile)
-
-sort = config.getboolean('Config', 'MostValuableFirst', fallback=True)
-icheck = config.getboolean('Debug', "IntegrityCheck", fallback=False)
-dryrun = config.getboolean('Debug', "DryRun", fallback=False)
+mostValuableFirst = CONFIG.getboolean('Config', 'MostValuableFirst', fallback=True)
+integrityCheck = CONFIG.getboolean('Debug', "IntegrityCheck", fallback=False)
+dryRun = CONFIG.getboolean('Debug', "DryRun", fallback=False)
 
 def signal_handler(signal, frame):
     stlogger.cfixer()
-    logger.info("Exiting...")
+    LOGGER.info("Exiting...")
     exit(0)
 
-if __name__ == "__main__":
-    signal(SIGINT, signal_handler)
+def getBadges():
+    fullPage = stnetwork.tryConnect(profile+"/badges/").content
+    html = bs(fullPage, 'html.parser')
+    badges = []
 
-    stlogger.cmsg("Searching for your username...", end='\r')
-    loginPage = tryConnect(configFile, 'http://store.steampowered.com/about/').content
-    username = bs(loginPage, 'html.parser').find('a', class_='username').text.strip()
-    profile = "http://steamcommunity.com/id/"+username
-    stlogger.cmsg("Hello {}!{:25s}".format(username, ''), end='\r')
-    stlogger.cfixer()
+    try:
+        pageCount = int(html.findAll('a', class_='pagelink')[-1].text)
+        LOGGER.debug("I found %d pages of badges", pageCount)
+        for currentPage in range(1, pageCount):
+            page = stnetwork.tryConnect(profile+"/badges/?p="+str(currentPage)).content
+            badges.append(bs(page, 'html.parser').findAll('div', class_='badge_title_row'))
+    except IndexError:
+        LOGGER.debug("I found only 1 pages of badges")
+        badges = html.findAll('div', class_='badge_title_row')
 
-    logger.info("Digging your badge list...")
-    fullPage = tryConnect(configFile, profile+"/badges/").content
-    pageCount = bs(fullPage, 'html.parser').findAll('a', class_='pagelink')
-    if pageCount:
-        logger.debug("I found %d pages of badges", pages[-1].text)
-        badges = []
-        for currentPage in range(1, int(pages[-1].text)):
-            page = tryConnect(configFile, profile+"/badges/?p="+str(currentPage)).content
-            badges += bs(page, 'html.parser').findAll('div', class_='badge_title_row')
-    else:
-        logger.debug("I found only 1 pages of badges")
-        badges = bs(fullPage, 'html.parser').findAll('div', class_='badge_title_row')
-
-    if not badges:
-        logger.critical("Something is very wrong! Please report with the log file")
-        logger.debug(fullPage)
-        exit(1)
-
-    logger.info("Getting badges info...")
-    badgeSet = {}
-    badgeSet['gameID'   ] = []
-    badgeSet['gameName' ] = []
-    badgeSet['cardCount'] = []
-    badgeSet['cardValue'] = []
+    badgeSet = {k: [] for k in ['gameID', 'gameName', 'cardCount', 'cardValue']}
     for badge in badges:
         progress = badge.find('span', class_='progress_info_bold')
         title = badge.find('div', class_='badge_title')
         title.span.unwrap()
 
         if not progress or "No" in progress.text:
-            logger.debug("%s have no cards to drop. Ignoring.", title.text.split('\t\t\t\t\t\t\t\t\t', 2)[1])
-            continue
+            try:
+                badgeSet['gameID'].append(badge.find('a')['href'].split('_')[-3])
+            except TypeError:
+                # Ignore. It's an special badge (not from games/apps)
+                continue
+            badgeSet['cardCount'].append(0)
+        else:
+            badgeSet['cardCount'].append(int(progress.text.split(' ', 3)[0]))
+            badgeSet['gameID'].append(badge.find('a')['href'].split('/', 3)[3])
 
-        badgeSet['cardCount'].append(int(progress.text.split(' ', 3)[0]))
-        badgeSet['gameID'].append(badge.find('a')['href'].split('/', 3)[3])
         badgeSet['gameName'].append(title.text.split('\t\t\t\t\t\t\t\t\t', 2)[1])
 
-    if sort:
-        logger.info("Getting cards values...")
-        pricesSet = {}
-        pricesSet['game'] = []
-        pricesSet['avg'] = []
-        pricesPage = tryConnect(configFile, "http://www.steamcardexchange.net/index.php?badgeprices").content
-        for game in bs(pricesPage, 'html.parser').findAll('tr')[1:]:
-            pricesSet['game'].append(game.find('a').text)
-            cardCount = int(game.findAll('td')[1].text)
-            price = float(game.findAll('td')[2].text[1:])
-            pricesSet['avg'].append(price / cardCount)
+    return badgeSet
 
+def getValues():
+    priceSet = {k: [] for k in ['game', 'avg']}
+    pricesPage = stnetwork.tryConnect("http://www.steamcardexchange.net/index.php?badgeprices").content
+    for game in bs(pricesPage, 'html.parser').findAll('tr')[1:]:
+        priceSet['game'].append(game.find('a').text)
+        cardCount = int(game.findAll('td')[1].text)
+        cardPrice = float(game.findAll('td')[2].text[1:])
+        priceSet['avg'].append(cardPrice / cardCount)
+
+    return priceSet
+
+def updateCardCount(gameID):
+    logger.debug("Updating card count")
+
+    page = stnetwork.tryConnect(profile+"/gamecards/"+gameID).content
+    progress = bs(page, 'html.parser').find('span', class_="progress_info_bold")
+    if not progress or "No" in progress.text or dryRun:
+        return 0
+    else:
+        return int(progress.text.split(' ', 3)[0])
+
+if __name__ == "__main__":
+    signal(SIGINT, signal_handler)
+
+    stlogger.cmsg("Searching for your username...", end='\r')
+    loginPage = stnetwork.tryConnect('http://store.steampowered.com/about/').content
+    username = bs(loginPage, 'html.parser').find('a', class_='username').text.strip()
+    profile = "http://steamcommunity.com/id/"+username
+
+    stlogger.cmsg("Hello {}!{:25s}".format(username, ''), end='\r')
+    stlogger.cfixer()
+    LOGGER.info("Getting badges info...")
+    badgeSet = getBadges()
+
+    if mostValuableFirst:
+        LOGGER.info("Getting cards values...")
+        priceSet = getValues()
         for game in badgeSet['gameName']:
             try:
-                badgeSet['cardValue'].append(pricesSet['avg'][pricesSet['game'].index(game)])
+                badgeSet['cardValue'].append(priceSet['avg'][priceSet['game'].index(game)])
             except ValueError:
                 badgeSet['cardValue'].append(0)
     else:
         badgeSet['cardValue'] = [ 0 for _ in badgeSet['gameID'] ]
 
-    if icheck:
-        logger.debug("Checking consistency of dictionaries...")
+    if integrityCheck:
+        LOGGER.debug("Checking consistency of dictionaries...")
         rtest = [ len(badgeSet[i]) for i,v in badgeSet.items() ]
         if len(set(rtest)) == 1:
-            logger.debug("Looks good.")
+            LOGGER.debug("Looks good.")
         else:
-            logger.debug("Very strange: %s", rtest)
+            LOGGER.debug("Very strange: %s", rtest)
             exit(1)
 
-    if sort:
-        logger.info("Getting highest card value...")
-        if icheck: logger.debug("OLD: %s", badgeSet)
+    if mostValuableFirst:
+        LOGGER.info("Getting highest card value...")
+        if integrityCheck: LOGGER.debug("OLD: %s", badgeSet)
         order = sorted(range(0, len(badgeSet['cardValue'])), key=lambda key: badgeSet['cardValue'][key], reverse=True)
         for item, value in badgeSet.items():
             badgeSet[item] = [value[i] for i in order]
-        if icheck:
-            logger.debug("NEW: %s", badgeSet)
+        if integrityCheck:
+            LOGGER.debug("NEW: %s", badgeSet)
 
-    logger.info("Ready to start.")
+    LOGGER.info("Ready to start.")
     for index in range(0, len(badgeSet['gameID'])):
+        if badgeSet['cardCount'][index] < 1:
+            LOGGER.debug("%s have no cards to drop. Ignoring.", badgeSet['gameName'][index])
+            continue
+
         stlogger.cfixer()
-        logger.info("Starting game %s (%s)", badgeSet['gameName'][index], badgeSet['gameID'][index])
-        if not dryrun:
-            fakeApp = subprocess.Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        LOGGER.info("Starting game %s (%s)", badgeSet['gameName'][index], badgeSet['gameID'][index])
+        if not dryRun:
+            fakeApp = Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=PIPE, stderr=PIPE)
 
         while True:
             stlogger.cmsg("{:2d} cards drop remaining. Waiting... {:7s}".format(badgeSet['cardCount'][index], ' '), end='\r')
-            logger.debug("Waiting cards drop loop")
-            if icheck: logger.debug("Current: %s", [badgeSet[i][index] for i,v in badgeSet.items()])
-            for i in range(0, 30):
-                if not dryrun and fakeApp.poll():
+            LOGGER.debug("Waiting cards drop loop")
+            if integrityCheck: LOGGER.debug("Current: %s", [badgeSet[i][index] for i,v in badgeSet.items()])
+            for i in range(40):
+                if not dryRun and fakeApp.poll():
                     stlogger.cfixer()
-                    logger.critical(fakeApp.stderr.read().decode('utf-8'))
+                    LOGGER.critical(fakeApp.stderr.read().decode('utf-8'))
                     exit(1)
                 sleep(1)
 
             stlogger.cmsg("Checking if game have more cards drops...", end='\r')
-            logger.debug("Updating cards count")
-            if icheck: logger.debug("OLD: %d", badgeSet['cardCount'][index])
-            badge = tryConnect(configFile, profile+"/gamecards/"+badgeSet['gameID'][index]).content
-            progress = bs(badge, 'html.parser').find('span', class_="progress_info_bold")
-            if dryrun: progress = ''
-            if not progress or "No" in progress.text:
-                stlogger.cfixer()
-                logger.info("The game has no more cards to drop.")
-                break
-            else:
-                badgeSet['cardCount'][index] = int(progress.text.split(' ', 3)[0])
-                if icheck: logger.debug("NEW: %d", badgeSet['cardCount'][index])
+            badgeSet['cardCount'][index] = updateCardCount(badgeSet['gameID'][index])
 
-        logger.info("Closing %s", badgeSet['gameName'][index])
-        if not dryrun:
+            if badgeSet['cardCount'] < 1:
+                stlogger.cfixer()
+                LOGGER.info("%s have no cards to drop. Ignoring.", badgeSet['gameName'][index])
+                break
+
+        LOGGER.info("Closing %s", badgeSet['gameName'][index])
+
+        if not dryRun:
             fakeApp.terminate()
             fakeApp.wait()
 
-    logger.info("There's nothing else we can do. Leaving.")
+    LOGGER.info("There's nothing else we can do. Leaving.")

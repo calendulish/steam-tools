@@ -16,39 +16,40 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import os
+import os, sys
 from logging import getLogger
 from configparser import RawConfigParser
 
-logger = getLogger('root')
-config = RawConfigParser()
-config.optionxform=str
+LOGGER = getLogger('root')
+CONFIG = RawConfigParser()
+CONFIG.optionxform=str
 
-def get_config_path(fileName):
+def getPath():
     if os.name == 'nt':
-        xdg_dir = os.getenv('LOCALAPPDATA')
+        dataDir = os.getenv('LOCALAPPDATA')
     else:
-        xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
+        dataDir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
 
-    config_file = os.path.join(xdg_dir, 'steam-tools', fileName)
-    os.makedirs(os.path.dirname(config_file), exist_ok=True)
+    configFile = os.path.basename(sys.argv[0])[:-3]+'.config'
+    configPath = os.path.join(dataDir, 'steam-tools', configFile)
+    os.makedirs(os.path.dirname(configPath), exist_ok=True)
 
-    if os.path.isfile(fileName):
-        return fileName
+    if os.path.isfile(configFile):
+        return configFile
     else:
-        if not os.path.isfile(config_file):
-            logger.warn("No config file found.")
-            logger.warn("Creating a new at %s", config_file)
-            config.add_section('Config')
-            with open(config_file, 'w') as fp:
-                config.write(fp)
-            
-        return config_file
+        if not os.path.isfile(configPath):
+            LOGGER.warn("No config file found.")
+            LOGGER.warn("Creating a new at %s", configPath)
+            CONFIG.add_section('Config')
+            with open(configPath, 'w') as fp:
+                CONFIG.write(fp)
 
-def read_config(fileName):
-    config.read(get_config_path(fileName))
-    return config
+        return configPath
 
-def write_config(fileName):
-    with open(get_config_path(fileName), 'w') as fp:
-        config.write(fp)
+def getParser():
+    CONFIG.read(getPath())
+    return CONFIG
+
+def write():
+    with open(getPath(), 'w') as fp:
+        CONFIG.write(fp)

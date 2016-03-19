@@ -21,36 +21,36 @@ from logging import getLogger
 
 import requests
 
-from stlib.stconfig import read_config, write_config
-from stlib.stcookie import get_steam_cookies
+from stlib import stconfig
+from stlib import stcookie
 
-agent = {'user-agent': 'unknown/0.0.0'}
-logger = getLogger('root')
+AGENT = {'user-agent': 'unknown/0.0.0'}
+LOGGER = getLogger('root')
+CONFIG = stconfig.getParser()
+
 steamLoginPages = [
                     'https://steamcommunity.com/login/home/',
                     'https://store.steampowered.com//login/',
                 ]
 
-def tryConnect(config_file, url, data=False):
-    config = read_config(config_file)
-    autorecovery = False
-
+def tryConnect(url, data=False):
+    autoRecovery = False
     while True:
         try:
-            if config.getboolean('Debug', 'IntegrityCheck', fallback=False):
-                logger.debug("Current cookies: %s", config._sections['Cookies'])
+            if CONFIG.getboolean('Debug', 'IntegrityCheck', fallback=False):
+                LOGGER.debug("Current cookies: %s", CONFIG._sections['Cookies'])
 
             try:
-                if not len(config._sections['Cookies']):
+                if not len(CONFIG._sections['Cookies']):
                     raise KeyError
             except KeyError:
-                logger.debug("I found no cookies in the Cookies section.")
+                LOGGER.debug("I found no cookies in the Cookies section.")
                 raise requests.exceptions.TooManyRedirects
 
             if data:
-                response = requests.post(url, data=data, cookies=config._sections['Cookies'], headers=agent, timeout=10)
+                response = requests.post(url, data=data, cookies=CONFIG._sections['Cookies'], headers=AGENT, timeout=10)
             else:
-                response = requests.get(url, cookies=config._sections['Cookies'], headers=agent, timeout=10)
+                response = requests.get(url, cookies=CONFIG._sections['Cookies'], headers=AGENT, timeout=10)
 
             response.raise_for_status()
 
@@ -58,32 +58,32 @@ def tryConnect(config_file, url, data=False):
             if any(p in str(response.content) for p in steamLoginPages):
                 raise requests.exceptions.TooManyRedirects
 
-            if autorecovery:
-                logger.info("[WITH POWERS] Success!!!")
-                logger.info("POWERS... DESACTIVATE!")
+            if autoRecovery:
+                LOGGER.info("[WITH POWERS] Success!!!")
+                LOGGER.info("POWERS... DESACTIVATE!")
 
-            autorecovery = False
+            autoRecovery = False
             return response
         except requests.exceptions.TooManyRedirects:
-            if not autorecovery:
-                logger.error("Invalid or expired cookies.")
-                logger.info("POWERS... ACTIVATE!")
-                logger.info("[WITH POWERS] Trying to automagically recovery...")
-                config['Cookies'] = get_steam_cookies(config_file, url)
-                write_config(config_file)
-                autorecovery = True
+            if not autoRecovery:
+                LOGGER.error("Invalid or expired cookies.")
+                LOGGER.info("POWERS... ACTIVATE!")
+                LOGGER.info("[WITH POWERS] Trying to automagically recovery...")
+                CONFIG['Cookies'] = stcookie.getCookies(url)
+                stconfig.write()
+                autoRecovery = True
             else:
-                logger.critical("I cannot recover D:")
-                logger.critical("(Chrome/Chromium profile not found? Cookies not found?)")
-                logger.critical("Please, check your configuration and update your cookies.")
-                logger.debug('', exc_info=True)
+                LOGGER.critical("I cannot recover D:")
+                LOGGER.critical("(Chrome/Chromium profile not found? Cookies not found?)")
+                LOGGER.critical("Please, check your configuration and update your cookies.")
+                LOGGER.debug('', exc_info=True)
                 exit(1)
         except(requests.exceptions.HTTPError, requests.exceptions.RequestException):
             # Report to steamgifts-bump if the tradeID is incorrect"
             if "/trade/" in url: return ""
-            logger.error("The connection is refused or fails. Trying again...")
-            logger.debug('', exc_info=True)
+            LOGGER.error("The connection is refused or fails. Trying again...")
+            LOGGER.debug('', exc_info=True)
             sleep(3)
 
-    logger.critical("Cannot access the internet! Please, check your internet connection.")
+    LOGGER.critical("Cannot access the internet! Please, check your internet connection.")
     exit(1)

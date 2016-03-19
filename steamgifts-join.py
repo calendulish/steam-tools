@@ -24,129 +24,139 @@ from configparser import NoOptionError, NoSectionError
 from bs4 import BeautifulSoup as bs
 
 from stlib import stlogger
-from stlib.stconfig import read_config
-from stlib.stnetwork import tryConnect
+from stlib import stconfig
+from stlib import stnetwork
 
-loggerFile = os.path.basename(__file__)[:-3]+'.log'
-configFile = os.path.basename(__file__)[:-3]+'.config'
-
-logger = stlogger.init(loggerFile)
-config = read_config(configFile)
+LOGGER = stlogger.getLogger()
+CONFIG = stconfig.getParser()
 
 try:
-    typeList = [l.strip() for l in config.get('Config', 'typeList').split(',')]
+    TYPELIST = [l.strip() for l in CONFIG.get('Config', 'typeList').split(',')]
 except(NoOptionError, NoSectionError):
-    typeList = [ 'wishlist', 'main', 'new' ]
-    config.set('Config', 'typeList', "wishlist, main, new")
-    logger.warn("No typeList found in the config file.")
-    logger.warn("Using the default: wishlist, main, new. You can edit these values.")
+    TYPELIST = [ 'wishlist', 'main', 'new' ]
+    CONFIG.set('Config', 'typeList', "wishlist, main, new")
+    LOGGER.warn("No typeList found in the config file.")
+    LOGGER.warn("Using the default: wishlist, main, new. You can edit these values.")
 
 def signal_handler(signal, frame):
     stlogger.cfixer()
-    logger.info("Exiting...")
+    LOGGER.info("Exiting...")
     exit(0)
 
 def steamgifts_config():
-    logger.info("Initializing...")
+    LOGGER.info("Initializing...")
     data = {}
     sgconfigURL = "http://www.steamgifts.com/account/settings/giveaways"
-    sgconfig = tryConnect(configFile, sgconfigURL).content
+    sgconfig = stnetwork.tryConnect(sgconfigURL).content
     form = bs(sgconfig, 'html.parser').find('form')
     for inputs in form.findAll('input'):
         data.update({inputs['name']:inputs['value']})
-    logger.debug("configData(page): %s", data)
+    LOGGER.debug("configData(page): %s", data)
     configData = {
                 'xsrf_token': data['xsrf_token'],
                 'filter_giveaways_exist_in_account': 1,
                 'filter_giveaways_missing_base_game': 1,
                 'filter_giveaways_level': 1
                 }
-    logger.debug("configData(post): %s", configData)
-    tryConnect(configFile, sgconfigURL, data=configData)
+    LOGGER.debug("configData(post): %s", configData)
+    stnetwork.tryConnect(sgconfigURL, data=configData)
+
+def getGiveaways(page):
+    giveaways = []
+    container = bs(page, 'html.parser').find('div', class_='widget-container')
+    pinned = container.find('div', class_='pinned-giveaways__outer-wrap').extract()
+
+    if CONFIG.getboolean('Config', 'DeveloperGiveaways', fallback=True):
+        giveaways = pinned.findAll('div', class_='giveaway__row-outer-wrap')
+
+    giveaways += container.findAll('div', class_='giveaway__row-outer-wrap')
+
+    giveawaySet = {k: [] for k in ['Name', 'Query', 'Copies', 'Points', 'Level']}
+    for giveaway in giveaways:
+        if giveaway.find('div', class_='is-faded'): continue
+
+        giveawaySet['Name'].append(giveaway.find('a', class_='giveaway__heading__name').text)
+        giveawaySet['Query'].append(giveaway.find('a', class_='giveaway__heading__name')['href'])
+
+        gvHeader = giveaway.find('span', class_='giveaway__heading__thin')
+        if "Copies" in gvHeader.text:
+            LOGGER.debug("The giveaway has more than 1 copy. Counting and fixing gvHeader.")
+            giveawaySet['Copies'].append(int(''.join(filter(str.isdigit, gvHeader.text))))
+            gvHeader = gvHeader.findNext('span', class_='giveaway__heading__thin')
+        else:
+            giveawaySet['Copies'].append(1)
+
+        giveawaySet['Points'].append(int(''.join(filter(str.isdigit, gvHeader.text))))
+
+        try:
+            gameLevel = giveaway.find('div', class_='giveaway__column--contributor-level')
+            giveawaySet['Level'].append(int(''.join(filter(str.isdigit, gameLevel.text))))
+        except AttributeError:
+            giveawaySet['Level'].append(0)
+
+    return giveawaySet
 
 if __name__ == "__main__":
     signal(SIGINT, signal_handler)
     steamgifts_config()
 
     while True:
-        for type in typeList:
+        for type in TYPELIST:
             stlogger.cmsg("Connecting to the server", end='\r')
-            domain = "http://www.steamgifts.com/giveaways/search?type="
+            query = "http://www.steamgifts.com/giveaways/search?type="
             if type == 'main':
-                url = domain
+                url = query
             elif type == 'wishlist':
-                url = domain+'wishlist'
+                url = query+'wishlist'
             elif type == 'new':
-                url = domain+'new'
+                url = query+'new'
             else:
-                url = domain+'&q='+type
+                url = query+'&q='+type
 
-            page = tryConnect(configFile, url).content
+            page = stnetwork.tryConnect(url).content
+            points = int(bs(page, 'html.parser').find('span', class_="nav__points").text)
+            level = int(''.join(filter(str.isdigit, bs(page, 'html.parser').find('span', class_=None).text)))
+            giveawaySet = getGiveaways(page)
 
-            try:
-                giveawayList = []
-                myPoints = int(bs(page, 'html.parser').find('span', class_="nav__points").text)
-                myLevel = int(''.join(filter(str.isdigit, bs(page, 'html.parser').find('span', class_=None).text)))
+            for index in range(len(giveawaySet['Name'])):
+                if points == 0: break
+                if points >= giveawaySet['Points'][index]:
+                    data = {}
+                    gvpage = stnetwork.tryConnect('http://steamgifts.com'+giveawaySet['Query'][index]).content
+                    form = bs(gvpage, 'html.parser').find('form')
+                    for inputs in form.findAll('input'):
+                        data.update({inputs['name']:inputs['value']})
+                    LOGGER.debug("pageData: %s", data)
+                    formData = {'xsrf_token': data['xsrf_token'], 'do': 'entry_insert', 'code': data['code']}
+                    LOGGER.debug("formData: %s", formData)
+                    stnetwork.tryConnect('http://www.steamgifts.com/ajax.php', data=formData)
+                    points -= giveawaySet['Points'][index]
 
-                container = bs(page, 'html.parser').find('div', class_='widget-container')
-                for div in container.findAll('div', class_=None):
-                    if div.find('div', class_='giveaway__row-outer-wrap'):
-                        giveawayList.append(div)
+                    LOGGER.info("Spent %d points in the giveaway of %s (Copies: %d)",
+                                                                    giveawaySet['Points'][index],
+                                                                    giveawaySet['Name'][index],
+                                                                    giveawaySet['Copies'][index])
+                else:
+                    LOGGER.debug("Ignoring %s bacause the account don't have the requirements to enter.", giveawaySet['Name'][index])
 
-                try:
-                    giveawayList[1]
-                except IndexError:
-                    logger.debug("No giveaways found at %s", url)
-                    continue
+                LOGGER.debug("C(%d) L(%d) ML(%d) P(%d) MP(%d) Q(%s)",
+                                                       giveawaySet['Copies'][index],
+                                                       giveawaySet['Level'][index],
+                                                       level,
+                                                       giveawaySet['Points'][index],
+                                                       points,
+                                                       giveawaySet['Query'][index])
 
-                for giveaway in giveawayList[1].findAll('div', class_='giveaway__row-outer-wrap'):
-                    if myPoints == 0:
-                        break
+            #except Exception:
+            #LOGGER.error("An error occured for url %s", url)
+            #LOGGER.error("Please, check if it's a valid url.")
+            #LOGGER.debug('', exc_info=True)
 
-                    gameName = giveaway.find('a', class_='giveaway__heading__name').text
-                    gameQuery = giveaway.find('a', class_='giveaway__heading__name')['href']
-                    gvHeader = giveaway.find('span', class_='giveaway__heading__thin')
+        LOGGER.debug("Remaining points: %d", points)
 
-                    if "Copies" in gvHeader.text:
-                        logger.debug("The giveaway has more than 1 copy. Counting and fixing gvHeader.")
-                        gameCopies = int(''.join(filter(str.isdigit, gvHeader.text)))
-                        gvHeader = gvHeader.findNext('span', class_='giveaway__heading__thin')
-                    else:
-                        gameCopies = 1
+        randomstart = randint(CONFIG.getint('Config', 'minTime', fallback=7000),
+                              CONFIG.getint('Config', 'maxTime', fallback=7300))
 
-                    gamePoints = int(''.join(filter(str.isdigit, gvHeader.text)))
-
-                    try:
-                        gameLevel = int(''.join(filter(str.isdigit, giveaway.find('div', class_='giveaway__column--contributor-level').text)))
-                    except AttributeError:
-                        gameLevel = 0
-
-                    # Check for points, and if we already enter.
-                    if myPoints >= gamePoints and not giveaway.find('div', class_='is-faded'):
-                        data = {}
-                        gvpage = tryConnect(configFile, "http://steamgifts.com"+gameQuery).content
-                        form = bs(gvpage, 'html.parser').find('form')
-                        for inputs in form.findAll('input'):
-                            data.update({inputs['name']:inputs['value']})
-                        logger.debug("pageData: %s", data)
-                        formData = {'xsrf_token': data['xsrf_token'], 'do': 'entry_insert', 'code': data['code']}
-                        logger.debug("formData: %s", formData)
-                        tryConnect(configFile, "http://www.steamgifts.com/ajax.php", data=formData)
-                        myPoints -= gamePoints
-
-                        logger.info("Spent %d points in the giveaway of %s (Copies: %d)", gamePoints, gameName, gameCopies)
-                    else:
-                        logger.debug("Ignoring %s bacause the account don't have the requirements to enter.", gameName)
-
-                    logger.debug("C(%d) L(%d) ML(%d) P(%d) MP(%d) Q(%s)", gameCopies, gameLevel, myLevel, gamePoints, myPoints, gameQuery)
-
-            except Exception:
-                logger.error("An error occured for url %s", url)
-                logger.error("Please, check if it's a valid url.")
-                logger.debug('', exc_info=True)
-
-        logger.debug("Remaining points: %d", myPoints)
-        randomstart = randint(config.getint('Config', 'minTime', fallback=7000), config.getint('Config', 'maxTime', fallback=7300))
         for i in range(0, randomstart):
             stlogger.cmsg("Waiting: {:4d} seconds {:5}".format(randomstart-i, ''), end='\r')
             sleep(1)

@@ -32,19 +32,20 @@ def cfixer():
 def cmsg(*objs, sep='', end='\n', out=sys.stdout):
     print(*objs, sep=sep, end=end, file=encoder(out.buffer), flush=True)
 
-def init(fileName):
+def getLogger():
     if os.name == 'nt':
-        xdg_dir = os.getenv('LOCALAPPDATA')
+        dataDir = os.getenv('LOCALAPPDATA')
     else:
-        xdg_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
+        dataDir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
 
-    path = os.path.join(xdg_dir, 'steam-tools')
-    os.makedirs(path, exist_ok=True)
+    logFile = os.path.basename(sys.argv[0])[:-3]+'.log'
+    logPath = os.path.join(dataDir, 'steam-tools')
+    os.makedirs(logPath, exist_ok=True)
 
     logger = logging.getLogger("root")
     logger.setLevel(logging.DEBUG)
 
-    file = logging.handlers.RotatingFileHandler(os.path.join(path, fileName), backupCount=1, encoding='utf-8')
+    file = logging.handlers.RotatingFileHandler(os.path.join(logPath, logFile), backupCount=1, encoding='utf-8')
     file.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     file.setLevel(logging.DEBUG)
     file.doRollover()
@@ -55,7 +56,7 @@ def init(fileName):
     console.setLevel(logging.INFO)
     logger.addHandler(console)
 
-    httpfile = logging.handlers.RotatingFileHandler(os.path.join(path, 'requests_'+fileName), backupCount=1, encoding='utf-8')
+    httpfile = logging.handlers.RotatingFileHandler(os.path.join(logPath, 'requests_'+logFile), backupCount=1, encoding='utf-8')
     httpfile.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     httpfile.setLevel(logging.DEBUG)
     httpfile.doRollover()
