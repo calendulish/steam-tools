@@ -104,7 +104,8 @@ if __name__ == "__main__":
     username = bs(loginPage, 'html.parser').find('a', class_='username').text.strip()
     profile = "http://steamcommunity.com/id/"+username
 
-    stlogger.cmsg("Hello {}!{:25s}".format(username, ''), end='\r')
+    stlogger.cfixer('\r')
+    stlogger.cmsg("Hello {}!".format(username))
     stlogger.cfixer()
     LOGGER.info("Getting badges info...")
     badgeSet = getBadges()
@@ -150,7 +151,7 @@ if __name__ == "__main__":
             fakeApp = Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=PIPE, stderr=PIPE)
 
         while True:
-            stlogger.cmsg("{:2d} cards drop remaining. Waiting... {:7s}".format(badgeSet['cardCount'][index], ' '), end='\r')
+            stlogger.cmsg("{:2d} cards drop remaining. Waiting...".format(badgeSet['cardCount'][index]), end='\r')
             LOGGER.debug("Waiting cards drop loop")
             if integrityCheck: LOGGER.debug("Current: %s", [badgeSet[i][index] for i,v in badgeSet.items()])
             for i in range(40):
@@ -159,7 +160,7 @@ if __name__ == "__main__":
                     LOGGER.critical(fakeApp.stderr.read().decode('utf-8'))
                     exit(1)
                 sleep(1)
-
+            stlogger.cfixer('\r')
             stlogger.cmsg("Checking if game have more cards drops...", end='\r')
             badgeSet['cardCount'][index] = updateCardCount(badgeSet['gameID'][index])
 
@@ -167,6 +168,7 @@ if __name__ == "__main__":
                 stlogger.cfixer()
                 LOGGER.info("%s have no cards to drop. Ignoring.", badgeSet['gameName'][index])
                 break
+            stlogger.cfixer('\r')
 
         LOGGER.info("Closing %s", badgeSet['gameName'][index])
 

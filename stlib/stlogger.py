@@ -21,13 +21,15 @@ import codecs
 import locale
 import logging
 import logging.handlers
+from shutil import get_terminal_size
 
 def encoder(buffer, error='replace'):
     writer = codecs.getwriter(locale.getpreferredencoding())
     return writer(buffer, error)
 
-def cfixer():
-    print('', flush=True)
+def cfixer(end='\n'):
+    tsize = get_terminal_size()[0]
+    print(('{:'+str(tsize-1)+'s}').format(''), end=end, flush=True)
 
 def cmsg(*objs, sep='', end='\n', out=sys.stdout):
     print(*objs, sep=sep, end=end, file=encoder(out.buffer), flush=True)

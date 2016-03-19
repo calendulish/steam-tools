@@ -157,6 +157,7 @@ if __name__ == "__main__":
         randomstart = randint(CONFIG.getint('Config', 'minTime', fallback=7000),
                               CONFIG.getint('Config', 'maxTime', fallback=7300))
 
+        stlogger.cfixer('\r')
         for i in range(0, randomstart):
-            stlogger.cmsg("Waiting: {:4d} seconds {:5}".format(randomstart-i, ''), end='\r')
+            stlogger.cmsg("Waiting: {:4d} seconds".format(randomstart-i), end='\r')
             sleep(1)

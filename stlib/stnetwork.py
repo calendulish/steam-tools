@@ -87,6 +87,7 @@ def tryConnect(url, data=False):
             attempt += 1
             LOGGER.debug('', exc_info=True)
             sleep(3)
+            stlogger.cfixer('\r')
 
     LOGGER.critical("Cannot access the internet! Please, check your internet connection.")
     exit(1)

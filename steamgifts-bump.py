@@ -60,16 +60,18 @@ def bumpTrade(id, response):
 
     try:
         ret = stnetwork.tryConnect(url, data=postData).content
+        stlogger.cfixer('\r')
         if 'Please wait' in ret.decode('utf-8'):
-            LOGGER.warning('%s (%s) Already bumped. Please wait. %12s', id, title, '')
+            LOGGER.warning('%s (%s) Already bumped. Please wait.', id, title)
         else:
             tradePage = stnetwork.tryConnect('http://www.steamgifts.com/trades').content
             if id in tradePage.decode('utf-8'):
-                LOGGER.info("%s (%s) Bumped! %12s", id, title, '')
+                LOGGER.info("%s (%s) Bumped!", id, title)
             else:
                 raise Exception
     except Exception:
-        LOGGER.error("An error occured for ID %s %12s", id, '')
+        stlogger.cfixer('\r')
+        LOGGER.error("An error occured for ID %s", id)
         LOGGER.error("Please, check if it's a valid ID.")
         LOGGER.debug('', exc_info=True)
 
