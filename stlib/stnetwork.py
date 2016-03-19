@@ -23,6 +23,7 @@ import requests
 
 from stlib import stconfig
 from stlib import stcookie
+from stlib import stlogger
 
 AGENT = {'user-agent': 'unknown/0.0.0'}
 LOGGER = getLogger('root')
@@ -35,6 +36,7 @@ steamLoginPages = [
 
 def tryConnect(url, data=False):
     autoRecovery = False
+    attempt = 1
     while True:
         try:
             if CONFIG.getboolean('Debug', 'IntegrityCheck', fallback=False):
@@ -81,7 +83,8 @@ def tryConnect(url, data=False):
         except(requests.exceptions.HTTPError, requests.exceptions.RequestException):
             # Report to steamgifts-bump if the tradeID is incorrect"
             if "/trade/" in url: return ""
-            LOGGER.error("The connection is refused or fails. Trying again...")
+            stlogger.cmsg("The connection is refused or fails. Trying again... ({} attempt)".format(attempt), end='\r')
+            attempt += 1
             LOGGER.debug('', exc_info=True)
             sleep(3)
 
