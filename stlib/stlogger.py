@@ -40,7 +40,7 @@ def getLogger():
     else:
         dataDir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
 
-    logFile = os.path.basename(sys.argv[0])[:-3]+'.log'
+    logFile = os.path.splitext(os.path.basename(sys.argv[0]))[0]+'.log'
     logPath = os.path.join(dataDir, 'steam-tools')
     os.makedirs(logPath, exist_ok=True)
 

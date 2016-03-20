@@ -30,7 +30,7 @@ def getPath():
     else:
         dataDir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
 
-    configFile = os.path.basename(sys.argv[0])[:-3]+'.config'
+    configFile = os.path.splitext(os.path.basename(sys.argv[0]))[0]+'.config'
     configPath = os.path.join(dataDir, 'steam-tools', configFile)
     os.makedirs(os.path.dirname(configPath), exist_ok=True)
 
