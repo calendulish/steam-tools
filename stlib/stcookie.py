@@ -77,10 +77,11 @@ def getChromeProfile():
             chromeDir = os.path.join(dataDir, 'chromium')
 
     profiles = []
-    for dirName in sorted(os.listdir(chromeDir)):
-        if 'Profile' in dirName or 'Default' in dirName:
-            if os.path.isfile(os.path.join(chromeDir, dirName, 'Cookies')):
-                profiles.append(os.path.join(chromeDir, dirName))
+    if os.path.isdir(chromeDir):
+        for dirName in sorted(os.listdir(chromeDir)):
+            if 'Profile' in dirName or 'Default' in dirName:
+                if os.path.isfile(os.path.join(chromeDir, dirName, 'Cookies')):
+                    profiles.append(os.path.join(chromeDir, dirName))
 
     if not len(profiles):
         LOGGER.error("[WITH POWERS] I cannot find your Chrome/Chromium profile")
