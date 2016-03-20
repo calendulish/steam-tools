@@ -148,7 +148,10 @@ if __name__ == "__main__":
         stlogger.cfixer()
         LOGGER.info("Starting game %s (%s)", badgeSet['gameName'][index], badgeSet['gameID'][index])
         if not dryRun:
-            fakeApp = Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=PIPE, stderr=PIPE)
+            if os.path.isfile('fake-steam-app.exe'):
+                fakeApp = Popen(['fake-steam-app.exe', badgeSet['gameID'][index]], stdout=PIPE, stderr=PIPE)
+            else:
+                fakeApp = Popen(['python', 'fake-steam-app.py', badgeSet['gameID'][index]], stdout=PIPE, stderr=PIPE)
 
         while True:
             stlogger.cmsg("{:2d} cards drop remaining. Waiting...".format(badgeSet['cardCount'][index]), end='\r')
