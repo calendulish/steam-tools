@@ -63,7 +63,7 @@ def getBadges():
         if not progress or "No" in progress.text:
             try:
                 badgeSet['gameID'].append(badge.find('a')['href'].split('_')[-3])
-            except TypeError:
+            except(TypeError, IndexError):
                 # Ignore. It's an special badge (not from games/apps)
                 continue
             badgeSet['cardCount'].append(0)
@@ -87,7 +87,7 @@ def getValues():
     return priceSet
 
 def updateCardCount(gameID):
-    logger.debug("Updating card count")
+    LOGGER.debug("Updating card count")
 
     page = stnetwork.tryConnect(profile+"/gamecards/"+gameID).content
     progress = bs(page, 'html.parser').find('span', class_="progress_info_bold")
@@ -167,7 +167,7 @@ if __name__ == "__main__":
             stlogger.cmsg("Checking if game have more cards drops...", end='\r')
             badgeSet['cardCount'][index] = updateCardCount(badgeSet['gameID'][index])
 
-            if badgeSet['cardCount'] < 1:
+            if badgeSet['cardCount'][index] < 1:
                 stlogger.cfixer()
                 LOGGER.info("%s have no cards to drop. Ignoring.", badgeSet['gameName'][index])
                 break
