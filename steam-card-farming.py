@@ -87,7 +87,7 @@ def getValues():
     return priceSet
 
 def updateCardCount(gameID):
-    logger.debug("Updating card count")
+    LOGGER.debug("Updating card count")
 
     page = stnetwork.tryConnect(profile+"/gamecards/"+gameID).content
     progress = bs(page, 'html.parser').find('span', class_="progress_info_bold")
