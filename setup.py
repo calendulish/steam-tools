@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
+import os
 from distutils.core import setup
-import py2exe
+if os.name == 'nt':
+    import py2exe
 
 data_files=[('lib64', ['lib64/libsteam_api.dll']),
             ('lib32', ['lib32/libsteam_api.dll']),
