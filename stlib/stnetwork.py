@@ -16,6 +16,7 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
+import sys
 from time import sleep
 from logging import getLogger
 
@@ -89,7 +90,7 @@ def tryConnect(url, data=False):
                 LOGGER.critical("(Chrome/Chromium profile not found? Cookies not found?)")
                 LOGGER.critical("Please, check your configuration and update your cookies.")
                 LOGGER.debug('', exc_info=True)
-                exit(1)
+                sys.exit(1)
         except(requests.exceptions.HTTPError, requests.exceptions.RequestException):
             # Report to steamgifts-bump if the tradeID is incorrect"
             if "/trade/" in url: return ""
@@ -100,4 +101,4 @@ def tryConnect(url, data=False):
             stlogger.cfixer('\r')
 
     LOGGER.critical("Cannot access the internet! Please, check your internet connection.")
-    exit(1)
+    sys.exit(1)

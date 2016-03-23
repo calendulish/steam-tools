@@ -16,7 +16,7 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import os
+import os, sys
 from subprocess import Popen, PIPE
 from time import sleep
 from signal import signal, SIGINT
@@ -37,7 +37,7 @@ dryRun = CONFIG.getboolean('Debug', "DryRun", fallback=False)
 def signal_handler(signal, frame):
     stlogger.cfixer()
     LOGGER.info("Exiting...")
-    exit(0)
+    sys.exit(0)
 
 def getBadges():
     fullPage = stnetwork.tryConnect(profile+"/badges/").content
@@ -128,7 +128,7 @@ if __name__ == "__main__":
             LOGGER.debug("Looks good.")
         else:
             LOGGER.debug("Very strange: %s", rtest)
-            exit(1)
+            sys.exit(1)
 
     if mostValuableFirst:
         LOGGER.info("Getting highest card value...")
@@ -161,7 +161,7 @@ if __name__ == "__main__":
                 if not dryRun and fakeApp.poll():
                     stlogger.cfixer()
                     LOGGER.critical(fakeApp.stderr.read().decode('utf-8'))
-                    exit(1)
+                    sys.exit(1)
                 sleep(1)
             stlogger.cfixer('\r')
             stlogger.cmsg("Checking if game have more cards drops...", end='\r')

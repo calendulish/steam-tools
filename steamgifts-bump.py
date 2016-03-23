@@ -16,7 +16,7 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import os
+import os, sys
 from time import sleep
 from datetime import datetime
 from random import randint
@@ -42,7 +42,7 @@ except(NoOptionError, NoSectionError):
 def signal_handler(signal, frame):
     stlogger.cfixer()
     LOGGER.info("Exiting...")
-    exit(0)
+    sys.exit(0)
 
 def bumpTrade(id, response):
     try:
