@@ -19,7 +19,6 @@
 import os, sys
 from time import sleep
 from signal import signal, SIGINT
-
 from ctypes import CDLL
 
 if os.name == 'nt':
@@ -28,9 +27,21 @@ else:
     ext = '.so'
 
 if sys.maxsize > 2**32:
-    STEAM_API = CDLL('lib64/libsteam_api' + ext)
+    STEAM_API = 'lib64/libsteam_api' + ext
 else:
-    STEAM_API = CDLL('lib32/libsteam_api' + ext)
+    STEAM_API = 'lib32/libsteam_api' + ext
+
+if not os.path.isfile(STEAM_API):
+    libDir = '/share/steam-tools'
+    if os.path.isfile(os.path.join('/usr/local', libDir, STEAM_API)):
+        STEAM_API = os.path.join('/usr/local', libDir, STEAM_API)
+    elif os.path.isfile(os.path.join('/usr', libDir, STEAM_API)):
+        STEAM_API = os.path.join('/usr', libDir, STEAM_API)
+    else:
+        print("I cannot find the SteamAPI. Please, verify your installation.", file=sys.stderr)
+        sys.exit(1)
+
+STEAM_API = CDLL(STEAM_API)
 
 if len(sys.argv) < 2:
     print("Hello~wooooo. Where is the game ID?", file=sys.stderr)
