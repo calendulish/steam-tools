@@ -62,6 +62,7 @@ def getLogger():
     httpfile.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     httpfile.setLevel(logging.DEBUG)
     httpfile.doRollover()
+    logger.addHandler(httpfile)
 
     requests = logging.getLogger("requests.packages.urllib3")
     requests.setLevel(logging.DEBUG)
