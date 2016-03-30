@@ -26,6 +26,7 @@ from bs4 import BeautifulSoup as bs
 from stlib import stlogger
 from stlib import stconfig
 from stlib import stnetwork
+from stlib import stcygwin
 
 LOGGER = stlogger.getLogger()
 CONFIG = stconfig.getParser()

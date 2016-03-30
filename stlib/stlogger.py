@@ -70,3 +70,9 @@ def getLogger():
     requests.addHandler(httpfile)
 
     return logger
+
+def closeAll():
+    logger = logging.getLogger('root')
+    for handler in logger.handlers[:]:
+        handler.close()
+        logger.removeHandler(handler)
