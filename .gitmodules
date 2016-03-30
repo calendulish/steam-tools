@@ -1,0 +1,3 @@
+[submodule "winpty"]
+	path = winpty
+	url = https://github.com/rprichard/winpty
