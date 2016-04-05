@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Lara Maia <dev@lara.click> 2016
+# Lara Maia <dev@lara.click> 2015 ~ 2016
 #
 # The Steam Tools is free software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as

@@ -11,26 +11,15 @@ Some useful tools for use with steam client or compatible programs, websites.
 - **steam-card-farming:** Checks if you have cards remaining to drop. Automatically starts a fake app and waits until all cards drop.
 - **fake-steam-app.py:** Create a fake steam app with the gameID param.
 
-Dependencies
-------------
+How to install?
+---------------
 
-- Python 3+
-- Beautiful Soup 4+
-- Requests
-- Linux Only: PyCrypto
+You don't need. Download from the "Releases" tab and run.
 
-#### A little help for Windows 'users'
+How to build from source?
+-------------------------
 
-- Download the last python installer from Python website.
-- Install with the option **"Add to PATH"** enabled.
-- Open the cmd (win+R -> ```cmd``` -> Enter)
-- install the requests with the command ```pip install requests```
-- install the Beautiful Soup with the command ```pip install beautifulsoup4```
-- Go to the folder where the steam-tools files is located (with ```cd <folder>``` on cmd)
-- Copy the configurations files from example folder and edit them.
-- and finally run: ```python <script>```
-
-        I'll not provide binary or any facilitator for windows in matter of instalation.
+You don't need, but if you want... read the sources.
 ___________________________________________________________________________________________
 
 This is an work in progress. You can request new features.
