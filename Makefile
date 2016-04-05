@@ -1,4 +1,4 @@
- PYTHONPATH =
+PYTHONPATH =
 CHMOD = /bin/chmod
 MV = /bin/mv
 
@@ -45,9 +45,16 @@ winpty:
 		echo "Nothing to be done for $@"; \
 	else \
 		$(CHMOD) +x ./$@/configure; \
-		./$@/configure; \
+		./$@/configure 1>/dev/null; \
 		$(MV) -f config.mk $@/; \
-		$(MAKE) -C $@; \
+		if [ "$(FORCE32BITS)" == "1" ]; \
+		then \
+		    echo -e 'UNIX_CXX=i686-pc-cygwin-g++\nMINGW_CXX=i686-w64-mingw32-g++'; \
+		    $(MAKE) UNIX_CXX=i686-pc-cygwin-g++ MINGW_CXX=i686-w64-mingw32-g++ -C $@; \
+		else \
+		    echo -e 'UNIX_CXX=x86_64-pc-cygwin-g++\nMINGW_CXX=x86_64-w64-mingw32-g++'; \
+		    $(MAKE) -C $@; \
+	    fi; \
 	fi;
 
 steam-tools: winpty
@@ -55,7 +62,7 @@ steam-tools: winpty
 	then \
 		echo "Nothing to be done for $@"; \
 	else \
-		$(PYTHONPATH)/python.exe setup.py py2exe CMK; \
+		$(PYTHONPATH)/python.exe -u setup.py py2exe CMK FORCECYG; \
 	fi;
 
 clean:

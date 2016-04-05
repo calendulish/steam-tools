@@ -6,19 +6,46 @@ from distutils.core import setup
 from distutils.command.build import build
 from distutils.command.install_scripts import install_scripts
 
-if os.name == 'nt':
+CMK, FORCELIN, FORCEWIN, FORCECYG = [ 0 for _ in range(4) ]
+
+if 'CMK' in sys.argv:
+    CMK=1
+    sys.argv.remove('CMK')
+
+if 'FORCELIN' in sys.argv:
+    FORCELIN=1
+    sys.argv.remove('FORCELIN')
+elif 'FORCEWIN' in sys.argv:
+    FORCEWIN=1
+    sys.argv.remove('FORCEWIN')
+elif 'FORCECYG' in sys.argv:
+    FORCECYG=1
+    sys.argv.remove('FORCECYG')
+
+def what():
+    if os.name == 'nt':
+        if os.getenv('PWD'):
+            ret = 'cyg'
+        else:
+            ret = 'win'
+    else:
+        ret = 'lin'
+
+    if FORCELIN:
+        ret = 'lin'
+    elif FORCEWIN:
+        ret = 'win'
+    elif FORCECYG:
+        ret = 'cyg'
+
+    return ret
+
+if what() == 'win' or what() == 'cyg':
     import py2exe
 elif 'py2exe' in sys.argv:
     print("You cannot use py2exe without a Windows Python")
     print("Rerun with the correct python version")
     sys.exit(1)
-
-# Check if this is an auto-build
-if 'CMK' in sys.argv:
-    CMK=1
-    sys.argv.remove('CMK')
-else:
-    CMK=0
 
 class check_ext(install_scripts):
     def run(self):
@@ -29,7 +56,7 @@ class check_ext(install_scripts):
 
 class winpty(build):
     def run(self):
-        if os.name == 'nt' and os.getenv('PWD'):
+        if what() == 'cyg':
             if not CMK:
                 print("You are using Cygwin")
                 print("Use `make' command instead of setup.py")
@@ -51,7 +78,7 @@ console_programs=['fake-steam-app.py',
                   'steamgifts-join.py']
 
 def py2exe_options():
-    if os.name == 'nt':
+    if what() == 'win':
         options = {'py2exe': {'bundle_files': 3,
                               'optimize': 1,
                               'compressed': 0}}
@@ -61,7 +88,7 @@ def py2exe_options():
     else:
         return {}
 
-if os.name == 'nt' and os.getenv('PWD'):
+if what() == 'cyg':
     data_files.append(('winpty', winpty_files))
 
 setup(
