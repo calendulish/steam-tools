@@ -78,7 +78,7 @@ console_programs=['fake-steam-app.py',
                   'steamgifts-join.py']
 
 def py2exe_options():
-    if what() == 'win':
+    if what() == 'win' or what() == 'cyg':
         options = {'py2exe': {'bundle_files': 3,
                               'optimize': 1,
                               'compressed': 0}}
