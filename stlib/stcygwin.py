@@ -17,22 +17,34 @@
 #
 
 import os, sys
-from subprocess import check_call
+from subprocess import check_call, CalledProcessError
 from logging import getLogger
 
 from stlib import stlogger
 
 LOGGER = getLogger('root')
 
+def safeCall(call):
+    try:
+        return check_call(call)
+    except CalledProcessError as e:
+        sys.exit(e.returncode)
+    except FileNotFoundError as e:
+        LOGGER.critical("Something is missing in your system.")
+        LOGGER.critical("I cannot found some libraries needed for the steam-tools work")
+        LOGGER.critical("Please, check your installation/build")
+        LOGGER.critical(e)
+        sys.exit(1)
+
 if os.name == 'nt' and os.getenv('PWD'):
     from psutil import Process
     if Process(os.getppid()).parent().name() != 'console.exe':
-        if os.path.isfile('winpty/console.exe'):
-            stlogger.closeAll()
-            ret = check_call(['winpty/console.exe', sys.executable, sys.argv[0]])
-        else:
-            LOGGER.critical("I cannot find some libraries needed for the steam-tools work")
-            LOGGER.critical("Please, check your installation/build")
-            sys.exit(1)
+        stlogger.closeAll()
+        wrapper = [ 'winpty/console.exe' ]
+        wrapperParams = [ sys.executable ]
 
+        if sys.executable != sys.argv[0]:
+            wrapperParams += [ sys.argv[0] ]
+
+        ret = safeCall(wrapper+wrapperParams)
         sys.exit(ret)
