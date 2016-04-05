@@ -40,5 +40,11 @@ if os.name == 'nt' and os.getenv('PWD'):
     from psutil import Process
     if Process(os.getppid()).parent().name() != 'console.exe':
         stlogger.closeAll()
-        ret = safeCall(['winpty/console.exe', sys.executable, sys.argv[0]])
+        wrapper = [ 'winpty/console.exe' ]
+        wrapperParams = [ sys.executable ]
+
+        if sys.executable != sys.argv[0]:
+            wrapperParams += [ sys.argv[0] ]
+
+        ret = safeCall(wrapper+wrapperParams)
         sys.exit(ret)
