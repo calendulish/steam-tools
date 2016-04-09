@@ -128,8 +128,12 @@ if __name__ == "__main__":
                     for inputs in form.findAll('input'):
                         data.update({inputs['name']:inputs['value']})
                     LOGGER.debug("pageData: %s", data)
-                    formData = {'xsrf_token': data['xsrf_token'], 'do': 'entry_insert', 'code': data['code']}
-                    LOGGER.debug("formData: %s", formData)
+                    try:
+                        formData = {'xsrf_token': data['xsrf_token'], 'do': 'entry_insert', 'code': data['code']}
+                        LOGGER.debug("formData: %s", formData)
+                    except KeyError:
+                        LOGGER.debug("%s has expired. Ignoring.", giveawaySet['Name'][index])
+                        continue
                     stnetwork.tryConnect('http://www.steamgifts.com/ajax.php', data=formData)
                     points -= giveawaySet['Points'][index]
 
