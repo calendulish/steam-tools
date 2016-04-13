@@ -21,7 +21,6 @@ from time import sleep
 from logging import getLogger
 
 import requests
-requests.packages.urllib3.disable_warnings()
 
 from stlib import stconfig
 from stlib import stcookie
