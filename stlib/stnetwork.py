@@ -87,7 +87,7 @@ def tryConnect(url, data=False):
                 autoRecovery = True
             else:
                 LOGGER.critical("I cannot recover D:")
-                LOGGER.critical("(Chrome/Chromium profile not found? Cookies not found?)")
+                LOGGER.critical("(Cookies not found? Chrome/Chromium profile not found?)")
                 LOGGER.critical("Please, check your configuration and update your cookies.")
                 LOGGER.debug('', exc_info=True)
                 sys.exit(1)
