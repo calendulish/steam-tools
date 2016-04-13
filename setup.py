@@ -57,7 +57,11 @@ def what():
     return ret
 
 if what() == 'win' or what() == 'cyg':
+    import atexit
+    import textwrap
     import py2exe
+    import requests.certs
+    from compileall import compile_file
 elif 'py2exe' in sys.argv:
     print("You cannot use py2exe without a Windows Python")
     print("Rerun with the correct python version")
@@ -104,8 +108,37 @@ def py2exe_options():
     else:
         return {}
 
-if what() == 'cyg':
-    data_files.append(('winpty', winpty_files))
+if what() == 'cyg' or what() == 'win':
+    requests_path = os.path.dirname(requests.__file__)
+    cacert_file = os.path.join(requests_path, 'cacert.pem')
+    certs_wrapper = os.path.join(requests_path, 'certs.py')
+
+    if os.path.isfile(certs_wrapper+'.bak'):
+        os.remove(certs_wrapper+'.bak')
+
+    os.rename(certs_wrapper, certs_wrapper+'.bak')
+
+    def fallback():
+        os.remove(certs_wrapper)
+        os.rename(certs_wrapper+'.bak', certs_wrapper)
+        compile_file(certs_wrapper, force=True)
+
+    atexit.register(fallback)
+
+    with open(certs_wrapper, 'w') as f:
+        f.write(textwrap.dedent("""\
+            import os, sys
+
+            def where():
+                return os.path.join(os.path.dirname(sys.executable), 'cacert.pem')
+        """))
+
+    compile_file(certs_wrapper, force=True)
+
+    data_files.append(('', [ cacert_file ]))
+
+    if what() == 'cyg':
+        data_files.append(('winpty', winpty_files))
 
 setup(
     name='Steam Tools',
