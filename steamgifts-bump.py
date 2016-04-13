@@ -62,7 +62,7 @@ def bumpTrade(id, response):
     try:
         ret = stnetwork.tryConnect(url, data=postData).content
         stlogger.cfixer('\r')
-        if 'Please wait' in ret.decode('utf-8'):
+        if 'Please wait another' in ret.decode('utf-8'):
             LOGGER.warning('%s (%s) Already bumped. Please wait.', id, title)
         else:
             tradePage = stnetwork.tryConnect('http://www.steamgifts.com/trades').content
