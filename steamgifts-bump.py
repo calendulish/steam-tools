@@ -65,7 +65,7 @@ def bumpTrade(id, response):
         if 'Please wait another' in ret.decode('utf-8'):
             LOGGER.warning('%s (%s) Already bumped. Please wait.', id, title)
         else:
-            tradePage = stnetwork.tryConnect('http://www.steamgifts.com/trades').content
+            tradePage = stnetwork.tryConnect('https://www.steamgifts.com/trades').content
             if id in tradePage.decode('utf-8'):
                 LOGGER.info("%s (%s) Bumped!", id, title)
             else:
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
         for id in TRADEID:
             stlogger.cmsg("Connecting to the server", end='\r')
-            url = "http://www.steamgifts.com/trade/"+id+'/'
+            url = "https://www.steamgifts.com/trade/"+id+'/'
             response = stnetwork.tryConnect(url)
 
             bumpTrade(id, response)

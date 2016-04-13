@@ -47,7 +47,7 @@ def signal_handler(signal, frame):
 def steamgifts_config():
     LOGGER.info("Initializing...")
     data = {}
-    sgconfigURL = "http://www.steamgifts.com/account/settings/giveaways"
+    sgconfigURL = "https://www.steamgifts.com/account/settings/giveaways"
     sgconfig = stnetwork.tryConnect(sgconfigURL).content
     form = bs(sgconfig, 'html.parser').find('form')
     for inputs in form.findAll('input'):
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     while True:
         for type in TYPELIST:
             stlogger.cmsg("Connecting to the server", end='\r')
-            query = "http://www.steamgifts.com/giveaways/search?type="
+            query = "https://www.steamgifts.com/giveaways/search?type="
             if type == 'main':
                 url = query
             elif type == 'wishlist':
@@ -123,7 +123,7 @@ if __name__ == "__main__":
                 if points == 0: break
                 if points >= giveawaySet['Points'][index]:
                     data = {}
-                    gvpage = stnetwork.tryConnect('http://steamgifts.com'+giveawaySet['Query'][index]).content
+                    gvpage = stnetwork.tryConnect('https://steamgifts.com'+giveawaySet['Query'][index]).content
                     form = bs(gvpage, 'html.parser').find('form')
                     for inputs in form.findAll('input'):
                         data.update({inputs['name']:inputs['value']})
@@ -134,7 +134,7 @@ if __name__ == "__main__":
                     except KeyError:
                         LOGGER.debug("%s has expired. Ignoring.", giveawaySet['Name'][index])
                         continue
-                    stnetwork.tryConnect('http://www.steamgifts.com/ajax.php', data=formData)
+                    stnetwork.tryConnect('https://www.steamgifts.com/ajax.php', data=formData)
                     points -= giveawaySet['Points'][index]
 
                     LOGGER.info("Spent %d points in the giveaway of %s (Copies: %d)",
