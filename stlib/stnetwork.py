@@ -51,18 +51,9 @@ def tryConnect(url, data=False):
                 raise requests.exceptions.TooManyRedirects
 
             if data:
-                response = requests.post(url,
-                                         data=data,
-                                         cookies=CONFIG._sections['Cookies'],
-                                         headers=AGENT,
-                                         timeout=10,
-                                         verify=False)
+                response = requests.post(url, data=data, cookies=CONFIG._sections['Cookies'], headers=AGENT, timeout=10)
             else:
-                response = requests.get(url,
-                                        cookies=CONFIG._sections['Cookies'],
-                                        headers=AGENT,
-                                        timeout=10,
-                                        verify=False)
+                response = requests.get(url, cookies=CONFIG._sections['Cookies'], headers=AGENT, timeout=10)
 
             response.raise_for_status()
 
