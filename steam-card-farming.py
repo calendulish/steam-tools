@@ -40,7 +40,7 @@ def signal_handler(signal, frame):
     LOGGER.info("Exiting...")
     sys.exit(0)
 
-def getBadges():
+def getBadges(profile):
     fullPage = stnetwork.tryConnect(profile+"/badges/").content
     html = bs(fullPage, 'html.parser')
     badges = []
@@ -87,7 +87,7 @@ def getValues():
 
     return priceSet
 
-def updateCardCount(gameID):
+def updateCardCount(profile, gameID):
     LOGGER.debug("Updating card count")
 
     page = stnetwork.tryConnect(profile+"/gamecards/"+gameID).content
@@ -101,15 +101,15 @@ if __name__ == "__main__":
     signal(SIGINT, signal_handler)
 
     stlogger.cmsg("Searching for your username...", end='\r')
-    loginPage = stnetwork.tryConnect('http://store.steampowered.com/about/').content
+    loginPage = stnetwork.tryConnect('https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about').content
     username = bs(loginPage, 'html.parser').find('a', class_='username').text.strip()
-    profile = "http://steamcommunity.com/id/"+username
+    profile = "https://steamcommunity.com/login/checkstoredlogin/?redirectURL=id/"+username
 
     stlogger.cfixer('\r')
     stlogger.cmsg("Hello {}!".format(username))
     stlogger.cfixer()
     LOGGER.info("Getting badges info...")
-    badgeSet = getBadges()
+    badgeSet = getBadges(profile)
 
     if mostValuableFirst:
         LOGGER.info("Getting cards values...")
@@ -166,11 +166,11 @@ if __name__ == "__main__":
                 sleep(1)
             stlogger.cfixer('\r')
             stlogger.cmsg("Checking if game have more cards drops...", end='\r')
-            badgeSet['cardCount'][index] = updateCardCount(badgeSet['gameID'][index])
+            badgeSet['cardCount'][index] = updateCardCount(profile, badgeSet['gameID'][index])
 
             if badgeSet['cardCount'][index] < 1:
-                stlogger.cfixer()
-                LOGGER.info("%s have no cards to drop. Ignoring.", badgeSet['gameName'][index])
+                stlogger.cfixer('\r')
+                LOGGER.info("No more cards to drop.")
                 break
             stlogger.cfixer('\r')
 
