@@ -90,12 +90,24 @@ def getValues():
 def updateCardCount(profile, gameID):
     LOGGER.debug("Updating card count")
 
-    page = stnetwork.tryConnect(profile+"/gamecards/"+gameID).content
-    progress = bs(page, 'html.parser').find('span', class_="progress_info_bold")
-    if not progress or "No" in progress.text or dryRun:
-        return 0
-    else:
-        return int(progress.text.split(' ', 3)[0])
+    for i in range(5):
+        page = stnetwork.tryConnect(profile+"/gamecards/"+gameID).content
+        pageData = bs(page, 'html.parser')
+        stats = pageData.find('div', class_="badge_title_stats_drops")
+
+        if stats:
+            progress = stats.find('span', class_="progress_info_bold")
+            if not progress or "No" in progress.text or dryRun:
+                return 0
+            else:
+                return int(progress.text.split(' ', 3)[0])
+        else:
+            LOGGER.debug("Something is wrong with the page, trying again")
+            sleep(3)
+
+    LOGGER.error("I cannot find the progress info for this badge. (Connection problem?)")
+    LOGGER.error("I'll jump to the next this time and try again later.")
+    return 0
 
 if __name__ == "__main__":
     signal(SIGINT, signal_handler)
