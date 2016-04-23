@@ -35,7 +35,7 @@ steamLoginPages = [
                     'https://store.steampowered.com//login/',
                 ]
 
-def tryConnect(url, data=False):
+def tryConnect(url, data=False, headers=AGENT):
     autoRecovery = False
     attempt = 1
     while True:
@@ -51,9 +51,9 @@ def tryConnect(url, data=False):
                 raise requests.exceptions.TooManyRedirects
 
             if data:
-                response = requests.post(url, data=data, cookies=CONFIG._sections['Cookies'], headers=AGENT, timeout=10)
+                response = requests.post(url, data=data, cookies=CONFIG._sections['Cookies'], headers=headers, timeout=10)
             else:
-                response = requests.get(url, cookies=CONFIG._sections['Cookies'], headers=AGENT, timeout=10)
+                response = requests.get(url, cookies=CONFIG._sections['Cookies'], headers=headers, timeout=10)
 
             response.raise_for_status()
 
