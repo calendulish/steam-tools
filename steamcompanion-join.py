@@ -76,9 +76,9 @@ def getGiveaways(page):
         giveawaySet['Name'].append(gvName)
 
         try:
-            giveawaySet['Points'].append(int(infoArray[0][1:].split('(')[1][:-2]))
+            giveawaySet['Points'].append(int(infoArray[0][1:].split('(')[-1][:-2]))
         except:
-            giveawaySet['Points'].append(int(infoArray[1][1:].split('(')[1][:-2]))
+            giveawaySet['Points'].append(int(infoArray[1][1:].split('(')[-1][:-2]))
         giveawaySet['Query'].append(giveaway['href'])
 
         # STUB: gameLevel ?
