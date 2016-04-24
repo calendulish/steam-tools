@@ -85,8 +85,10 @@ class winpty(build):
 
         build.run(self)
 
-data_files=[('lib64', ['lib64/libsteam_api.dll']),
-            ('lib32', ['lib32/libsteam_api.dll'])]
+data_files=[('lib64', ['lib64/libsteam_api.dll',
+                       'lib64/libsteam_api.so']),
+            ('lib32', ['lib32/libsteam_api.dll',
+                       'lib32/libsteam_api.so'])]
 
 winpty_files = [ 'winpty/build/console.exe',
                  'winpty/build/winpty.dll',

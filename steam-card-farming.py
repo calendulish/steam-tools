@@ -109,6 +109,19 @@ def updateCardCount(profile, gameID):
     LOGGER.error("I'll jump to the next this time and try again later.")
     return 0
 
+def findFakeSteamApp():
+    paths = os.path.dirname(os.path.abspath(sys.argv[0]))+os.pathsep+os.environ['PATH']
+
+    for path in paths.split(os.pathsep):
+        for ext in [ '', '.exe', '.py' ]:
+            fullPath = os.path.join(path, 'fake-steam-app'+ext)
+
+            if os.path.isfile(fullPath):
+                return fullPath
+
+    LOGGER.critical("I cannot find the fake-steam-app. Please, verify your installation.")
+    sys.exit(1)
+
 if __name__ == "__main__":
     signal(SIGINT, signal_handler)
 
@@ -161,15 +174,13 @@ if __name__ == "__main__":
         stlogger.cfixer()
         LOGGER.info("Starting game %s (%s)", badgeSet['gameName'][index], badgeSet['gameID'][index])
         if not dryRun:
-            if os.path.isfile('fake-steam-app.exe'):
-                fakeAppExec = "fake-steam-app.exe"
-                fakeApp = Popen([fakeAppExec, badgeSet['gameID'][index]], stdout=PIPE, stderr=PIPE)
-            else:
-                if os.path.isfile('fake-steam-app.py'):
-                    fakeAppExec = "fake-steam-app.py"
-                else:
-                    fakeAppExec = "fake-steam-app"
-                fakeApp = Popen(['python', fakeAppExec, badgeSet['gameID'][index]], stdout=PIPE, stderr=PIPE)
+            fakeAppPath = findFakeSteamApp()
+            fakeAppExec = [fakeAppPath, badgeSet['gameID'][index]]
+
+            if fakeAppPath[-3:] != 'exe':
+                fakeAppExec = ['python']+fakeAppExec
+
+            fakeApp = Popen(fakeAppExec, stdout=PIPE, stderr=PIPE)
 
 
         while True:
