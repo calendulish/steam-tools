@@ -49,8 +49,9 @@ def getGiveaways(page):
     # STUB: pinned ?
     container = bs(page, 'html.parser').find('section', class_='col-2-3')
 
-    giveaways += container.findAll('a', class_='giveaway-links')
+    giveaways += container.findAll('div', class_='giveaway-links')
     giveawaySet = {k: [] for k in ['Name', 'Query', 'Copies', 'Points']}
+
     for giveaway in giveaways:
         try:
             # Already joined.
@@ -76,10 +77,11 @@ def getGiveaways(page):
         giveawaySet['Name'].append(gvName)
 
         try:
-            giveawaySet['Points'].append(int(infoArray[0][1:].split('(')[-1][:-2]))
+            giveawaySet['Points'].append(int(infoArray[0][1:].split('(')[-1][:-3]))
         except:
-            giveawaySet['Points'].append(int(infoArray[1][1:].split('(')[-1][:-2]))
-        giveawaySet['Query'].append(giveaway['href'])
+            giveawaySet['Points'].append(int(infoArray[1][1:].split('(')[-1][:-3]))
+
+        giveawaySet['Query'].append(giveaway['data-href'])
 
         # STUB: gameLevel ?
 
