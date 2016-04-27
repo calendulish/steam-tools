@@ -35,10 +35,7 @@ def cmsg(*objs, sep='', end='\n', out=sys.stdout):
     print(*objs, sep=sep, end=end, file=encoder(out.buffer), flush=True)
 
 def getLogger():
-    if os.name == 'nt':
-        dataDir = os.getenv('LOCALAPPDATA')
-    else:
-        dataDir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
+    dataDir = tempfile.gettempdir()
 
     logFile = os.path.splitext(os.path.basename(sys.argv[0]))[0]+'.log'
     logPath = os.path.join(dataDir, 'steam-tools')
