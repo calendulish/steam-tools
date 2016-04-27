@@ -21,6 +21,7 @@ import codecs
 import locale
 import logging
 import logging.handlers
+import tempfile
 from shutil import get_terminal_size
 
 def encoder(buffer, error='replace'):

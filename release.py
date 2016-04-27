@@ -69,7 +69,7 @@ def build(version, system, arch):
         startDir = os.path.dirname(os.path.abspath(sys.argv[0]))
         setup_options = [ 'build',
                           'install',
-                          '--root', os.path.join(startdir, 'dist'),
+                          '--root', os.path.join(startDir, 'dist'),
                           '--install-data', '.',
                           '--install-scripts', '.',
                           '--install-lib', '.',
