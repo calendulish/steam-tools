@@ -44,12 +44,12 @@ def safeCall(call):
         check_call(call)
     except CalledProcessError as e:
         print("command: {}\nrcode: {}".format(call, e.returncode))
-        exit(1)
+        sys.exit(1)
     except FileNotFoundError as e:
         print("Something is missing in your system for make an complete release")
         print("command: {}".format(call))
         print(e)
-        exit(1)
+        sys.exit(1)
 
 def build(version, system, arch):
     try:
@@ -69,8 +69,10 @@ def build(version, system, arch):
         startDir = os.path.dirname(os.path.abspath(sys.argv[0]))
         setup_options = [ 'build',
                           'install',
-                          '--root', os.path.join(startDir, 'dist'),
-                          '--prefix', '/usr',
+                          '--root', os.path.join(startdir, 'dist'),
+                          '--install-data', '.',
+                          '--install-scripts', '.',
+                          '--install-lib', '.',
                           'FORCELIN' ]
     elif system == 'WIN':
         com = WCOM+WCOMPARAMS
@@ -113,7 +115,14 @@ def archive(version, system, arch):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Please, define the version")
-        exit(1)
+        sys.exit(1)
+
+    if sys.argv[1] == 'clean':
+        for file in os.listdir(os.path.dirname(os.path.abspath(sys.argv[0]))):
+            if '.zip' in file:
+                os.remove(file)
+        print("Done!")
+        sys.exit(0)
 
     for system in [ 'WIN', 'CYG', 'LIN' ]:
         for arch in [ 32, 64, 'ALL' ]:

@@ -144,11 +144,12 @@ if what() == 'cyg' or what() == 'win':
 
 setup(
     name='Steam Tools',
-    version='1.0',
+    version='0.7',
     description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
     author='Lara Maia',
     author_email='dev@lara.click',
     url='http://github.com/ShyPixie/steam-tools',
+    license='GPL',
     data_files=data_files,
     scripts=console_programs,
     packages=['stlib'],
