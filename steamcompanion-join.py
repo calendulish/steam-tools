@@ -105,50 +105,61 @@ if __name__ == "__main__":
             else:
                 url = query+'&search='+type
 
-            page = stnetwork.tryConnect(url).content
-            points = int(bs(page, 'html.parser').find('span', class_="points").text)
-            # STUB: level ?
-            giveawaySet = getGiveaways(page)
-
-            for index in range(len(giveawaySet['Name'])):
-                if points == 0: break
-                if points >= giveawaySet['Points'][index]:
-                    data = {}
-                    gvPage = stnetwork.tryConnect(giveawaySet['Query'][index]).content
-                    form = bs(gvPage, 'html.parser').find('form')
-
+            for pageNumber in range(1, CONFIG.getint('Config', 'maxPages', fallback=5)):
+                if pageNumber != 1:
                     try:
-                        for inputs in form.findAll('input'):
-                            data.update({inputs['name']:inputs['value']})
+                        pagination = bs(page, 'html.parser').find('ul', class_="pagination").text
+                        if points == 0 or not "Next" in pagination:
+                            break
                     except AttributeError:
-                        LOGGER.debug("Ignoring %s because you don't have the requirements to enter.", giveawaySet['Name'][index])
-                        LOGGER.debug("(Missing base Game?)")
-                        continue
+                        # Only the first page
+                        break
 
-                    formData = { 'script': 'enter',
-                                 'hashID': giveawaySet['Query'][index].split('/')[4],
-                                 'token': '',
-                                 'action': 'enter_giveaway'}
+                LOGGER.debug("Checking page %d", pageNumber)
 
-                    response = stnetwork.tryConnect('https://steamcompanion.com/gifts/steamcompanion.php',
-                                                    data=formData, headers={'X-Requested-With': 'XMLHttpRequest'})
+                page = stnetwork.tryConnect(url+'&page='+str(pageNumber)).content
+                points = int(bs(page, 'html.parser').find('span', class_="points").text)
+                giveawaySet = getGiveaways(page)
 
-                    points -= giveawaySet['Points'][index]
+                for index in range(len(giveawaySet['Name'])):
+                    if points >= giveawaySet['Points'][index]:
+                        data = {}
+                        gvPage = stnetwork.tryConnect(giveawaySet['Query'][index]).content
+                        form = bs(gvPage, 'html.parser').find('form')
 
-                    LOGGER.info("Spent %d points in the giveaway of %s (Copies: %d)",
-                                                                    giveawaySet['Points'][index],
-                                                                    giveawaySet['Name'][index],
-                                                                    giveawaySet['Copies'][index])
-                else:
-                    LOGGER.debug("Ignoring %s bacause the account don't have the requirements to enter.", giveawaySet['Name'][index])
+                        try:
+                            for inputs in form.findAll('input'):
+                                data.update({inputs['name']:inputs['value']})
+                        except AttributeError:
+                            LOGGER.debug("Ignoring %s because you don't have the requirements to enter.", giveawaySet['Name'][index])
+                            LOGGER.debug("(Missing base Game?)")
+                            continue
 
-                LOGGER.debug("C(%d) P(%d) MP(%d) Q(%s)",
-                                                       giveawaySet['Copies'][index],
-                                                       giveawaySet['Points'][index],
-                                                       points,
-                                                       giveawaySet['Query'][index])
+                        formData = { 'script': 'enter',
+                                     'hashID': giveawaySet['Query'][index].split('/')[4],
+                                     'token': '',
+                                     'action': 'enter_giveaway'}
 
-        LOGGER.debug("Remaining points: %d", points)
+                        response = stnetwork.tryConnect('https://steamcompanion.com/gifts/steamcompanion.php',
+                                                        data=formData, headers={'X-Requested-With': 'XMLHttpRequest'})
+
+                        points -= giveawaySet['Points'][index]
+
+                        LOGGER.info("Spent %d points in the giveaway of %s (Copies: %d)",
+                                                                        giveawaySet['Points'][index],
+                                                                        giveawaySet['Name'][index],
+                                                                        giveawaySet['Copies'][index])
+
+                        if points == 0:
+                            break
+                    else:
+                        LOGGER.debug("Ignoring %s bacause the account don't have the requirements to enter.", giveawaySet['Name'][index])
+
+                    LOGGER.debug("C(%d) P(%d) MP(%d) Q(%s)",
+                                                           giveawaySet['Copies'][index],
+                                                           giveawaySet['Points'][index],
+                                                           points,
+                                                           giveawaySet['Query'][index])
 
         randomstart = randint(CONFIG.getint('Config', 'minTime', fallback=7000),
                               CONFIG.getint('Config', 'maxTime', fallback=7300))
