@@ -117,8 +117,13 @@ if __name__ == "__main__":
                     gvPage = stnetwork.tryConnect(giveawaySet['Query'][index]).content
                     form = bs(gvPage, 'html.parser').find('form')
 
-                    for inputs in form.findAll('input'):
-                        data.update({inputs['name']:inputs['value']})
+                    try:
+                        for inputs in form.findAll('input'):
+                            data.update({inputs['name']:inputs['value']})
+                    except AttributeError:
+                        LOGGER.debug("Ignoring %s because you don't have the requirements to enter.", giveawaySet['Name'][index])
+                        LOGGER.debug("(Missing base Game?)")
+                        continue
 
                     formData = { 'script': 'enter',
                                  'hashID': giveawaySet['Query'][index].split('/')[4],
