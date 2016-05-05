@@ -168,3 +168,19 @@ if __name__ == "__main__":
         for i in range(0, randomstart):
             stlogger.cmsg("Waiting: {:4d} seconds".format(randomstart-i), end='\r')
             sleep(1)
+            if i != 0 and i % 300 == 0:
+                stcPage = stnetwork.tryConnect("https://steamcompanion.com/gifts/").content
+                oldPoints = int(bs(stcPage, 'html.parser').find('span', class_="points").text)
+
+                arrow = bs(stcPage, 'html.parser').find('li', class_="arrow")
+                maxPageNumber = int(arrow.find('a', class_=None)['href'][-1])
+                randomPage = stnetwork.tryConnect("https://steamcompanion.com/gifts/?page="+str(randint(1, maxPageNumber))).content
+
+                randomGiveawaySet = getGiveaways(randomPage)
+                maxRandomGiveawayNumber = len(randomGiveawaySet['Query'])-1
+                stnetwork.tryConnect(randomGiveawaySet['Query'][randint(0, maxRandomGiveawayNumber)])
+
+                stcPage = stnetwork.tryConnect("https://steamcompanion.com/gifts/").content
+                newPoints = int(bs(stcPage, 'html.parser').find('span', class_="points").text)
+                if newPoints > oldPoints:
+                    LOGGER.debug("You win %d points by acessing random pages!", newPoints-oldPoints)
