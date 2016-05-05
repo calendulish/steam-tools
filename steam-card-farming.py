@@ -32,7 +32,6 @@ CONFIG = stconfig.getParser()
 LOGGER = stlogger.getLogger(CONFIG.get('Debug', 'logFileLevel', fallback='verbose'))
 
 mostValuableFirst = CONFIG.getboolean('Config', 'MostValuableFirst', fallback=True)
-integrityCheck = CONFIG.getboolean('Debug', "IntegrityCheck", fallback=False)
 dryRun = CONFIG.getboolean('Debug', "DryRun", fallback=False)
 
 def signal_handler(signal, frame):
@@ -146,15 +145,6 @@ if __name__ == "__main__":
                 badgeSet['cardValue'].append(0)
     else:
         badgeSet['cardValue'] = [ 0 for _ in badgeSet['gameID'] ]
-
-    if integrityCheck:
-        LOGGER.trace("Checking consistency of dictionaries...")
-        rtest = [ len(badgeSet[i]) for i,v in badgeSet.items() ]
-        if len(set(rtest)) == 1:
-            LOGGER.trace("Looks good.")
-        else:
-            LOGGER.trace("Very strange: %s", rtest)
-            sys.exit(1)
 
     if mostValuableFirst:
         LOGGER.info("Getting highest card value...")
