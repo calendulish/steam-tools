@@ -40,14 +40,14 @@ def tryConnect(url, data=False):
     attempt = 1
     while True:
         try:
-            LOGGER.trace("Current cookies: %s", CONFIG._sections['Cookies'])
-
             try:
                 if not len(CONFIG._sections['Cookies']):
                     raise KeyError
             except KeyError:
                 LOGGER.verbose("I found no cookies in the Cookies section.")
                 raise requests.exceptions.TooManyRedirects
+
+            LOGGER.trace("Current cookies: %s", CONFIG._sections['Cookies'])
 
             if data:
                 response = requests.post(url, data=data, cookies=CONFIG._sections['Cookies'], headers=AGENT, timeout=10)
