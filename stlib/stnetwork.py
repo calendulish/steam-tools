@@ -40,14 +40,13 @@ def tryConnect(url, data=False):
     attempt = 1
     while True:
         try:
-            if CONFIG.getboolean('Debug', 'IntegrityCheck', fallback=False):
-                LOGGER.debug("Current cookies: %s", CONFIG._sections['Cookies'])
+            LOGGER.trace("Current cookies: %s", CONFIG._sections['Cookies'])
 
             try:
                 if not len(CONFIG._sections['Cookies']):
                     raise KeyError
             except KeyError:
-                LOGGER.debug("I found no cookies in the Cookies section.")
+                LOGGER.verbose("I found no cookies in the Cookies section.")
                 raise requests.exceptions.TooManyRedirects
 
             if data:
@@ -62,16 +61,14 @@ def tryConnect(url, data=False):
                 raise requests.exceptions.TooManyRedirects
 
             if autoRecovery:
-                LOGGER.info("[WITH POWERS] Success!!!")
-                LOGGER.info("POWERS... DESACTIVATE!")
+                LOGGER.warn("Recovery with success!")
 
             autoRecovery = False
             return response
         except requests.exceptions.TooManyRedirects:
             if not autoRecovery:
                 LOGGER.error("Invalid or expired cookies.")
-                LOGGER.info("POWERS... ACTIVATE!")
-                LOGGER.info("[WITH POWERS] Trying to automagically recovery...")
+                LOGGER.warn("Trying to automagically recovery...")
                 CONFIG['Cookies'] = stcookie.getCookies(url)
                 stconfig.write()
                 autoRecovery = True
@@ -79,14 +76,14 @@ def tryConnect(url, data=False):
                 LOGGER.critical("I cannot recover D:")
                 LOGGER.critical("(Cookies not found? Chrome/Chromium profile not found?)")
                 LOGGER.critical("Please, check your configuration and update your cookies.")
-                LOGGER.debug('', exc_info=True)
+                LOGGER.trace('', exc_info=True)
                 sys.exit(1)
         except(requests.exceptions.HTTPError, requests.exceptions.RequestException):
             # Report to steamgifts-bump if the tradeID is incorrect"
             if "/trade/" in url: return ""
             stlogger.cmsg("The connection is refused or fails. Trying again... ({} attempt)".format(attempt), end='\r')
             attempt += 1
-            LOGGER.debug('', exc_info=True)
+            LOGGER.trace('', exc_info=True)
             sleep(3)
             stlogger.cfixer('\r')
 

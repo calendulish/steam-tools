@@ -35,28 +35,46 @@ def cfixer(end='\n'):
 def cmsg(*objs, sep='', end='\n', out=sys.stdout):
     print(*objs, sep=sep, end=end, file=encoder(out.buffer), flush=True)
 
-def getLogger():
+def getLogger(logFileLevel):
     dataDir = tempfile.gettempdir()
 
-    logFile = os.path.splitext(os.path.basename(sys.argv[0]))[0]+'.log'
-    logPath = os.path.join(dataDir, 'steam-tools')
-    os.makedirs(logPath, exist_ok=True)
+    logFileName = os.path.splitext(os.path.basename(sys.argv[0]))[0]+'.log'
+    logFilePath = os.path.join(dataDir, 'steam-tools')
+    os.makedirs(logFilePath, exist_ok=True)
 
+    logging.VERBOSE = 15
+    logging.TRACE = 5
+    logging.addLevelName(logging.VERBOSE, 'VERBOSE')
+    logging.addLevelName(logging.TRACE, 'TRACE')
+
+    ### --- Internal logger control --- ###
     logger = logging.getLogger("root")
-    logger.setLevel(logging.DEBUG)
+    logger.verbose = lambda msg, *args: logger._log(logging.VERBOSE, msg, args)
+    logger.trace = lambda msg, *args: logger._log(logging.TRACE, msg, args)
+    logger.setLevel(logging.TRACE)
+    ### ### ### ### ### ### ### ### ### ###
 
-    file = logging.handlers.RotatingFileHandler(os.path.join(logPath, logFile), backupCount=1, encoding='utf-8')
-    file.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
-    file.setLevel(logging.DEBUG)
-    file.doRollover()
-    logger.addHandler(file)
+    ### --- Logfile Handler --- ###
+    logFile = logging.handlers.RotatingFileHandler(os.path.join(logFilePath, logFileName),
+                                                   backupCount=1,
+                                                   encoding='utf-8')
+    logFile.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+    logFile.setLevel(eval('logging.'+logFileLevel.upper()))
+    logFile.doRollover()
+    logger.addHandler(logFile)
+    ### ### ### ### ### ### ### ###
 
+    ### --- Console Handler --- ###
     console = logging.StreamHandler(encoder(sys.stdout.buffer))
     console.setFormatter(logging.Formatter('%(message)s'))
     console.setLevel(logging.INFO)
     logger.addHandler(console)
+    ### ### ### ### ### ### ### ###
 
-    httpfile = logging.handlers.RotatingFileHandler(os.path.join(logPath, 'requests_'+logFile), backupCount=1, encoding='utf-8')
+    ### --- Requests Logfile handler --- ###
+    httpfile = logging.handlers.RotatingFileHandler(os.path.join(logFilePath, 'requests_'+logFileName),
+                                                    backupCount=1,
+                                                    encoding='utf-8')
     httpfile.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     httpfile.setLevel(logging.DEBUG)
     httpfile.doRollover()
@@ -65,6 +83,7 @@ def getLogger():
     requests.setLevel(logging.DEBUG)
     requests.removeHandler("root")
     requests.addHandler(httpfile)
+    ### ### ### ### ### ### ### ### ### ###
 
     return logger
 

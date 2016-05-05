@@ -28,8 +28,8 @@ from stlib import stconfig
 from stlib import stnetwork
 from stlib import stcygwin
 
-LOGGER = stlogger.getLogger()
 CONFIG = stconfig.getParser()
+LOGGER = stlogger.getLogger(CONFIG.get('Debug', 'logFileLevel', fallback='verbose'))
 
 mostValuableFirst = CONFIG.getboolean('Config', 'MostValuableFirst', fallback=True)
 integrityCheck = CONFIG.getboolean('Debug', "IntegrityCheck", fallback=False)
@@ -37,7 +37,7 @@ dryRun = CONFIG.getboolean('Debug', "DryRun", fallback=False)
 
 def signal_handler(signal, frame):
     stlogger.cfixer()
-    LOGGER.info("Exiting...")
+    LOGGER.warning("Exiting...")
     sys.exit(0)
 
 def getBadges(profile):
@@ -47,12 +47,12 @@ def getBadges(profile):
 
     try:
         pageCount = int(html.findAll('a', class_='pagelink')[-1].text)
-        LOGGER.debug("I found %d pages of badges", pageCount)
+        LOGGER.verbose("I found %d pages of badges", pageCount)
         for currentPage in range(1, pageCount):
             page = stnetwork.tryConnect(profile+"/badges/?p="+str(currentPage)).content
             badges.append(bs(page, 'html.parser').findAll('div', class_='badge_title_row'))
     except IndexError:
-        LOGGER.debug("I found only 1 pages of badges")
+        LOGGER.verbose("I found only 1 pages of badges")
         badges = html.findAll('div', class_='badge_title_row')
 
     badgeSet = {k: [] for k in ['gameID', 'gameName', 'cardCount', 'cardValue']}
@@ -88,7 +88,7 @@ def getValues():
     return priceSet
 
 def updateCardCount(profile, gameID):
-    LOGGER.debug("Updating card count")
+    LOGGER.verbose("Updating card count")
 
     for i in range(5):
         page = stnetwork.tryConnect(profile+"/gamecards/"+gameID).content
@@ -102,7 +102,7 @@ def updateCardCount(profile, gameID):
             else:
                 return int(progress.text.split(' ', 3)[0])
         else:
-            LOGGER.debug("Something is wrong with the page, trying again")
+            LOGGER.warning("Something is wrong with the page, trying again")
             sleep(3)
 
     LOGGER.error("I cannot find the progress info for this badge. (Connection problem?)")
@@ -148,27 +148,29 @@ if __name__ == "__main__":
         badgeSet['cardValue'] = [ 0 for _ in badgeSet['gameID'] ]
 
     if integrityCheck:
-        LOGGER.debug("Checking consistency of dictionaries...")
+        LOGGER.trace("Checking consistency of dictionaries...")
         rtest = [ len(badgeSet[i]) for i,v in badgeSet.items() ]
         if len(set(rtest)) == 1:
-            LOGGER.debug("Looks good.")
+            LOGGER.trace("Looks good.")
         else:
-            LOGGER.debug("Very strange: %s", rtest)
+            LOGGER.trace("Very strange: %s", rtest)
             sys.exit(1)
 
     if mostValuableFirst:
         LOGGER.info("Getting highest card value...")
-        if integrityCheck: LOGGER.debug("OLD: %s", badgeSet)
+        LOGGER.trace("OLD: %s", badgeSet)
+
         order = sorted(range(0, len(badgeSet['cardValue'])), key=lambda key: badgeSet['cardValue'][key], reverse=True)
+
         for item, value in badgeSet.items():
             badgeSet[item] = [value[i] for i in order]
-        if integrityCheck:
-            LOGGER.debug("NEW: %s", badgeSet)
 
-    LOGGER.info("Ready to start.")
+        LOGGER.trace("NEW: %s", badgeSet)
+
+    LOGGER.warning("Ready to start.")
     for index in range(0, len(badgeSet['gameID'])):
         if badgeSet['cardCount'][index] < 1:
-            LOGGER.debug("%s have no cards to drop. Ignoring.", badgeSet['gameName'][index])
+            LOGGER.verbose("%s have no cards to drop. Ignoring.", badgeSet['gameName'][index])
             continue
 
         stlogger.cfixer()
@@ -185,8 +187,9 @@ if __name__ == "__main__":
 
         while True:
             stlogger.cmsg("{:2d} cards drop remaining. Waiting...".format(badgeSet['cardCount'][index]), end='\r')
-            LOGGER.debug("Waiting cards drop loop")
-            if integrityCheck: LOGGER.debug("Current: %s", [badgeSet[i][index] for i,v in badgeSet.items()])
+            LOGGER.verbose("Waiting cards drop loop")
+            LOGGER.trace("Current: %s", [badgeSet[i][index] for i,v in badgeSet.items()])
+
             for i in range(40):
                 if not dryRun and fakeApp.poll():
                     stlogger.cfixer()
@@ -194,12 +197,13 @@ if __name__ == "__main__":
                     sys.exit(1)
                 sleep(1)
             stlogger.cfixer('\r')
+
             stlogger.cmsg("Checking if game have more cards drops...", end='\r')
             badgeSet['cardCount'][index] = updateCardCount(profile, badgeSet['gameID'][index])
 
             if badgeSet['cardCount'][index] < 1:
                 stlogger.cfixer('\r')
-                LOGGER.info("No more cards to drop.")
+                LOGGER.warning("No more cards to drop.")
                 break
             stlogger.cfixer('\r')
 
@@ -209,4 +213,4 @@ if __name__ == "__main__":
             fakeApp.terminate()
             fakeApp.wait()
 
-    LOGGER.info("There's nothing else we can do. Leaving.")
+    LOGGER.warning("There's nothing else we can do. Leaving.")

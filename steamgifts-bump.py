@@ -29,20 +29,20 @@ from stlib import stconfig
 from stlib import stnetwork
 from stlib import stcygwin
 
-LOGGER = stlogger.getLogger()
 CONFIG = stconfig.getParser()
+LOGGER = stlogger.getLogger(CONFIG.get('Debug', 'logFileLevel', fallback='verbose'))
 
 try:
     TRADEID = [l.strip() for l in CONFIG.get('Config', 'tradeID').split(',')]
 except(NoOptionError, NoSectionError):
     TRADEID = [ 'EXAMPLEID1', 'EXAMPLEID2' ]
     CONFIG.set('Config', 'tradeID', "EXAMPLEID1, EXAMPLEID2")
-    LOGGER.warn("No tradeID found in the config file. Using EXAMPLEID's.")
-    LOGGER.warn("Please, edit the auto-generated config file after this run.")
+    LOGGER.error("No tradeID found in the config file. Using EXAMPLEID's.")
+    LOGGER.error("Please, edit the auto-generated config file after this run.")
 
 def signal_handler(signal, frame):
     stlogger.cfixer()
-    LOGGER.info("Exiting...")
+    LOGGER.warning("Exiting...")
     sys.exit(0)
 
 def bumpTrade(id, response):
@@ -74,7 +74,7 @@ def bumpTrade(id, response):
         stlogger.cfixer('\r')
         LOGGER.error("An error occured for ID %s", id)
         LOGGER.error("Please, check if it's a valid ID.")
-        LOGGER.debug('', exc_info=True)
+        LOGGER.trace('', exc_info=True)
 
 if __name__ == "__main__":
     signal(SIGINT, signal_handler)
