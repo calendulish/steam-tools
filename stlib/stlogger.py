@@ -24,6 +24,18 @@ import logging.handlers
 import tempfile
 from shutil import get_terminal_size
 
+class ColoredFormatter(logging.Formatter):
+    def format(self, log):
+        colorMap = {
+            'INFO': 37,
+            'WARNING': 33,
+            'ERROR': 35,
+            'CRITICAL': 31,
+        }
+
+        colorNumber = colorMap.get(log.levelname, 37)
+        return '\033[32m --> \033[{}m{}\033[m'.format(colorNumber, log.getMessage())
+
 def encoder(buffer, error='replace'):
     writer = codecs.getwriter(locale.getpreferredencoding())
     return writer(buffer, error)
@@ -66,7 +78,7 @@ def getLogger(logFileLevel):
 
     ### --- Console Handler --- ###
     console = logging.StreamHandler(encoder(sys.stdout.buffer))
-    console.setFormatter(logging.Formatter('%(message)s'))
+    console.setFormatter(ColoredFormatter())
     console.setLevel(logging.INFO)
     logger.addHandler(console)
     ### ### ### ### ### ### ### ###
