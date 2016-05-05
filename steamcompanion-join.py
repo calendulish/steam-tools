@@ -93,7 +93,7 @@ if __name__ == "__main__":
     while True:
         for type in TYPELIST:
             stlogger.cmsg("Connecting to the server", end='\r')
-            query = "https://steamcompanion.com/gifts/search/?state=open&type=public"
+            query = "https://steamcompanion.com/gifts/search/?state=open&type=public&games=you"
             if type == 'main':
                 url = query
             elif type == 'wishlist':
