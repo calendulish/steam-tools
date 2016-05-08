@@ -28,20 +28,20 @@ from stlib import stconfig
 from stlib import stnetwork
 from stlib import stcygwin
 
-LOGGER = stlogger.getLogger()
 CONFIG = stconfig.getParser()
+LOGGER = stlogger.getLogger(CONFIG.get('Debug', 'logFileLevel', fallback='verbose'))
 
 try:
     TYPELIST = [l.strip() for l in CONFIG.get('Config', 'typeList').split(',')]
 except(NoOptionError, NoSectionError):
     TYPELIST = [ 'wishlist', 'single' ]
     CONFIG.set('Config', 'typeList', "wishlist, single")
-    LOGGER.warn("No typeList found in the config file.")
-    LOGGER.warn("Using the default: wishlist, single. You can edit these values.")
+    LOGGER.warning("No typeList found in the config file.")
+    LOGGER.warning("Using the default: wishlist, single. You can edit these values.")
 
 def signal_handler(signal, frame):
     stlogger.cfixer()
-    LOGGER.info("Exiting...")
+    LOGGER.warning("Exiting...")
     sys.exit(0)
 
 def getGiveaways(page):
@@ -62,13 +62,13 @@ def getGiveaways(page):
 
         infoRaw = giveaway.find('p', class_='game-name')
         infoArray = infoRaw.text.split('\t\t\t\t\t\t\t\t\t')
-        
+
         try:
             infoType = infoRaw.find('a').find('span', class_='has-tip')['title']
 
             if 'Contributor' or 'Group' in infoType:
                 # FIXME: Ignore all Contributor/Group giveaways for now
-                LOGGER.debug("Ignoring {} giveaway".format(infoType))
+                LOGGER.verbose("Ignoring {} giveaway".format(infoType))
                 continue
         except TypeError:
             pass
@@ -80,7 +80,7 @@ def getGiveaways(page):
         try:
             giveawaySet['Copies'].append(int(infoRaw.find('span', class_='copies').text[:-1]))
             gvName = ''.join(gvName.split(' ')[1:])
-            LOGGER.debug("The giveaway %s has more than 1 copy. Counting and fixing gvName.", gvName)
+            LOGGER.verbose("The giveaway %s has more than 1 copy. Counting and fixing gvName.", gvName)
         except AttributeError:
             giveawaySet['Copies'].append(1)
 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
                         # Only the first page
                         break
 
-                LOGGER.debug("Checking page %d", pageNumber)
+                LOGGER.verbose("Checking page %d", pageNumber)
 
                 page = stnetwork.tryConnect(url+'&page='+str(pageNumber)).content
                 points = int(bs(page, 'html.parser').find('span', class_="points").text)
@@ -141,8 +141,8 @@ if __name__ == "__main__":
                             for inputs in form.findAll('input'):
                                 data.update({inputs['name']:inputs['value']})
                         except AttributeError:
-                            LOGGER.debug("Ignoring %s because you don't have the requirements to enter.", giveawaySet['Name'][index])
-                            LOGGER.debug("(Missing base Game?)")
+                            LOGGER.verbose("Ignoring %s because you don't have the requirements to enter.", giveawaySet['Name'][index])
+                            LOGGER.verbose("(Missing base Game?)")
                             continue
 
                         formData = { 'script': 'enter',
@@ -163,13 +163,13 @@ if __name__ == "__main__":
                         if points == 0:
                             break
                     else:
-                        LOGGER.debug("Ignoring %s bacause the account don't have the requirements to enter.", giveawaySet['Name'][index])
+                        LOGGER.verbose("Ignoring %s bacause you don't have points to enter.", giveawaySet['Name'][index])
 
-                    LOGGER.debug("C(%d) P(%d) MP(%d) Q(%s)",
-                                                           giveawaySet['Copies'][index],
-                                                           giveawaySet['Points'][index],
-                                                           points,
-                                                           giveawaySet['Query'][index])
+                    LOGGER.trace("C(%d) P(%d) MP(%d) Q(%s)",
+                                            giveawaySet['Copies'][index],
+                                            giveawaySet['Points'][index],
+                                            points,
+                                            giveawaySet['Query'][index])
 
         randomstart = randint(CONFIG.getint('Config', 'minTime', fallback=7000),
                               CONFIG.getint('Config', 'maxTime', fallback=7300))
