@@ -108,7 +108,7 @@ def getChromeProfile(url):
                     profiles.append(os.path.join(chromeDir, dirName))
 
     if not len(profiles):
-        LOGGER.error("[WITH POWERS] I cannot find your Chrome/Chromium profile")
+        LOGGER.error("I cannot find your Chrome/Chromium profile")
         return None
     elif len(profiles) == 1:
         return profiles[0]
@@ -119,15 +119,15 @@ def getChromeProfile(url):
                 if "steamLogin" in sqlConn(profile, url):
                     return profile
                 else:
-                    LOGGER.error("[WITH POWERS] I don't find steam cookies in the current profile")
+                    LOGGER.error("I don't find steam cookies in the current profile")
             else:
                 return profile
 
-        LOGGER.info(" Who are you?")
+        LOGGER.warning(" Who are you?")
         for i in range(len(profiles)):
             with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
                 prefs = json.load(prefs_file)
-            LOGGER.info('  - [%d] %s (%s)',
+            LOGGER.warning('  - [%d] %s (%s)',
                         i+1,
                         prefs['account_info'][0]['full_name'],
                         os.path.basename(profiles[i]))
@@ -138,9 +138,9 @@ def getChromeProfile(url):
                 if opc > len(profiles) or opc < 1:
                     raise(ValueError)
             except ValueError:
-                LOGGER.info('Please, choose an valid option.')
+                LOGGER.error('Please, choose an valid option.')
                 continue
-            LOGGER.info("Okay, I'm remember that.")
+            LOGGER.warning("Okay, I'm remember that.")
             break
 
         return profiles[opc-1]

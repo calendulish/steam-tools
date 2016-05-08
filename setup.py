@@ -85,8 +85,10 @@ class winpty(build):
 
         build.run(self)
 
-data_files=[('lib64', ['lib64/libsteam_api.dll']),
-            ('lib32', ['lib32/libsteam_api.dll'])]
+data_files=[('lib64', ['lib64/libsteam_api.dll',
+                       'lib64/libsteam_api.so']),
+            ('lib32', ['lib32/libsteam_api.dll',
+                       'lib32/libsteam_api.so'])]
 
 winpty_files = [ 'winpty/build/console.exe',
                  'winpty/build/winpty.dll',
@@ -142,11 +144,12 @@ if what() == 'cyg' or what() == 'win':
 
 setup(
     name='Steam Tools',
-    version='1.0',
+    version='0.7',
     description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
     author='Lara Maia',
     author_email='dev@lara.click',
     url='http://github.com/ShyPixie/steam-tools',
+    license='GPL',
     data_files=data_files,
     scripts=console_programs,
     packages=['stlib'],

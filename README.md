@@ -1,6 +1,8 @@
 Steam Tools
 -----------
 
+[![wercker status](https://app.wercker.com/status/f414fee9b1aea1be537a6898e52392ab/s "wercker status")](https://app.wercker.com/project/bykey/f414fee9b1aea1be537a6898e52392ab)
+
 #### \*\* Now the configurations will be updated automatically with your cookies if you use Google Chrome or Chromium. \*\*
 
 Some useful tools for use with steam client or compatible programs, websites.
