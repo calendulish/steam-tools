@@ -62,6 +62,16 @@ def getGiveaways(page):
 
         infoRaw = giveaway.find('p', class_='game-name')
         infoArray = infoRaw.text.split('\t\t\t\t\t\t\t\t\t')
+        
+        try:
+            infoType = infoRaw.find('a').find('span', class_='has-tip')['title']
+
+            if 'Contributor' or 'Group' in infoType:
+                # FIXME: Ignore all Contributor/Group giveaways for now
+                LOGGER.debug("Ignoring {} giveaway".format(infoType))
+                continue
+        except TypeError:
+            pass
 
         if not infoArray[0][1:]:
             infoArray = infoArray[1:]
@@ -93,7 +103,7 @@ if __name__ == "__main__":
     while True:
         for type in TYPELIST:
             stlogger.cmsg("Connecting to the server", end='\r')
-            query = "https://steamcompanion.com/gifts/search/?state=open&type=public&games=you"
+            query = "https://steamcompanion.com/gifts/search/?state=open&type=all&games=you"
             if type == 'main':
                 url = query
             elif type == 'wishlist':
