@@ -34,7 +34,13 @@ class ColoredFormatter(logging.Formatter):
         }
 
         colorNumber = colorMap.get(log.levelname, 37)
-        return '\033[32m --> \033[{}m{}\033[m'.format(colorNumber, log.getMessage())
+
+        if os.name == 'nt' and not os.getenv('PWD'):
+            msg = ' --> {}'.format(log.getMessage())
+        else:
+            msg = '\033[32m --> \033[{}m{}\033[m'.format(colorNumber, log.getMessage())
+
+        return msg
 
 def encoder(buffer, error='replace'):
     writer = codecs.getwriter(locale.getpreferredencoding())
