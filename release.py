@@ -37,7 +37,7 @@ else:
     CCOM = [ 'C:\\cygwin64\\bin\\mintty.exe' ]
 
 WCOMPARAMS = [ '/C' ]
-CCOMPARAMS = [ '-w', 'hide', '-l', '/dev/stdout', '-e' ]
+CCOMPARAMS = [ '-w', 'hide', '-l', '-', '-e' ]
 
 def safeCall(call):
     try:
@@ -83,10 +83,12 @@ def build(version, system, arch):
         if arch == 32:
             mkcall += [ 'FORCE32BITS=1' ]
 
+        print("Building...")
         safeCall(com+mkcall+['clean'])
         safeCall(com+mkcall)
         return
 
+    print("Building...")
     pycall = [interpreter, '-u', 'setup.py']
     safeCall(com+pycall+setup_options)
 
@@ -113,6 +115,10 @@ def archive(version, system, arch):
     print('Archiving complete: {}'.format(archiveDir+'.zip'))
 
 if __name__ == "__main__":
+    if sys.version_info[0] < 3:
+        print("You must execute in python 3+")
+        sys.exit(1)
+
     if len(sys.argv) < 2:
         print("Please, define the version")
         sys.exit(1)
