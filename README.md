@@ -3,15 +3,14 @@ Steam Tools
 
 [![wercker status](https://app.wercker.com/status/f414fee9b1aea1be537a6898e52392ab/s "wercker status")](https://app.wercker.com/project/bykey/f414fee9b1aea1be537a6898e52392ab)
 
-#### \*\* Now the configurations will be updated automatically with your cookies if you use Google Chrome or Chromium. \*\*
-
 Some useful tools for use with steam client or compatible programs, websites.
 
 - **steamgifts-bump:** Automatically bumps your trades at steamgifts.com/trades
-- **steamgifts-join:** Automatically join on giveways at steamgifts.com
-- **steamcompanion-join:** (Coming Soon)
+- **steamgifts-join:** Automatically join on giveaways at steamgifts.com
+- **steamcompanion-join:** Automatically join on giveaways at steamcompanion.com
 - **steam-card-farming:** Checks if you have cards remaining to drop. Automatically starts a fake app and waits until all cards drop.
 - **fake-steam-app.py:** Create a fake steam app with the gameID param.
+- **steam-tools:** *A Gtk+3 GUI for all tools above* (**Coming Soon**)
 
 How to install?
 ---------------
