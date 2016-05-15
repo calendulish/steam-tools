@@ -76,14 +76,12 @@ def tryConnect(url, data=False, headers=AGENT):
                 LOGGER.critical("I cannot recover D:")
                 LOGGER.critical("(Cookies not found? Chrome/Chromium profile not found?)")
                 LOGGER.critical("Please, check your configuration and update your cookies.")
-                LOGGER.trace('', exc_info=True)
                 sys.exit(1)
         except(requests.exceptions.HTTPError, requests.exceptions.RequestException):
             # Report to steamgifts-bump if the tradeID is incorrect"
             if "/trade/" in url: return ""
             stlogger.cmsg("The connection is refused or fails. Trying again... ({} attempt)".format(attempt), end='\r')
             attempt += 1
-            LOGGER.trace('', exc_info=True)
             sleep(3)
             stlogger.cfixer('\r')
 

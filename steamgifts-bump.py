@@ -74,7 +74,6 @@ def bumpTrade(id, response):
         stlogger.cfixer('\r')
         LOGGER.error("An error occured for ID %s", id)
         LOGGER.error("Please, check if it's a valid ID.")
-        LOGGER.trace('', exc_info=True)
 
 if __name__ == "__main__":
     signal(SIGINT, signal_handler)
