@@ -97,7 +97,8 @@ winpty_files = [ 'winpty/build/console.exe',
 console_programs=['fake-steam-app.py',
                   'steam-card-farming.py',
                   'steamgifts-bump.py',
-                  'steamgifts-join.py']
+                  'steamgifts-join.py',
+                  'steamcompanion-join.py']
 
 def py2exe_options():
     if what() == 'win' or what() == 'cyg':
