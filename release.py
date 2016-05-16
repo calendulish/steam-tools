@@ -37,19 +37,19 @@ else:
     CCOM = [ 'C:\\cygwin64\\bin\\mintty.exe' ]
 
 WCOMPARAMS = [ '/C' ]
-CCOMPARAMS = [ '-w', 'hide', '-l', '/dev/stdout', '-e' ]
+CCOMPARAMS = [ '-w', 'hide', '-l', '-', '-e' ]
 
 def safeCall(call):
     try:
         check_call(call)
     except CalledProcessError as e:
         print("command: {}\nrcode: {}".format(call, e.returncode))
-        exit(1)
+        sys.exit(1)
     except FileNotFoundError as e:
         print("Something is missing in your system for make an complete release")
         print("command: {}".format(call))
         print(e)
-        exit(1)
+        sys.exit(1)
 
 def build(version, system, arch):
     try:
@@ -70,7 +70,9 @@ def build(version, system, arch):
         setup_options = [ 'build',
                           'install',
                           '--root', os.path.join(startDir, 'dist'),
-                          '--prefix', '/usr',
+                          '--install-data', '.',
+                          '--install-scripts', '.',
+                          '--install-lib', '.',
                           'FORCELIN' ]
     elif system == 'WIN':
         com = WCOM+WCOMPARAMS
@@ -81,10 +83,12 @@ def build(version, system, arch):
         if arch == 32:
             mkcall += [ 'FORCE32BITS=1' ]
 
+        print("Building...")
         safeCall(com+mkcall+['clean'])
         safeCall(com+mkcall)
         return
 
+    print("Building...")
     pycall = [interpreter, '-u', 'setup.py']
     safeCall(com+pycall+setup_options)
 
@@ -111,9 +115,20 @@ def archive(version, system, arch):
     print('Archiving complete: {}'.format(archiveDir+'.zip'))
 
 if __name__ == "__main__":
+    if sys.version_info[0] < 3:
+        print("You must execute in python 3+")
+        sys.exit(1)
+
     if len(sys.argv) < 2:
         print("Please, define the version")
-        exit(1)
+        sys.exit(1)
+
+    if sys.argv[1] == 'clean':
+        for file in os.listdir(os.path.dirname(os.path.abspath(sys.argv[0]))):
+            if '.zip' in file:
+                os.remove(file)
+        print("Done!")
+        sys.exit(0)
 
     for system in [ 'WIN', 'CYG', 'LIN' ]:
         for arch in [ 32, 64, 'ALL' ]:

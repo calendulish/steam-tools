@@ -28,38 +28,41 @@ from stlib import stconfig
 from stlib import stnetwork
 from stlib import stcygwin
 
-LOGGER = stlogger.getLogger()
 CONFIG = stconfig.getParser()
+LOGGER = stlogger.getLogger(CONFIG.get('Debug', 'logFileLevel', fallback='verbose'))
 
 try:
     TYPELIST = [l.strip() for l in CONFIG.get('Config', 'typeList').split(',')]
 except(NoOptionError, NoSectionError):
     TYPELIST = [ 'wishlist', 'main', 'new' ]
     CONFIG.set('Config', 'typeList', "wishlist, main, new")
-    LOGGER.warn("No typeList found in the config file.")
-    LOGGER.warn("Using the default: wishlist, main, new. You can edit these values.")
+    LOGGER.warning("No typeList found in the config file.")
+    LOGGER.warning("Using the default: wishlist, main, new. You can edit these values.")
 
 def signal_handler(signal, frame):
     stlogger.cfixer()
-    LOGGER.info("Exiting...")
+    LOGGER.warning("Exiting...")
     sys.exit(0)
 
 def steamgifts_config():
     LOGGER.info("Initializing...")
     data = {}
-    sgconfigURL = "http://www.steamgifts.com/account/settings/giveaways"
+    sgconfigURL = "https://www.steamgifts.com/account/settings/giveaways"
     sgconfig = stnetwork.tryConnect(sgconfigURL).content
+
     form = bs(sgconfig, 'html.parser').find('form')
     for inputs in form.findAll('input'):
         data.update({inputs['name']:inputs['value']})
-    LOGGER.debug("configData(page): %s", data)
+    LOGGER.trace("configData(page): %s", data)
+
     configData = {
                 'xsrf_token': data['xsrf_token'],
                 'filter_giveaways_exist_in_account': 1,
                 'filter_giveaways_missing_base_game': 1,
                 'filter_giveaways_level': 1
                 }
-    LOGGER.debug("configData(post): %s", configData)
+    LOGGER.trace("configData(post): %s", configData)
+
     stnetwork.tryConnect(sgconfigURL, data=configData)
 
 def getGiveaways(page):
@@ -81,7 +84,7 @@ def getGiveaways(page):
 
         gvHeader = giveaway.find('span', class_='giveaway__heading__thin')
         if "Copies" in gvHeader.text:
-            LOGGER.debug("The giveaway has more than 1 copy. Counting and fixing gvHeader.")
+            LOGGER.verbose("The giveaway has more than 1 copy. Counting and fixing gvHeader.")
             giveawaySet['Copies'].append(int(''.join(filter(str.isdigit, gvHeader.text))))
             gvHeader = gvHeader.findNext('span', class_='giveaway__heading__thin')
         else:
@@ -104,7 +107,7 @@ if __name__ == "__main__":
     while True:
         for type in TYPELIST:
             stlogger.cmsg("Connecting to the server", end='\r')
-            query = "http://www.steamgifts.com/giveaways/search?type="
+            query = "https://www.steamgifts.com/giveaways/search?type="
             if type == 'main':
                 url = query
             elif type == 'wishlist':
@@ -123,14 +126,21 @@ if __name__ == "__main__":
                 if points == 0: break
                 if points >= giveawaySet['Points'][index]:
                     data = {}
-                    gvpage = stnetwork.tryConnect('http://steamgifts.com'+giveawaySet['Query'][index]).content
+                    gvpage = stnetwork.tryConnect('https://steamgifts.com'+giveawaySet['Query'][index]).content
+
                     form = bs(gvpage, 'html.parser').find('form')
                     for inputs in form.findAll('input'):
                         data.update({inputs['name']:inputs['value']})
-                    LOGGER.debug("pageData: %s", data)
-                    formData = {'xsrf_token': data['xsrf_token'], 'do': 'entry_insert', 'code': data['code']}
-                    LOGGER.debug("formData: %s", formData)
-                    stnetwork.tryConnect('http://www.steamgifts.com/ajax.php', data=formData)
+                    LOGGER.trace("pageData: %s", data)
+
+                    try:
+                        formData = {'xsrf_token': data['xsrf_token'], 'do': 'entry_insert', 'code': data['code']}
+                        LOGGER.trace("formData: %s", formData)
+                    except KeyError:
+                        LOGGER.verbose("%s has expired. Ignoring.", giveawaySet['Name'][index])
+                        continue
+
+                    stnetwork.tryConnect('https://www.steamgifts.com/ajax.php', data=formData)
                     points -= giveawaySet['Points'][index]
 
                     LOGGER.info("Spent %d points in the giveaway of %s (Copies: %d)",
@@ -138,9 +148,9 @@ if __name__ == "__main__":
                                                                     giveawaySet['Name'][index],
                                                                     giveawaySet['Copies'][index])
                 else:
-                    LOGGER.debug("Ignoring %s bacause the account don't have the requirements to enter.", giveawaySet['Name'][index])
+                    LOGGER.verbose("Ignoring %s bacause the account don't have the requirements to enter.", giveawaySet['Name'][index])
 
-                LOGGER.debug("C(%d) L(%d) ML(%d) P(%d) MP(%d) Q(%s)",
+                LOGGER.verbose("C(%d) L(%d) ML(%d) P(%d) MP(%d) Q(%s)",
                                                        giveawaySet['Copies'][index],
                                                        giveawaySet['Level'][index],
                                                        level,
@@ -148,12 +158,7 @@ if __name__ == "__main__":
                                                        points,
                                                        giveawaySet['Query'][index])
 
-            #except Exception:
-            #LOGGER.error("An error occured for url %s", url)
-            #LOGGER.error("Please, check if it's a valid url.")
-            #LOGGER.debug('', exc_info=True)
-
-        LOGGER.debug("Remaining points: %d", points)
+        LOGGER.verbose("Remaining points: %d", points)
 
         randomstart = randint(CONFIG.getint('Config', 'minTime', fallback=7000),
                               CONFIG.getint('Config', 'maxTime', fallback=7300))

@@ -57,7 +57,11 @@ def what():
     return ret
 
 if what() == 'win' or what() == 'cyg':
+    import atexit
+    import textwrap
     import py2exe
+    import requests.certs
+    from compileall import compile_file
 elif 'py2exe' in sys.argv:
     print("You cannot use py2exe without a Windows Python")
     print("Rerun with the correct python version")
@@ -81,8 +85,10 @@ class winpty(build):
 
         build.run(self)
 
-data_files=[('lib64', ['lib64/libsteam_api.dll']),
-            ('lib32', ['lib32/libsteam_api.dll'])]
+data_files=[('lib64', ['lib64/libsteam_api.dll',
+                       'lib64/libsteam_api.so']),
+            ('lib32', ['lib32/libsteam_api.dll',
+                       'lib32/libsteam_api.so'])]
 
 winpty_files = [ 'winpty/build/console.exe',
                  'winpty/build/winpty.dll',
@@ -91,7 +97,8 @@ winpty_files = [ 'winpty/build/console.exe',
 console_programs=['fake-steam-app.py',
                   'steam-card-farming.py',
                   'steamgifts-bump.py',
-                  'steamgifts-join.py']
+                  'steamgifts-join.py',
+                  'steamcompanion-join.py']
 
 def py2exe_options():
     if what() == 'win' or what() == 'cyg':
@@ -104,16 +111,46 @@ def py2exe_options():
     else:
         return {}
 
-if what() == 'cyg':
-    data_files.append(('winpty', winpty_files))
+if what() == 'cyg' or what() == 'win':
+    requests_path = os.path.dirname(requests.__file__)
+    cacert_file = os.path.join(requests_path, 'cacert.pem')
+    certs_wrapper = os.path.join(requests_path, 'certs.py')
+
+    if os.path.isfile(certs_wrapper+'.bak'):
+        os.remove(certs_wrapper+'.bak')
+
+    os.rename(certs_wrapper, certs_wrapper+'.bak')
+
+    def fallback():
+        os.remove(certs_wrapper)
+        os.rename(certs_wrapper+'.bak', certs_wrapper)
+        compile_file(certs_wrapper, force=True)
+
+    atexit.register(fallback)
+
+    with open(certs_wrapper, 'w') as f:
+        f.write(textwrap.dedent("""\
+            import os, sys
+
+            def where():
+                return os.path.join(os.path.dirname(sys.executable), 'cacert.pem')
+        """))
+
+    compile_file(certs_wrapper, force=True)
+
+    data_files.append(('', [ cacert_file ]))
+
+    if what() == 'cyg':
+        data_files.append(('winpty', winpty_files))
 
 setup(
     name='Steam Tools',
-    version='1.0',
+    version='0.7',
     description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
     author='Lara Maia',
     author_email='dev@lara.click',
     url='http://github.com/ShyPixie/steam-tools',
+    license='GPL',
     data_files=data_files,
     scripts=console_programs,
     packages=['stlib'],

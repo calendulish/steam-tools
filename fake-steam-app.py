@@ -32,7 +32,7 @@ else:
     STEAM_API = 'lib32/libsteam_api' + ext
 
 if not os.path.isfile(STEAM_API):
-    libDir = '/share/steam-tools'
+    libDir = 'share/steam-tools'
     if os.path.isfile(os.path.join('/usr/local', libDir, STEAM_API)):
         STEAM_API = os.path.join('/usr/local', libDir, STEAM_API)
     elif os.path.isfile(os.path.join('/usr', libDir, STEAM_API)):

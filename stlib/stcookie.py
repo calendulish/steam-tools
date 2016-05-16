@@ -62,7 +62,31 @@ else:
     from Crypto.Protocol.KDF import PBKDF2
     from Crypto.Cipher import AES
 
-def getChromeProfile():
+def sqlConn(profile, url):
+    cookies = {}
+    tempDir = tempfile.mkdtemp()
+    cookiesPath = os.path.join(profile, 'Cookies')
+    temp_cookiesPath = os.path.join(tempDir, os.path.basename(cookiesPath))
+    copy(cookiesPath, temp_cookiesPath)
+
+    connection = sqlite3.connect(temp_cookiesPath)
+    query = 'SELECT name, value, encrypted_value FROM cookies WHERE host_key LIKE ?'
+    for key, data, edata in connection.execute(query, (getDomainName(url),)):
+        if key == '_ga': continue
+        if edata[:3] != b'v10' and edata[:3] != b'\x01\x00\x00':
+            if data:
+                cookies[key] = data
+            else:
+                cookies[key] = edata
+        else:
+            cookies[key] = decryptData(edata)
+    connection.close()
+
+    rmtree(tempDir)
+
+    return cookies
+
+def getChromeProfile(url):
     if os.name == 'nt':
         dataDir = os.getenv('LOCALAPPDATA')
         chromeDir = os.path.join(dataDir, 'Google/Chrome/User Data')
@@ -84,20 +108,26 @@ def getChromeProfile():
                     profiles.append(os.path.join(chromeDir, dirName))
 
     if not len(profiles):
-        LOGGER.error("[WITH POWERS] I cannot find your Chrome/Chromium profile")
+        LOGGER.error("I cannot find your Chrome/Chromium profile")
         return None
     elif len(profiles) == 1:
         return profiles[0]
     else:
         profile = os.path.join(chromeDir, CONFIG.get('Config', 'chromeProfile', fallback='Default'))
         if os.path.isfile(os.path.join(profile, 'Cookies')):
-            return profile
+            if "steampowered" or "steamcommunity" in url:
+                if "steamLogin" in sqlConn(profile, url):
+                    return profile
+                else:
+                    LOGGER.error("I don't find steam cookies in the current profile")
+            else:
+                return profile
 
-        LOGGER.info(" Who are you?")
+        LOGGER.warning(" Who are you?")
         for i in range(len(profiles)):
             with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
                 prefs = json.load(prefs_file)
-            LOGGER.info('  - [%d] %s (%s)',
+            LOGGER.warning('  - [%d] %s (%s)',
                         i+1,
                         prefs['account_info'][0]['full_name'],
                         os.path.basename(profiles[i]))
@@ -108,9 +138,9 @@ def getChromeProfile():
                 if opc > len(profiles) or opc < 1:
                     raise(ValueError)
             except ValueError:
-                LOGGER.info('Please, choose an valid option.')
+                LOGGER.error('Please, choose an valid option.')
                 continue
-            LOGGER.info("Okay, I'm remember that.")
+            LOGGER.warning("Okay, I'm remember that.")
             break
 
         return profiles[opc-1]
@@ -134,33 +164,12 @@ def getDomainName(url):
             return '.'.join(site[-2:])
 
 def getCookies(url):
-    cookies = {}
-    profile = getChromeProfile()
-    query = 'SELECT name, value, encrypted_value FROM cookies WHERE host_key LIKE ?'
+    profile = getChromeProfile(url)
 
     if profile:
         CONFIG.set('Config', 'chromeProfile', os.path.basename(profile))
         stconfig.write()
     else:
-        return cookies
+        return {}
 
-    tempDir = tempfile.mkdtemp()
-    cookiesPath = os.path.join(profile, 'Cookies')
-    temp_cookiesPath = os.path.join(tempDir, os.path.basename(cookiesPath))
-    copy(cookiesPath, temp_cookiesPath)
-
-    connection = sqlite3.connect(temp_cookiesPath)
-    for key, data, edata in connection.execute(query, (getDomainName(url),)):
-        if key == '_ga': continue
-        if edata[:3] != b'v10' and edata[:3] != b'\x01\x00\x00':
-            if data:
-                cookies[key] = data
-            else:
-                cookies[key] = edata
-        else:
-            cookies[key] = decryptData(edata)
-    connection.close()
-
-    rmtree(tempDir)
-
-    return cookies
+    return sqlConn(profile, url)
