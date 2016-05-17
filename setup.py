@@ -57,6 +57,7 @@ def what():
     return ret
 
 if what() == 'win' or what() == 'cyg':
+    import site
     import atexit
     import textwrap
     import py2exe
@@ -100,18 +101,24 @@ console_programs=['fake-steam-app.py',
                   'steamgifts-join.py',
                   'steamcompanion-join.py']
 
+windows_programs=[
+                    {'script': 'steam-tools.py'}
+                    # 'icon_resources': [(1, 'steam-tools.ico')]}
+                ]
+
 def py2exe_options():
     if what() == 'win' or what() == 'cyg':
         options = {'py2exe': {'bundle_files': 3,
                               'optimize': 1,
-                              'compressed': 0}}
+                              'compressed': 0,
+                              'packages': 'gi'}}
 
         return {'console': console_programs,
                 'options': options}
     else:
         return {}
 
-if what() == 'cyg' or what() == 'win':
+def fix_cacert():
     requests_path = os.path.dirname(requests.__file__)
     cacert_file = os.path.join(requests_path, 'cacert.pem')
     certs_wrapper = os.path.join(requests_path, 'certs.py')
@@ -124,7 +131,7 @@ if what() == 'cyg' or what() == 'win':
     def fallback():
         os.remove(certs_wrapper)
         os.rename(certs_wrapper+'.bak', certs_wrapper)
-        compile_file(certs_wrapper, force=True)
+        compile_file(certs_wrapper, force=True, quiet=1)
 
     atexit.register(fallback)
 
@@ -136,12 +143,35 @@ if what() == 'cyg' or what() == 'win':
                 return os.path.join(os.path.dirname(sys.executable), 'cacert.pem')
         """))
 
-    compile_file(certs_wrapper, force=True)
+    compile_file(certs_wrapper, force=True, quiet=1)
 
     data_files.append(('', [ cacert_file ]))
 
     if what() == 'cyg':
         data_files.append(('winpty', winpty_files))
+
+def fix_gtk():
+    gnome_dir = os.path.join(site.getsitepackages()[1], 'gnome')
+
+    gtk_dirs = ['lib\\girepository-1.0',
+                'share\\icons',
+                'share\\themes\\MS-Windows-XP']
+
+    for _file in os.listdir(gnome_dir):
+        if _file.endswith('.dll'):
+            data_files.append(('', [ os.path.join(gnome_dir, _file) ]))
+
+    for _dir in gtk_dirs:
+        for root, dirs, files in os.walk(os.path.join(gnome_dir, _dir)):
+            for _file in files:
+                data_files.append((root[len(gnome_dir)+1:], [ os.path.join(root, _file) ]))
+
+if what() == 'cyg' or what() == 'win':
+    fix_cacert()
+    fix_gtk()
+
+if what() == 'cyg':
+    data_files.append(('winpty', winpty_files))
 
 setup(
     name='Steam Tools',
@@ -153,6 +183,7 @@ setup(
     license='GPL',
     data_files=data_files,
     scripts=console_programs,
+    windows=windows_programs,
     packages=['stlib'],
     cmdclass = {'build': winpty,
                 'install_scripts': check_ext},
