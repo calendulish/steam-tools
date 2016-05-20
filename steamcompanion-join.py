@@ -162,6 +162,8 @@ if __name__ == "__main__":
 
                         if points == 0:
                             break
+
+                        sleep(randint(5, 20))
                     else:
                         LOGGER.verbose("Ignoring %s bacause you don't have points to enter.", giveawaySet['Name'][index])
 

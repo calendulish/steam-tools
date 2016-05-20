@@ -147,6 +147,8 @@ if __name__ == "__main__":
                                                                     giveawaySet['Points'][index],
                                                                     giveawaySet['Name'][index],
                                                                     giveawaySet['Copies'][index])
+
+                    sleep(randint(5, 20))
                 else:
                     LOGGER.verbose("Ignoring %s bacause the account don't have the requirements to enter.", giveawaySet['Name'][index])
 
