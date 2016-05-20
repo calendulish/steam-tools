@@ -18,41 +18,34 @@
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GObject
 
-class SignalHandler:
-    def on_window_destroy(self, widget):
-        Gtk.main_quit()
+from stlib.checklogins import checkLogins
 
-    def on_tray_button_press_event(self, widget):
-        pass
+class WindowSignals:
+    def __init__(self, parent):
+        self.parent = parent
 
-    def on_tray_activate(self, widget):
-        pass
-
-    def on_tray_popup_menu(self, widget):
-        pass
-
-    def on_tabs_change_current_page(self, widget):
-        pass
-
-    def on_tabs_focus_tab(self, widget):
-        pass
-
-    def on_tabs_select_page(self, widget):
-        pass
+    def on_window_destroy(self, *args):
+        Gtk.main_quit(*args)
 
 class SteamTools:
-    def main(self):
+    def __init__(self):
         builder = Gtk.Builder()
         builder.add_from_file("interface.xml")
-        builder.connect_signals(SignalHandler())
+        builder.connect_signals(WindowSignals(self))
 
-        window = builder.get_object("mainWindow")
-        window.set_default_size(640, 480)
-        window.show_all()
+        for _object in builder.get_objects():
+            if issubclass(type(_object), Gtk.Buildable):
+                name = Gtk.Buildable.get_name(_object)
+                setattr(self, name, _object)
+
+        self.mainWindow.show_all()
+
+        self.logins = checkLogins(self)
+        self.logins.start()
 
 if __name__ == "__main__":
+    GObject.threads_init()
     st = SteamTools()
-    st.main()
     Gtk.main()
