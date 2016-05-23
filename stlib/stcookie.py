@@ -127,9 +127,15 @@ def getChromeProfile(url):
         for i in range(len(profiles)):
             with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
                 prefs = json.load(prefs_file)
+
+            try:
+                profileName = prefs['account_info'][0]['full_name']
+            except KeyError:
+                profileName = prefs['profile']['name']
+
             LOGGER.warning('  - [%d] %s (%s)',
                         i+1,
-                        prefs['account_info'][0]['full_name'],
+                        profileName,
                         os.path.basename(profiles[i]))
 
         while True:
