@@ -117,10 +117,16 @@ if __name__ == "__main__":
             else:
                 url = query+'&q='+type
 
-            page = stnetwork.tryConnect(url).content
-            points = int(bs(page, 'html.parser').find('span', class_="nav__points").text)
-            level = int(''.join(filter(str.isdigit, bs(page, 'html.parser').find('span', class_=None).text)))
-            giveawaySet = getGiveaways(page)
+            response = stnetwork.tryConnect(url)
+
+            if 'suspensions' in response.url:
+                LOGGER.critical("You are banned!")
+                LOGGER.critical("Exiting...")
+                sys.exit(1)
+
+            points = int(bs(response.content, 'html.parser').find('span', class_="nav__points").text)
+            level = int(''.join(filter(str.isdigit, bs(response.content, 'html.parser').find('span', class_=None).text)))
+            giveawaySet = getGiveaways(response.content)
 
             for index in range(len(giveawaySet['Name'])):
                 if points == 0: break
