@@ -52,6 +52,11 @@ def bumpTrade(id, response):
         LOGGER.error("tradeID %s is incorrect. Ignoring.", id)
         LOGGER.error("Please, update your config file at %s", stconfig.getPath())
         return
+    else:
+        if 'suspensions' in response.url:
+            LOGGER.critical("You are banned!")
+            LOGGER.critical("Exiting...")
+            sys.exit(1)
 
     url = response.url
     title = os.path.basename(url).replace('-', ' ')
