@@ -16,11 +16,15 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
+import sys
+from argparse import ArgumentParser
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
 
 from stlib.checklogins import checkLogins
+from stlib.stconsole import STConsole
 
 class WindowSignals:
     def __init__(self, parent):
@@ -46,6 +50,14 @@ class SteamTools:
         self.logins.start()
 
 if __name__ == "__main__":
+    aParser = ArgumentParser()
+    aParser.add_argument('-c', '--cli', nargs='+')
+    cParams = aParser.parse_args()
+
+    if cParams.cli:
+        STC = STConsole(cParams)
+        sys.exit(0)
+
     GObject.threads_init()
     st = SteamTools()
     Gtk.main()
