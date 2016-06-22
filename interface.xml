@@ -191,9 +191,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="tab_pos">left</property>
-                <signal name="change-current-page" handler="on_tabs_change_current_page" swapped="no"/>
-                <signal name="focus-tab" handler="on_tabs_focus_tab" swapped="no"/>
-                <signal name="select-page" handler="on_tabs_select_page" swapped="no"/>
+                <signal name="switch-page" handler="on_tabs_switch_page" swapped="no"/>
                 <child>
                   <object class="GtkBox" id="scf_box">
                     <property name="visible">True</property>
