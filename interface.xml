@@ -1735,6 +1735,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="spacing">2</property>
+            <signal name="text-pushed" handler="on_statusBar_text_pushed" swapped="no"/>
             <child>
               <object class="GtkImage" id="sLoginStatus">
                 <property name="visible">True</property>
