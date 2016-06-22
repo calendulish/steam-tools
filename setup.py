@@ -60,12 +60,15 @@ def what():
 
 if what() == 'win' or what() == 'cyg':
     import site
+    import shutil
+    import tempfile
     import atexit
     import textwrap
     # noinspection PyUnresolvedReferences
     import py2exe
     import requests.certs
     from compileall import compile_file
+    from py_compile import compile
 elif 'py2exe' in sys.argv:
     print("You cannot use py2exe without a Windows Python")
     print("Rerun with the correct python version")
@@ -95,23 +98,14 @@ class winpty(build):
 data_files = [('lib64', ['lib64/libsteam_api.dll',
                          'lib64/libsteam_api.so']),
               ('lib32', ['lib32/libsteam_api.dll',
-                         'lib32/libsteam_api.so'])]
+                         'lib32/libsteam_api.so']),
+              ('', ['interface.xml'])]
 
 winpty_files = ['winpty/build/console.exe',
                 'winpty/build/winpty.dll',
                 'winpty/build/winpty-agent.exe']
 
-console_programs = ['fake-steam-app.py',
-                    'steam-card-farming.py',
-                    'steamgifts-bump.py',
-                    'steamgifts-join.py',
-                    'steamcompanion-join.py']
-
-windows_programs = [
-    {'script':'steam-tools.py'}
-    # 'icon_resources': [(1, 'steam-tools.ico')]}
-]
-
+console_programs = ['steam-tools.py']
 
 def py2exe_options():
     if what() == 'win' or what() == 'cyg':
@@ -120,7 +114,10 @@ def py2exe_options():
                              'compressed':0,
                              'packages':'gi'}}
 
-        return {'console':console_programs,
+        return {'console':[{'script':'steam-tools.py',
+                            # 'icon_resources': [(1, 'steam-tools.ico')]
+                            },
+                           {'script':'stlib/libsteam_wrapper.py'}],
                 'options':options}
     else:
         return {}
@@ -176,9 +173,21 @@ def fix_gtk():
                 data_files.append((root[len(gnome_dir) + 1:], [os.path.join(root, _file)]))
 
 
+def fix_libsteam():
+    tempDir = tempfile.mkdtemp()
+    temp_libsteam = os.path.join(tempDir, 'libsteam_wrapper.py')
+
+    shutil.copyfile('stlib/libsteam_wrapper.py', temp_libsteam)
+    compiled_libsteam = compile(temp_libsteam)
+    os.rename(compiled_libsteam, os.path.join(tempDir, 'libsteam_wrapper.pyc'))
+
+    data_files.append(('', ['libsteam_wrapper.pyc']))
+
+
 if what() == 'cyg' or what() == 'win':
     fix_cacert()
     fix_gtk()
+    fix_libsteam()
 
 if what() == 'cyg':
     data_files.append(('winpty', winpty_files))
@@ -193,7 +202,6 @@ setup(
         license='GPL',
         data_files=data_files,
         scripts=console_programs,
-        windows=windows_programs,
         packages=['stlib'],
         cmdclass={'build':winpty,
                   'install_scripts':check_ext},
