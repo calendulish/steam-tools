@@ -16,10 +16,11 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import os, sys
+import os
 import shutil
-from time import sleep
+import sys
 from subprocess import check_call, CalledProcessError
+from time import sleep
 
 WIN32 = 'C:\\Python3486\\python.exe'
 WIN64 = 'C:\\Python34\\python.exe'
@@ -29,15 +30,16 @@ LINALL = '/usr/bin/python'
 CMAKE = '/usr/bin/make'
 
 if os.name == 'nt' and os.getenv('PWD') \
-   or 'cygwin' in sys.platform:
-    WCOM = [ '/cygdrive/c/Windows/System32/cmd.exe' ]
-    CCOM = [ '/cygdrive/c/cygwin64/bin/mintty.exe' ]
+        or 'cygwin' in sys.platform:
+    WCOM = ['/cygdrive/c/Windows/System32/cmd.exe']
+    CCOM = ['/cygdrive/c/cygwin64/bin/mintty.exe']
 else:
-    WCOM = [ 'C:\\Windows\\System32\\cmd.exe' ]
-    CCOM = [ 'C:\\cygwin64\\bin\\mintty.exe' ]
+    WCOM = ['C:\\Windows\\System32\\cmd.exe']
+    CCOM = ['C:\\cygwin64\\bin\\mintty.exe']
 
-WCOMPARAMS = [ '/C' ]
-CCOMPARAMS = [ '-w', 'hide', '-l', '-', '-e' ]
+WCOMPARAMS = ['/C']
+CCOMPARAMS = ['-w', 'hide', '-l', '-', '-e']
+
 
 def safeCall(call):
     try:
@@ -51,9 +53,10 @@ def safeCall(call):
         print(e)
         sys.exit(1)
 
+
 def build(version, system, arch):
     try:
-        interpreter = eval(system+str(arch))
+        interpreter = eval(system + str(arch))
     except NameError:
         return
 
@@ -65,37 +68,38 @@ def build(version, system, arch):
     sleep(3)
 
     if system == 'LIN':
-        com = CCOM+CCOMPARAMS
+        com = CCOM + CCOMPARAMS
         startDir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        setup_options = [ 'build',
-                          'install',
-                          '--root', os.path.join(startDir, 'dist'),
-                          '--install-data', '.',
-                          '--install-scripts', '.',
-                          '--install-lib', '.',
-                          'FORCELIN' ]
+        setup_options = ['build',
+                         'install',
+                         '--root', os.path.join(startDir, 'dist'),
+                         '--install-data', '.',
+                         '--install-scripts', '.',
+                         '--install-lib', '.',
+                         'FORCELIN']
     elif system == 'WIN':
-        com = WCOM+WCOMPARAMS
-        setup_options = [ 'py2exe', 'FORCEWIN' ]
+        com = WCOM + WCOMPARAMS
+        setup_options = ['py2exe', 'FORCEWIN']
     else:
-        com = CCOM+CCOMPARAMS
-        mkcall = [ CMAKE, 'PYTHONPATH='+os.path.dirname(interpreter) ]
+        com = CCOM + CCOMPARAMS
+        mkcall = [CMAKE, 'PYTHONPATH=' + os.path.dirname(interpreter)]
         if arch == 32:
-            mkcall += [ 'FORCE32BITS=1' ]
+            mkcall += ['FORCE32BITS=1']
 
         print("Building...")
-        safeCall(com+mkcall+['clean'])
-        safeCall(com+mkcall)
+        safeCall(com + mkcall + ['clean'])
+        safeCall(com + mkcall)
         return
 
     print("Building...")
     pycall = [interpreter, '-u', 'setup.py']
-    safeCall(com+pycall+setup_options)
+    safeCall(com + pycall + setup_options)
+
 
 def archive(version, system, arch):
     startDir = os.path.dirname(os.path.abspath(sys.argv[0]))
     outDir = os.path.join(startDir, 'dist')
-    archiveName = 'steam_tools_'+version+'_'+system+'_'+str(arch)
+    archiveName = 'steam_tools_' + version + '_' + system + '_' + str(arch)
     archiveDir = os.path.join(startDir, archiveName)
 
     if not os.path.isdir(outDir):
@@ -103,8 +107,8 @@ def archive(version, system, arch):
 
     print('Preparing for archive')
 
-    if os.path.isfile(archiveDir+'.zip'):
-        os.remove(archiveDir+'.zip')
+    if os.path.isfile(archiveDir + '.zip'):
+        os.remove(archiveDir + '.zip')
 
     if os.path.isdir(archiveDir):
         shutil.rmtree(archiveDir)
@@ -112,7 +116,8 @@ def archive(version, system, arch):
     os.rename(outDir, archiveDir)
     shutil.make_archive(archiveName, 'zip', startDir, os.path.basename(archiveDir))
     shutil.rmtree(archiveDir)
-    print('Archiving complete: {}'.format(archiveDir+'.zip'))
+    print('Archiving complete: {}'.format(archiveDir + '.zip'))
+
 
 if __name__ == "__main__":
     if sys.version_info[0] < 3:
@@ -130,8 +135,8 @@ if __name__ == "__main__":
         print("Done!")
         sys.exit(0)
 
-    for system in [ 'WIN', 'CYG', 'LIN' ]:
-        for arch in [ 32, 64, 'ALL' ]:
+    for system in ['WIN', 'CYG', 'LIN']:
+        for arch in [32, 64, 'ALL']:
             shutil.rmtree('dist', ignore_errors=True)
             shutil.rmtree('build', ignore_errors=True)
             build(sys.argv[1], system, arch)

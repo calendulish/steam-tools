@@ -16,27 +16,28 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import os, sys
-
-from distutils.core import setup
+import os
+import sys
 from distutils.command.build import build
 from distutils.command.install_scripts import install_scripts
+from distutils.core import setup
 
-CMK, FORCELIN, FORCEWIN, FORCECYG = [ 0 for _ in range(4) ]
+CMK, FORCELIN, FORCEWIN, FORCECYG = [0 for _ in range(4)]
 
 if 'CMK' in sys.argv:
-    CMK=1
+    CMK = 1
     sys.argv.remove('CMK')
 
 if 'FORCELIN' in sys.argv:
-    FORCELIN=1
+    FORCELIN = 1
     sys.argv.remove('FORCELIN')
 elif 'FORCEWIN' in sys.argv:
-    FORCEWIN=1
+    FORCEWIN = 1
     sys.argv.remove('FORCEWIN')
 elif 'FORCECYG' in sys.argv:
-    FORCECYG=1
+    FORCECYG = 1
     sys.argv.remove('FORCECYG')
+
 
 def what():
     if os.name == 'nt':
@@ -56,10 +57,12 @@ def what():
 
     return ret
 
+
 if what() == 'win' or what() == 'cyg':
     import site
     import atexit
     import textwrap
+    # noinspection PyUnresolvedReferences
     import py2exe
     import requests.certs
     from compileall import compile_file
@@ -68,12 +71,14 @@ elif 'py2exe' in sys.argv:
     print("Rerun with the correct python version")
     sys.exit(1)
 
+
 class check_ext(install_scripts):
     def run(self):
         install_scripts.run(self)
         for script in self.get_outputs():
             if script.endswith('.py') and os.name != 'nt':
                 os.rename(script, script[:-3])
+
 
 class winpty(build):
     def run(self):
@@ -86,51 +91,54 @@ class winpty(build):
 
         build.run(self)
 
-data_files=[('lib64', ['lib64/libsteam_api.dll',
-                       'lib64/libsteam_api.so']),
-            ('lib32', ['lib32/libsteam_api.dll',
-                       'lib32/libsteam_api.so'])]
 
-winpty_files = [ 'winpty/build/console.exe',
-                 'winpty/build/winpty.dll',
-                 'winpty/build/winpty-agent.exe']
+data_files = [('lib64', ['lib64/libsteam_api.dll',
+                         'lib64/libsteam_api.so']),
+              ('lib32', ['lib32/libsteam_api.dll',
+                         'lib32/libsteam_api.so'])]
 
-console_programs=['fake-steam-app.py',
-                  'steam-card-farming.py',
-                  'steamgifts-bump.py',
-                  'steamgifts-join.py',
-                  'steamcompanion-join.py']
+winpty_files = ['winpty/build/console.exe',
+                'winpty/build/winpty.dll',
+                'winpty/build/winpty-agent.exe']
 
-windows_programs=[
-                    {'script': 'steam-tools.py'}
-                    # 'icon_resources': [(1, 'steam-tools.ico')]}
-                ]
+console_programs = ['fake-steam-app.py',
+                    'steam-card-farming.py',
+                    'steamgifts-bump.py',
+                    'steamgifts-join.py',
+                    'steamcompanion-join.py']
+
+windows_programs = [
+    {'script':'steam-tools.py'}
+    # 'icon_resources': [(1, 'steam-tools.ico')]}
+]
+
 
 def py2exe_options():
     if what() == 'win' or what() == 'cyg':
-        options = {'py2exe': {'bundle_files': 3,
-                              'optimize': 1,
-                              'compressed': 0,
-                              'packages': 'gi'}}
+        options = {'py2exe':{'bundle_files':3,
+                             'optimize':1,
+                             'compressed':0,
+                             'packages':'gi'}}
 
-        return {'console': console_programs,
-                'options': options}
+        return {'console':console_programs,
+                'options':options}
     else:
         return {}
+
 
 def fix_cacert():
     requests_path = os.path.dirname(requests.__file__)
     cacert_file = os.path.join(requests_path, 'cacert.pem')
     certs_wrapper = os.path.join(requests_path, 'certs.py')
 
-    if os.path.isfile(certs_wrapper+'.bak'):
-        os.remove(certs_wrapper+'.bak')
+    if os.path.isfile(certs_wrapper + '.bak'):
+        os.remove(certs_wrapper + '.bak')
 
-    os.rename(certs_wrapper, certs_wrapper+'.bak')
+    os.rename(certs_wrapper, certs_wrapper + '.bak')
 
     def fallback():
         os.remove(certs_wrapper)
-        os.rename(certs_wrapper+'.bak', certs_wrapper)
+        os.rename(certs_wrapper + '.bak', certs_wrapper)
         compile_file(certs_wrapper, force=True, quiet=1)
 
     atexit.register(fallback)
@@ -145,10 +153,11 @@ def fix_cacert():
 
     compile_file(certs_wrapper, force=True, quiet=1)
 
-    data_files.append(('', [ cacert_file ]))
+    data_files.append(('', [cacert_file]))
 
     if what() == 'cyg':
         data_files.append(('winpty', winpty_files))
+
 
 def fix_gtk():
     gnome_dir = os.path.join(site.getsitepackages()[1], 'gnome')
@@ -159,12 +168,13 @@ def fix_gtk():
 
     for _file in os.listdir(gnome_dir):
         if _file.endswith('.dll'):
-            data_files.append(('', [ os.path.join(gnome_dir, _file) ]))
+            data_files.append(('', [os.path.join(gnome_dir, _file)]))
 
     for _dir in gtk_dirs:
         for root, dirs, files in os.walk(os.path.join(gnome_dir, _dir)):
             for _file in files:
-                data_files.append((root[len(gnome_dir)+1:], [ os.path.join(root, _file) ]))
+                data_files.append((root[len(gnome_dir) + 1:], [os.path.join(root, _file)]))
+
 
 if what() == 'cyg' or what() == 'win':
     fix_cacert()
@@ -174,18 +184,18 @@ if what() == 'cyg':
     data_files.append(('winpty', winpty_files))
 
 setup(
-    name='Steam Tools',
-    version='0.7',
-    description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
-    author='Lara Maia',
-    author_email='dev@lara.click',
-    url='http://github.com/ShyPixie/steam-tools',
-    license='GPL',
-    data_files=data_files,
-    scripts=console_programs,
-    windows=windows_programs,
-    packages=['stlib'],
-    cmdclass = {'build': winpty,
-                'install_scripts': check_ext},
-    **py2exe_options()
-    )
+        name='Steam Tools',
+        version='GIT',
+        description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
+        author='Lara Maia',
+        author_email='dev@lara.click',
+        url='http://github.com/ShyPixie/steam-tools',
+        license='GPL',
+        data_files=data_files,
+        scripts=console_programs,
+        windows=windows_programs,
+        packages=['stlib'],
+        cmdclass={'build':winpty,
+                  'install_scripts':check_ext},
+        **py2exe_options()
+)
