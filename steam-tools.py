@@ -96,14 +96,19 @@ class WindowSignals:
             self.stwindow.start.set_sensitive(False)
             self.is_fake_app_running = False
             self.fake_app.terminate()
-            self.stwindow.update_statusBar("WaitingFakeApp", "Waiting to fake_app terminate.")
-            self.fake_app.wait()
+            self.stwindow.update_statusBar("WaitingFakeApp", "Waiting to fakeapp terminate.")
+            try:
+                self.fake_app.communicate(timeout=20)
+            except TimeoutExpired:
+                self.stwindow.update_statusBar("KillingFAkeApp", "Force Killing fakeapp")
+                self.fake_app.kill()
+                self.fake_app.communicate()
 
-            if self.fake_app.returncode == 1:
+            if self.fake_app.returncode is None:
                 error = self.fake_app.stderr.read()
                 self.stwindow.new_dialog(Gtk.MessageType.ERROR,
                                          'Fake Steam App',
-                                         'An Error occured.',
+                                         'An Error occured ({}).'.format(self.fake_app.returncode),
                                          error.decode(locale.getpreferredencoding()))
             self.stwindow.update_statusBar("FakeAppStopped", "Done!")
             self.stwindow.start.set_sensitive(True)
