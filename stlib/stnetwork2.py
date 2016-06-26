@@ -29,9 +29,9 @@ steamLoginPages = [
 Session = Session()
 Session.headers.update({'user-agent': 'unknown/0.0.0'})
 
-def getResponse(url, data=False):
-    cookies = stcookie.getCookies(url)
-    add_dict_to_cookiejar(Session.cookies, cookies)
+def getResponse(url, data=False, cookies=None):
+    if cookies:
+        add_dict_to_cookiejar(Session.cookies, cookies)
 
     try:
         if data:
@@ -41,7 +41,7 @@ def getResponse(url, data=False):
 
         response.raise_for_status()
         return response
-    except requests.exceptions.TooManyRedirects:
+    except TooManyRedirects:
         return 1
-    except requests.exceptions.HTTPError:
+    except HTTPError:
         return 2

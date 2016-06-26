@@ -62,7 +62,7 @@ else:
     from Crypto.Protocol.KDF import PBKDF2
     from Crypto.Cipher import AES
 
-def sqlConn(profile, url):
+def get_cookies(profile, url):
     cookies = {}
     tempDir = tempfile.mkdtemp()
     cookiesPath = os.path.join(profile, 'Cookies')
@@ -86,65 +86,6 @@ def sqlConn(profile, url):
 
     return cookies
 
-def getChromeProfile(url):
-    if os.name == 'nt':
-        dataDir = os.getenv('LOCALAPPDATA')
-        chromeDir = os.path.join(dataDir, 'Google/Chrome/User Data')
-        # Fallback to Chromium
-        if not os.path.isdir(chromeDir):
-            chromeDir = os.path.join(dataDir, 'Chromium/User Data')
-    else:
-        dataDir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
-        chromeDir = os.path.join(dataDir, 'google-chrome')
-        # Fallback to Chromium
-        if not os.path.isdir(chromeDir):
-            chromeDir = os.path.join(dataDir, 'chromium')
-
-    profiles = []
-    if os.path.isdir(chromeDir):
-        for dirName in sorted(os.listdir(chromeDir)):
-            if 'Profile' in dirName or 'Default' in dirName:
-                if os.path.isfile(os.path.join(chromeDir, dirName, 'Cookies')):
-                    profiles.append(os.path.join(chromeDir, dirName))
-
-    if not len(profiles):
-        LOGGER.error("I cannot find your Chrome/Chromium profile")
-        return None
-    elif len(profiles) == 1:
-        return profiles[0]
-    else:
-        profile = os.path.join(chromeDir, CONFIG.get('Config', 'chromeProfile', fallback='Default'))
-        if os.path.isfile(os.path.join(profile, 'Cookies')):
-            if "steampowered" or "steamcommunity" in url:
-                if "steamLogin" in sqlConn(profile, url):
-                    return profile
-                else:
-                    LOGGER.error("I don't find steam cookies in the current profile")
-            else:
-                return profile
-
-        LOGGER.warning(" Who are you?")
-        for i in range(len(profiles)):
-            with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
-                prefs = json.load(prefs_file)
-            LOGGER.warning('  - [%d] %s (%s)',
-                        i+1,
-                        prefs['account_info'][0]['full_name'],
-                        os.path.basename(profiles[i]))
-
-        while True:
-            try:
-                opc = int(input("Please, input an number [1-{}]:".format(len(profiles))))
-                if opc > len(profiles) or opc < 1:
-                    raise(ValueError)
-            except ValueError:
-                LOGGER.error('Please, choose an valid option.')
-                continue
-            LOGGER.warning("Okay, I'm remember that.")
-            break
-
-        return profiles[opc-1]
-
 def decryptData(edata):
     if os.name == 'nt':
         return win32CryptUnprotectData(edata).decode('utf-8')
@@ -163,13 +104,36 @@ def getDomainName(url):
         else:
             return '.'.join(site[-2:])
 
-def getCookies(url):
-    profile = getChromeProfile(url)
-
-    if profile:
-        CONFIG.set('Config', 'chromeProfile', os.path.basename(profile))
-        stconfig.write()
+def get_chrome_profile():
+    if os.name == 'nt':
+        dataDir = os.getenv('LOCALAPPDATA')
+        chromeDir = os.path.join(dataDir, 'Google/Chrome/User Data')
+        # Fallback to Chromium
+        if not os.path.isdir(chromeDir):
+            chromeDir = os.path.join(dataDir, 'Chromium/User Data')
     else:
-        return {}
+        dataDir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
+        chromeDir = os.path.join(dataDir, 'google-chrome')
+        # Fallback to Chromium
+        if not os.path.isdir(chromeDir):
+            chromeDir = os.path.join(dataDir, 'chromium')
 
-    return sqlConn(profile, url)
+    profile = os.path.join(chromeDir, CONFIG.get('Config', 'chromeProfile', fallback='Default'))
+
+    if os.path.isfile(os.path.join(profile, 'Cookies')):
+        pass
+        # Check url and check if steam cookies exists
+        # if cookies exists:
+        #     update profile in the config
+        #     return true
+        # else:
+        #     search manually (just continue)
+
+    profiles = []
+    if os.path.isdir(chromeDir):
+        for dirName in sorted(os.listdir(chromeDir)):
+            if 'Profile' in dirName or 'Default' in dirName:
+                if os.path.isfile(os.path.join(chromeDir, dirName, 'Cookies')):
+                    profiles.append(os.path.join(chromeDir, dirName))
+
+    return profiles

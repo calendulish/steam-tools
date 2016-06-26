@@ -17,14 +17,17 @@
 #
 
 import sys
+import os
 from datetime import timedelta
 from argparse import ArgumentParser
 import locale
+import json
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject, GLib, Gdk
 
+from stlib.stcookie import get_chrome_profile
 from stlib.checklogins import checkLogins
 from stlib.stconsole import STConsole
 from stlib.stfakeapp import STFakeApp
@@ -142,6 +145,10 @@ class WindowSignals:
     def on_statusBar_text_pushed(self, object, context, text):
         GLib.timeout_add_seconds(10, self.statusBar_text_pushed_timer, context)
 
+    def on_select_profile_button_toggled(self, object, id):
+        if object.get_active():
+            self.stwindow.selected_profile = id
+
     def statusBar_text_pushed_timer(self, context):
         self.stwindow.statusBar.pop(context)
         return False
@@ -184,6 +191,41 @@ class SteamTools:
         self.fsa_currentTime.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('black'))
 
         self.mainWindow.show_all()
+
+        profiles = get_chrome_profile()
+        if not len(profiles):
+            self.update_statusbar('NoChromeProfile', 'I cannot find your chrome/Chromium profile')
+            self.new_dialog(Gtk.MesageType.ERROR,
+                            'checkcookies',
+                            'I cannot find your Chrome/Chromium profile',
+                            'Some functions will be disabled.')
+            return False
+        elif len(profiles) == 1:
+            pass
+            #CONFIG.set('Config', 'chromeProfile', profiles[0])
+        else:
+            self.selectProfile_dialog.add_button('Ok', 1)
+            self.selected_profile = 0
+
+            temp_radiobutton = None
+            for i in range(len(profiles)):
+                with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
+                    prefs = json.load(prefs_file)
+
+                temp_radiobutton =  Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
+                                                              '{} ({})'.format(prefs['account_info'][0]['full_name'],
+                                                                               os.path.basename(profiles[i])))
+
+                temp_radiobutton.connect('toggled', WindowSignals(self).on_select_profile_button_toggled, i)
+                self.radiobutton_box.pack_start(temp_radiobutton, False, False, 0)
+
+            self.selectProfile_dialog.show_all()
+            self.selectProfile_dialog.run()
+            self.selectProfile_dialog.destroy()
+
+
+        # FIXME: update config with the selected profile
+        self.browser_profile = profiles[self.selected_profile]
 
         self.logins = checkLogins(self)
         self.logins.start()

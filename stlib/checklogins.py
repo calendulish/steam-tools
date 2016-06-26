@@ -20,6 +20,7 @@ from threading import Thread
 from bs4 import BeautifulSoup as bs
 
 from stlib import stnetwork2 as stnetwork
+from stlib import stcookie
 
 class checkLogins(Thread):
     def __init__(self, parent):
@@ -33,9 +34,12 @@ class checkLogins(Thread):
         self.stwindow.statusBar.push(0, "Checking if you are logged in on Steam...")
         self.stwindow.sLoginStatus.set_from_file("icons/steam_yellow.png")
         loginPage = 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about'
-        response = stnetwork.getResponse(loginPage)
+        # FIXME: Get cookies from config file
+        cookies = stcookie.get_cookies(self.stwindow.browser_profile, loginPage)
+        response = stnetwork.getResponse(loginPage, cookies=cookies)
 
         try:
+            # FIXME
             if type(response) == int:
                 raise AttributeError
 
@@ -56,9 +60,13 @@ class checkLogins(Thread):
         self.stwindow.statusBar.push(0, "Checking if you are logged in on SteamGifts...")
         self.stwindow.sgLoginStatus.set_from_file("icons/sg_yellow.png")
         loginPage = 'https://www.steamgifts.com/account/profile/sync'
-        response = stnetwork.getResponse(loginPage)
+        # FIXME: Get cookies from config file
+        cookies = stcookie.get_cookies(self.stwindow.browser_profile, loginPage)
+        response = stnetwork.getResponse(loginPage, cookies=cookies)
+
 
         try:
+            # FIXME
             if type(response) == int:
                 raise AttributeError
 
@@ -81,9 +89,12 @@ class checkLogins(Thread):
         self.stwindow.statusBar.push(0, "Checking if you are logged in on SteamCompanion...")
         self.stwindow.scLoginStatus.set_from_file("icons/sc_yellow.png")
         loginPage = 'https://steamcompanion.com/settings'
-        response = stnetwork.getResponse(loginPage)
+        # FIXME: Get cookies from config file
+        cookies = stcookie.get_cookies(self.stwindow.browser_profile, loginPage)
+        response = stnetwork.getResponse(loginPage, cookies=cookies)
 
         try:
+            # FIXME
             if type(response) == int:
                 raise AttributeError
 
