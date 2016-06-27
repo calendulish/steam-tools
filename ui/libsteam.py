@@ -20,35 +20,38 @@ import atexit
 import locale
 import os
 import sys
-from ctypes import CDLL
-from logging import getLogger
-from subprocess import Popen, PIPE
+import ctypes
+import logging
+import subprocess
 
 if os.name is 'posix':
     import site
 
+import gi
 
-class STFakeApp:
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, GLib
+
+class LibSteam:
     def __init__(self):
         atexit.register(self._safe_exit)
-        self.logger = getLogger('root')
-        try:
-            self.libsteam_path = self._find_libsteam()
-            self.steam_api = CDLL(self.libsteam_path)
-        except OSError:
-            self.logger.critical("Something is wrong with your installation.")
-            self.logger.critical("I cannot found some libraries needed for steam-tools work")
-            return 1
+        self.logger = logging.getLogger('root')
+        self.libsteam_path = self._find_libsteam()
+        self.steam_api = ctypes.CDLL(self.libsteam_path)
 
     def _safe_exit(self, SIG=None, FRM=None):
         self.logger.warning('Exiting...')
         if 'wrapper_process' in dir(self):
             self.wrapper_process.terminate()
             self.logger.debug("Waiting to libsteam_wrapper terminate.")
-            self.wrapper_process.wait()
+            try:
+                self.wrapper_process.communicate(timeout=20)
+            except subprocess.TimeoutExpired:
+                self.logger.debug("Force Killing libsteam_wrapper.")
+                self.wrapper_process.kill()
+                self.wrapper_process.communicate()
+
             if self.wrapper_process.returncode:
-                error = self.wrapper_process.stderr.read()
-                self.logger.critical(error.decode(locale.getpreferredencoding()))
                 return 1
             else:
                 return 0
@@ -81,7 +84,7 @@ class STFakeApp:
     def _find_wrapper(self):
         paths = []
         paths.append(os.path.dirname(os.path.abspath(sys.argv[0])))
-        paths.append(os.path.join(paths[0], 'stlib'))
+        paths.append(os.path.join(paths[0], 'ui'))
 
         if os.name is 'posix':
             paths.append(os.path.join(site.getsitepackages()[1], 'stlib'))
@@ -92,10 +95,6 @@ class STFakeApp:
 
                 if os.path.isfile(full_path):
                     return full_path
-
-        self.logger.critical("Unable to locate some libraries and files.")
-        self.logger.critical("Please, verify your installation.")
-        sys.exit(1)
 
     def is_steam_running(self):
         if self.steam_api.SteamAPI_IsSteamRunning():
@@ -110,6 +109,6 @@ class STFakeApp:
         if wrapper_path[-3:] != 'exe':
             wrapper_exec = ['python'] + wrapper_exec
 
-        self.wrapper_process = Popen(wrapper_exec, stdout=PIPE, stderr=PIPE)
+        self.wrapper_process = subprocess.Popen(wrapper_exec, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         return self.wrapper_process

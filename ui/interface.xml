@@ -1754,7 +1754,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">SteamGifts Login Status:You are not logged in</property>
-                <property name="pixbuf">icons/sg.png</property>
+                <property name="pixbuf">icons/steamgifts.png</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1767,7 +1767,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">SteamCompanion Login status:You are not logged in</property>
-                <property name="pixbuf">icons/sc.png</property>
+                <property name="pixbuf">icons/steamcompanion.png</property>
               </object>
               <packing>
                 <property name="expand">False</property>

@@ -18,15 +18,15 @@
 
 import os
 import sys
-from ctypes import CDLL
-from time import sleep
+import ctypes
+import time
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
         os.environ["SteamAppId"] = sys.argv[1]
 
         try:
-            steam_api = CDLL(sys.argv[2])
+            steam_api = ctypes.CDLL(sys.argv[2])
         except OSError:
             sys.exit(1)
 
@@ -34,7 +34,8 @@ if __name__ == "__main__":
             sys.exit(1)
 
         try:
-            while True: sleep(1)
+            while True:
+                time.sleep(1)
         except KeyboardInterrupt:
             os.environ.pop("SteamAppId")
             steam_api.SteamAPI_Shutdown()

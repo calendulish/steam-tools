@@ -16,21 +16,23 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import os, sys
 import codecs
 import locale
 import logging
 import logging.handlers
+import os
+import shutil
+import sys
 import tempfile
-from shutil import get_terminal_size
+
 
 class ColoredFormatter(logging.Formatter):
     def format(self, log):
         colorMap = {
-            'INFO': 37,
-            'WARNING': 33,
-            'ERROR': 35,
-            'CRITICAL': 31,
+            'INFO':37,
+            'WARNING':33,
+            'ERROR':35,
+            'CRITICAL':31,
         }
 
         colorNumber = colorMap.get(log.levelname, 37)
@@ -42,21 +44,25 @@ class ColoredFormatter(logging.Formatter):
 
         return msg
 
+
 def encoder(buffer, error='replace'):
     writer = codecs.getwriter(locale.getpreferredencoding())
     return writer(buffer, error)
 
-def cfixer(end='\n'):
-    tsize = get_terminal_size()[0]
-    print(('{:'+str(tsize-1)+'s}').format(''), end=end, flush=True)
 
-def cmsg(*objs, sep='', end='\n', out=sys.stdout):
+def console_fixer(end='\n'):
+    tsize = shutil.get_terminal_size()[0]
+    print(('{:' + str(tsize - 1) + 's}').format(''), end=end, flush=True)
+
+
+def console_msg(*objs, sep='', end='\n', out=sys.stdout):
     print(*objs, sep=sep, end=end, file=encoder(out.buffer), flush=True)
 
-def getLogger(logFileLevel):
+
+def get_logger(logFileLevel):
     dataDir = tempfile.gettempdir()
 
-    logFileName = os.path.splitext(os.path.basename(sys.argv[0]))[0]+'.log'
+    logFileName = os.path.splitext(os.path.basename(sys.argv[0]))[0] + '.log'
     logFilePath = os.path.join(dataDir, 'steam-tools')
     os.makedirs(logFilePath, exist_ok=True)
 
@@ -67,8 +73,8 @@ def getLogger(logFileLevel):
 
     ### --- Internal logger control --- ###
     logger = logging.getLogger("root")
-    logger.verbose = lambda msg, *args: logger._log(logging.VERBOSE, msg, args)
-    logger.trace = lambda msg, *args: logger._log(logging.TRACE, msg, args)
+    logger.verbose = lambda msg, *args:logger._log(logging.VERBOSE, msg, args)
+    logger.trace = lambda msg, *args:logger._log(logging.TRACE, msg, args)
     logger.setLevel(logging.TRACE)
     ### ### ### ### ### ### ### ### ### ###
 
@@ -77,7 +83,7 @@ def getLogger(logFileLevel):
                                                    backupCount=1,
                                                    encoding='utf-8')
     logFile.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
-    logFile.setLevel(eval('logging.'+logFileLevel.upper()))
+    logFile.setLevel(eval('logging.' + logFileLevel.upper()))
     logFile.doRollover()
     logger.addHandler(logFile)
     ### ### ### ### ### ### ### ###
@@ -90,7 +96,7 @@ def getLogger(logFileLevel):
     ### ### ### ### ### ### ### ###
 
     ### --- Requests Logfile handler --- ###
-    httpfile = logging.handlers.RotatingFileHandler(os.path.join(logFilePath, 'requests_'+logFileName),
+    httpfile = logging.handlers.RotatingFileHandler(os.path.join(logFilePath, 'requests_' + logFileName),
                                                     backupCount=1,
                                                     encoding='utf-8')
     httpfile.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
@@ -105,7 +111,8 @@ def getLogger(logFileLevel):
 
     return logger
 
-def closeAll():
+
+def close_all():
     logger = logging.getLogger('root')
     for handler in logger.handlers[:]:
         handler.close()
