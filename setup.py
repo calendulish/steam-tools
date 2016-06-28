@@ -99,7 +99,7 @@ data_files = [('lib64', ['lib64/libsteam_api.dll',
                          'lib64/libsteam_api.so']),
               ('lib32', ['lib32/libsteam_api.dll',
                          'lib32/libsteam_api.so']),
-              ('', ['interface.xml'])]
+              ('ui', ['ui/interface.xml'])]
 
 winpty_files = ['winpty/build/console.exe',
                 'winpty/build/winpty.dll',
@@ -117,7 +117,7 @@ def py2exe_options():
         return {'console':[{'script':'steam-tools.py',
                             # 'icon_resources': [(1, 'steam-tools.ico')]
                             },
-                           {'script':'stlib/libsteam_wrapper.py'}],
+                           {'script':'ui/libsteam_wrapper.py'}],
                 'options':options}
     else:
         return {}
@@ -177,11 +177,11 @@ def fix_libsteam():
     tempDir = tempfile.mkdtemp()
     temp_libsteam = os.path.join(tempDir, 'libsteam_wrapper.py')
 
-    shutil.copyfile('stlib/libsteam_wrapper.py', temp_libsteam)
+    shutil.copyfile('ui/libsteam_wrapper.py', temp_libsteam)
     compiled_libsteam = compile(temp_libsteam)
     os.rename(compiled_libsteam, os.path.join(tempDir, 'libsteam_wrapper.pyc'))
 
-    data_files.append(('', ['libsteam_wrapper.pyc']))
+    data_files.append(('ui', ['libsteam_wrapper.pyc']))
 
 
 if what() == 'cyg' or what() == 'win':
