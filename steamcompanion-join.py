@@ -34,7 +34,7 @@ LOGGER = stlogger.getLogger(CONFIG.get('Debug', 'logFileLevel', fallback='verbos
 try:
     TYPELIST = [l.strip() for l in CONFIG.get('Config', 'typeList').split(',')]
 except(NoOptionError, NoSectionError):
-    TYPELIST = [ 'wishlist', 'single' ]
+    TYPELIST = [ 'wishlist', 'single', 'raffle' ]
     CONFIG.set('Config', 'typeList', "wishlist, single")
     LOGGER.warning("No typeList found in the config file.")
     LOGGER.warning("Using the default: wishlist, single. You can edit these values.")
