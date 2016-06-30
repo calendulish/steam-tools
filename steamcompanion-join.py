@@ -66,10 +66,11 @@ def getGiveaways(page):
         try:
             infoType = infoRaw.find('a').find('span', class_='has-tip')['title']
 
-            if 'Contributor' or 'Group' in infoType:
-                # FIXME: Ignore all Contributor/Group giveaways for now
-                LOGGER.verbose("Ignoring {} giveaway".format(infoType))
-                continue
+            if 'Public Group giveaway:' in infoType:
+                infoType = infoType[23:]
+
+            if 'Contributor giveaway' in infoType:
+                infoType = infoRaw.findAll('span')[2].text
         except TypeError:
             pass
 
@@ -142,7 +143,7 @@ if __name__ == "__main__":
                                 data.update({inputs['name']:inputs['value']})
                         except AttributeError:
                             LOGGER.verbose("Ignoring %s because you don't have the requirements to enter.", giveawaySet['Name'][index])
-                            LOGGER.verbose("(Missing base Game?)")
+                            LOGGER.verbose("(Missing base Game? You're not in the group?)")
                             continue
 
                         formData = { 'script': 'enter',
