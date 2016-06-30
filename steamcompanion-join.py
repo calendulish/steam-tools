@@ -35,9 +35,9 @@ try:
     TYPELIST = [l.strip() for l in CONFIG.get('Config', 'typeList').split(',')]
 except(NoOptionError, NoSectionError):
     TYPELIST = [ 'wishlist', 'single', 'raffle' ]
-    CONFIG.set('Config', 'typeList', "wishlist, single")
+    CONFIG.set('Config', 'typeList', "wishlist, single, raffle")
     LOGGER.warning("No typeList found in the config file.")
-    LOGGER.warning("Using the default: wishlist, single. You can edit these values.")
+    LOGGER.warning("Using the default: wishlist, single, 'raffle'. You can edit these values.")
 
 def signal_handler(signal, frame):
     stlogger.cfixer()
