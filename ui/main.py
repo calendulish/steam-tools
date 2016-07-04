@@ -18,8 +18,8 @@
 
 
 import json
-import locale
 import os
+import random
 
 import gi
 
@@ -28,6 +28,7 @@ from gi.repository import Gtk, Gdk
 
 import stlib
 import ui.signals
+
 
 class SteamTools:
     def __init__(self):
@@ -63,7 +64,7 @@ class SteamTools:
 
         profiles = self.browser_bridge.get_chrome_profile()
         if not len(profiles):
-            self.update_statusbar('NoChromeProfile', 'I cannot find your chrome/Chromium profile')
+            self.update_statusbar('I cannot find your chrome/Chromium profile')
             self.new_dialog(Gtk.MesageType.ERROR,
                             'checkcookies',
                             'I cannot find your Chrome/Chromium profile',
@@ -100,9 +101,11 @@ class SteamTools:
         self.logins = ui.logins.CheckLogins(self)
         self.logins.start()
 
-    def update_statusBar(self, context, message):
-        id = self.statusBar.get_context_id(context)
+    def update_statusBar(self, message):
+        id = random.randrange(500)
         self.statusBar.push(id, message)
+
+        return id
 
     def new_dialog(self, msg_type, title, markup, secondary_markup=None):
         dialog = Gtk.MessageDialog(transient_for=self.mainWindow,

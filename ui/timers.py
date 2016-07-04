@@ -38,7 +38,7 @@ class WindowTimers:
         self.fake_app_elapsed_time += 1
         if self.signals.is_fake_app_running:
             if self.signals.fake_app.poll():
-                self.window.update_statusBar("gameIDInvalid", "This is not a valid gameID.")
+                self.window.update_statusBar("This is not a valid gameID.")
                 self.window.new_dialog(Gtk.MessageType.ERROR,
                                          'Fake Steam App',
                                          'This is not a valid gameID.',

@@ -35,7 +35,7 @@ class CheckLogins(Thread):
         self.network_session = stlib.network.Session()
 
     def check_steam_login(self):
-        status_context = self.window.update_statusBar('CheckSteam', "Checking if you are logged in on Steam...")
+        status_context = self.window.update_statusBar("Checking if you are logged in on Steam...")
         self.window.sLoginStatus.set_from_file(os.path.join(self.window.icons_path, self.window.steam_icon_busy))
         loginPage = 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about'
         # FIXME: Get cookies from config file
@@ -64,7 +64,7 @@ class CheckLogins(Thread):
         self.window.statusBar.pop(status_context)
 
     def check_steamgifts_login(self):
-        status_context = self.window.update_statusBar('CheckSteamGifts', "Checking if you are logged in on SteamGifts...")
+        status_context = self.window.update_statusBar("Checking if you are logged in on SteamGifts...")
         self.window.sgLoginStatus.set_from_file(os.path.join(self.window.icons_path, self.window.steamgifts_icon_busy))
         loginPage = 'https://www.steamgifts.com/account/profile/sync'
         # FIXME: Get cookies from config file
@@ -95,7 +95,7 @@ class CheckLogins(Thread):
         self.window.statusBar.pop(status_context)
 
     def check_steamcompanion_login(self):
-        status_context = self.window.update_statusBar('CheckSteamCompanion', "Checking if you are logged in on SteamCompanion...")
+        status_context = self.window.update_statusBar("Checking if you are logged in on SteamCompanion...")
         self.window.scLoginStatus.set_from_file(
                 os.path.join(self.window.icons_path, self.window.steamcompanion_icon_busy))
         loginPage = 'https://steamcompanion.com/settings'

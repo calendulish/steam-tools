@@ -48,10 +48,10 @@ class WindowSignals:
         if current_page == 0:
             pass
         elif current_page == 1:
-            self.window.update_statusBar("FakeAppWait", "Preparing. Please wait...")
+            self.window.update_statusBar("Preparing. Please wait...")
             self.fake_app_id = self.window.fsa_appID.get_text().strip()
             if not self.fake_app_id:
-                self.window.update_statusBar("NoAppID", "No AppID found!")
+                self.window.update_statusBar("No AppID found!")
                 self.window.new_dialog(Gtk.MessageType.ERROR,
                                          'Fake Steam App',
                                          'No AppID found!',
@@ -67,7 +67,7 @@ class WindowSignals:
                     self.is_fake_app_running = True
                     self.window.stop.set_sensitive(True)
                 else:
-                    self.window.update_statusBar("NoSteamInstance", "Unable to locate a running instance of steam.")
+                    self.window.update_statusBar("Unable to locate a running instance of steam.")
                     self.window.new_dialog(Gtk.MessageType.ERROR,
                                              'Fake Steam App',
                                              'Unable to locate a running instance of steam.',
@@ -95,11 +95,11 @@ class WindowSignals:
             self.window.start.set_sensitive(False)
             self.is_fake_app_running = False
             self.fake_app.terminate()
-            self.window.update_statusBar("WaitingFakeApp", "Waiting to fakeapp terminate.")
+            self.window.update_statusBar("Waiting to fakeapp terminate.")
             try:
                 self.fake_app.communicate(timeout=20)
             except subprocess.TimeoutExpired:
-                self.window.update_statusBar("KillingFAkeApp", "Force Killing fakeapp")
+                self.window.update_statusBar("Force Killing fakeapp")
                 self.fake_app.kill()
                 self.fake_app.communicate()
 
@@ -109,7 +109,7 @@ class WindowSignals:
                                          'Fake Steam App',
                                          'An Error occured ({}).'.format(self.fake_app.returncode),
                                          error.decode(locale.getpreferredencoding()))
-            self.window.update_statusBar("FakeAppStopped", "Done!")
+            self.window.update_statusBar("Done!")
             self.window.start.set_sensitive(True)
             self.window.fsa_currentGame.set_text('')
             self.window.fsa_currentTime.set_text('')
