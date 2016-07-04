@@ -27,18 +27,14 @@ class Session:
         self.session.headers.update(data)
 
     def update_cookies(self, cookies):
-        requests.utils.add_dict_to_cookiejar(self.session.cookies, cookies)
+        self.session.cookies = requests.utils.cookiejar_from_dict(cookies)
 
     def get_response(self, url, data=None, timeout=10, verify='cacert.pem', stream=False):
-        try:
-            if data:
-                response = self.session.post(url, data=data, timeout=timeout, verify=verify, stream=stream)
-            else:
-                response = self.session.get(url, timeout=timeout, verify=verify, stream=stream)
+        if data:
+            response = self.session.post(url, data=data, timeout=timeout, verify=verify, stream=stream)
+        else:
+            response = self.session.get(url, timeout=timeout, verify=verify, stream=stream)
 
-            response.raise_for_status()
-            return response
-        except requests.exceptions.TooManyRedirects:
-            return 1
-        except requests.exceptions.HTTPError:
-            return 2
+        response.raise_for_status()
+        return response
+
