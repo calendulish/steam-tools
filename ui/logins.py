@@ -35,7 +35,7 @@ class CheckLogins(Thread):
         self.network_session = stlib.network.Session()
 
     def check_steam_login(self):
-        self.window.statusBar.push(0, "Checking if you are logged in on Steam...")
+        status_context = self.window.update_statusBar('CheckSteam', "Checking if you are logged in on Steam...")
         self.window.sLoginStatus.set_from_file(os.path.join(self.window.icons_path, self.window.steam_icon_busy))
         loginPage = 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about'
         # FIXME: Get cookies from config file
@@ -61,10 +61,10 @@ class CheckLogins(Thread):
                                                       "\nsteampowered.com or steamcommunity.com")
             self.steam_connected = False
 
-        self.window.statusBar.pop(0)
+        self.window.statusBar.pop(status_context)
 
     def check_steamgifts_login(self):
-        self.window.statusBar.push(0, "Checking if you are logged in on SteamGifts...")
+        status_context = self.window.update_statusBar('CheckSteamGifts', "Checking if you are logged in on SteamGifts...")
         self.window.sgLoginStatus.set_from_file(os.path.join(self.window.icons_path, self.window.steamgifts_icon_busy))
         loginPage = 'https://www.steamgifts.com/account/profile/sync'
         # FIXME: Get cookies from config file
@@ -92,10 +92,10 @@ class CheckLogins(Thread):
                                                        "\nwww.steamgifts.com")
             self.steamgifts_connected = False
 
-        self.window.statusBar.pop(0)
+        self.window.statusBar.pop(status_context)
 
     def check_steamcompanion_login(self):
-        self.window.statusBar.push(0, "Checking if you are logged in on SteamCompanion...")
+        status_context = self.window.update_statusBar('CheckSteamCompanion', "Checking if you are logged in on SteamCompanion...")
         self.window.scLoginStatus.set_from_file(
                 os.path.join(self.window.icons_path, self.window.steamcompanion_icon_busy))
         loginPage = 'https://steamcompanion.com/settings'
@@ -126,7 +126,7 @@ class CheckLogins(Thread):
                                                        "\nsteamcompanion.com")
             self.steamcompanion_connected = False
 
-        self.window.statusBar.pop(0)
+        self.window.statusBar.pop(status_context)
 
     def run(self):
         self.check_steam_login()
