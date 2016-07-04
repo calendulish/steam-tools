@@ -40,13 +40,12 @@ class CheckLogins(Thread):
         self.config_parser = stlib.config.Parser()
         self.logger = logging.getLogger('root')
 
-        self.config_parser.read_config()
-
     def try_connect(self, service_name, url):
         self.auto_recovery = False
 
         for i in range(1, 4):
             try:
+                self.config_parser.read_config()
                 cookies = self.config_parser.config._sections[service_name+'Cookies']
                 self.network_session.update_cookies(cookies)
                 response = self.network_session.get_response(url)
@@ -55,20 +54,20 @@ class CheckLogins(Thread):
                     self.logger.error('Unable to find cookies in the config file')
                     self.logger.error('Trying to auto recovery')
                     self.auto_recovery = True
-                    cookies = self.browser_bridge.get_cookies(self.window.browser_profile, url)
+                    cookies = self.browser_bridge.get_cookies(url)
 
                     self.config_parser.config[service_name+'Cookies'] = cookies
                     self.config_parser.write_config()
                     self.network_session.update_cookies(cookies)
                 else:
                     self.logger.error('Unable to get cookies.')
-                    self.window.update_statusBar('NoCookies', 'Unable to get cookies.')
-                    return False
+                    self.window.update_statusBar('Unable to get cookies.')
+                    return None
             except(requests.exceptions.ConnectionError,
                    requests.exceptions.RequestException,
                    requests.exceptions.Timeout):
                 self.logger.error('Unable to connect. Trying again... ({}/3)'.format(i))
-                self.window.update_statusBar('ConnectionError', 'Unable to connect. Trying again... ({}/3)'.format(i))
+                self.window.update_statusBar('Unable to connect. Trying again... ({}/3)'.format(i))
                 time.sleep(3)
             else:
                 return response

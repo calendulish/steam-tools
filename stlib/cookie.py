@@ -44,7 +44,6 @@ class BrowserBridge:
     def __init__(self):
         self.logger = logging.getLogger('root')
         self.config_parser = stlib.config.Parser()
-        self.config_parser.read_config()
 
     def get_domain_name(self, url):
         site = url.split('//', 1)[1].split('/', 1)[0].split('.')
@@ -77,10 +76,12 @@ class BrowserBridge:
             decrypted = cipher.decrypt(encrypted_data[3:])
             return decrypted[:-decrypted[-1]].decode('utf-8')
 
-    def get_cookies(self, profile, url):
+    def get_cookies(self, url):
         cookies = {}
         temp_dir = tempfile.mkdtemp()
-        cookies_path = os.path.join(profile, 'Cookies')
+        self.config_parser.read_config()
+        profile = self.config_parser.config.get('Config', 'chromeProfile')
+        cookies_path = os.path.join(self.get_chrome_dir(), profile, 'Cookies')
         temp_cookies_path = os.path.join(temp_dir, os.path.basename(cookies_path))
         shutil.copy(cookies_path, temp_cookies_path)
 
@@ -101,7 +102,7 @@ class BrowserBridge:
 
         return cookies
 
-    def get_chrome_profile(self):
+    def get_chrome_dir(self):
         if os.name == 'nt':
             data_dir = os.getenv('LOCALAPPDATA')
             chrome_dir = os.path.join(data_dir, 'Google/Chrome/User Data')
@@ -115,16 +116,10 @@ class BrowserBridge:
             if not os.path.isdir(chrome_dir):
                 chrome_dir = os.path.join(data_dir, 'chromium')
 
-        profile = os.path.join(chrome_dir, self.config_parser.config.get('Config', 'chromeProfile', fallback='Default'))
+        return chrome_dir
 
-        if os.path.isfile(os.path.join(profile, 'Cookies')):
-            pass
-            # Check url and check if steam cookies exists
-            # if cookies exists:
-            #     update profile in the config
-            #     return true
-            # else:
-            #     search manually (just continue)
+    def get_chrome_profile(self):
+        chrome_dir = self.get_chrome_dir()
 
         profiles = []
         if os.path.isdir(chrome_dir):

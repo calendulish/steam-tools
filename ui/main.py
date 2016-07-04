@@ -16,7 +16,7 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-
+import configparser
 import json
 import os
 import random
@@ -32,9 +32,15 @@ import ui.signals
 
 class SteamTools:
     def __init__(self):
+        self.config_parser = stlib.config.Parser()
+        self.config_parser.read_config()
+
+        self.signals = ui.signals.WindowSignals(self)
+        self.logins = ui.logins.CheckLogins(self)
+
         builder = Gtk.Builder()
         builder.add_from_file('ui/interface.xml')
-        builder.connect_signals(ui.signals.WindowSignals(self))
+        builder.connect_signals(self.signals)
 
         for _object in builder.get_objects():
             if issubclass(type(_object), Gtk.Buildable):
@@ -61,18 +67,24 @@ class SteamTools:
         self.mainWindow.show_all()
 
         self.browser_bridge = stlib.cookie.BrowserBridge()
+        self.config_parser.read_config()
 
-        profiles = self.browser_bridge.get_chrome_profile()
+        try:
+            profile_name = self.config_parser.config.get('Config', 'chromeProfile')
+        except configparser.NoOptionError:
+            profiles = self.browser_bridge.get_chrome_profile()
+        else:
+            profile_path = os.path.join(self.browser_bridge.get_chrome_dir(), profile_name)
+            profiles = [ profile_path ]
+
         if not len(profiles):
-            self.update_statusbar('I cannot find your chrome/Chromium profile')
+            self.update_statusBar('I cannot find your chrome/Chromium profile')
             self.new_dialog(Gtk.MesageType.ERROR,
-                            'checkcookies',
+                            'Network Error',
                             'I cannot find your Chrome/Chromium profile',
                             'Some functions will be disabled.')
-            return False
         elif len(profiles) == 1:
-            pass
-            # CONFIG.set('Config', 'chromeProfile', profiles[0])
+            self.config_parser.config.set('Config', 'chromeProfile', profiles[0])
         else:
             self.selectProfile_dialog.add_button('Ok', 1)
             self.selected_profile = 0
@@ -82,23 +94,22 @@ class SteamTools:
                 with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
                     prefs = json.load(prefs_file)
 
+                account_name = prefs['account_info'][0]['full_name']
+                profile_name = os.path.basename(profiles[i])
                 temp_radiobutton = Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
-                                                                              '{} ({})'.format(prefs['account_info'][0][
-                                                                                                   'full_name'],
-                                                                                               os.path.basename(
-                                                                                                       profiles[i])))
+                                                                              '{} ({})'.format(account_name,
+                                                                                               profile_name))
 
-                temp_radiobutton.connect('toggled', ui.signals.WindowSignals(self).on_select_profile_button_toggled, i)
+                temp_radiobutton.connect('toggled', self.signals.on_select_profile_button_toggled, i)
                 self.radiobutton_box.pack_start(temp_radiobutton, False, False, 0)
 
             self.selectProfile_dialog.show_all()
             self.selectProfile_dialog.run()
             self.selectProfile_dialog.destroy()
 
-        # FIXME: update config with the selected profile
-        self.browser_profile = profiles[self.selected_profile]
+            self.config_parser.config.set('Config', 'chromeProfile', profiles[self.selected_profile])
+            self.config_parser.write_config()
 
-        self.logins = ui.logins.CheckLogins(self)
         self.logins.start()
 
     def update_statusBar(self, message):
