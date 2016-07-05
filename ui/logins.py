@@ -21,7 +21,6 @@ import os
 import time
 from threading import Thread
 
-import requests
 from bs4 import BeautifulSoup as bs
 
 import stlib
@@ -40,42 +39,11 @@ class CheckLogins(Thread):
         self.config_parser = stlib.config.Parser()
         self.logger = logging.getLogger('root')
 
-    def try_connect(self, service_name, url):
-        self.auto_recovery = False
-
-        for i in range(1, 4):
-            try:
-                self.config_parser.read_config()
-                cookies = self.config_parser.config._sections[service_name+'Cookies']
-                self.network_session.update_cookies(cookies)
-                response = self.network_session.get_response(url)
-            except(requests.exceptions.TooManyRedirects, KeyError):
-                if not self.auto_recovery:
-                    self.logger.error('Unable to find cookies in the config file')
-                    self.logger.error('Trying to auto recovery')
-                    self.auto_recovery = True
-                    cookies = self.browser_bridge.get_cookies(url)
-
-                    self.config_parser.config[service_name+'Cookies'] = cookies
-                    self.config_parser.write_config()
-                    self.network_session.update_cookies(cookies)
-                else:
-                    self.logger.error('Unable to get cookies.')
-                    self.window.update_statusBar('Unable to get cookies.')
-                    return None
-            except(requests.exceptions.ConnectionError,
-                   requests.exceptions.RequestException,
-                   requests.exceptions.Timeout):
-                self.logger.error('Unable to connect. Trying again... ({}/3)'.format(i))
-                self.window.update_statusBar('Unable to connect. Trying again... ({}/3)'.format(i))
-                time.sleep(3)
-            else:
-                return response
-
     def check_steam_login(self):
         status_context = self.window.update_statusBar("Checking if you are logged in on Steam...")
         self.window.sLoginStatus.set_from_file(os.path.join(self.window.icons_path, self.window.steam_icon_busy))
-        response = self.try_connect('steam', 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about')
+        login_page = 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about'
+        response = self.network_session.try_get_response('steam', login_page)
 
         try:
             user = bs(response.content, 'html.parser').find('a', class_='username').text.strip()
@@ -96,7 +64,7 @@ class CheckLogins(Thread):
     def check_steamgifts_login(self):
         status_context = self.window.update_statusBar("Checking if you are logged in on SteamGifts...")
         self.window.sgLoginStatus.set_from_file(os.path.join(self.window.icons_path, self.window.steamgifts_icon_busy))
-        response = self.try_connect('steamGifts', 'https://www.steamgifts.com/account/profile/sync')
+        response = self.network_session.try_get_response('steamGifts', 'https://www.steamgifts.com/account/profile/sync')
 
         try:
             data = {}
@@ -120,7 +88,7 @@ class CheckLogins(Thread):
         status_context = self.window.update_statusBar("Checking if you are logged in on SteamCompanion...")
         self.window.scLoginStatus.set_from_file(
                 os.path.join(self.window.icons_path, self.window.steamcompanion_icon_busy))
-        response = self.try_connect('steamCompanion', 'https://steamcompanion.com/settings')
+        response = self.network_session.try_get_response('steamCompanion', 'https://steamcompanion.com/settings')
 
         try:
             user = bs(response.content, 'html.parser').find('div', class_='profile').find('a').text.strip()

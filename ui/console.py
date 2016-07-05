@@ -20,7 +20,6 @@ import logging
 import sys
 import time
 
-import requests
 from bs4 import BeautifulSoup as bs
 
 import stlib
@@ -40,44 +39,10 @@ class CheckLogins:
             'https://store.steampowered.com//login/',
         ]
 
-    def try_connect(self, service_name, url):
-        self.auto_recovery = False
-
-        for i in range(1, 4):
-            try:
-                self.config_parser.read_config()
-                cookies = self.config_parser.config._sections[service_name + 'Cookies']
-                self.network_session.update_cookies(cookies)
-                response = self.network_session.get_response(url)
-
-                if service_name is 'Steam':
-                    if any(page in str(response.content) for page in self.steam_login_pages):
-                        raise requests.exceptions.TooManyRedirects
-
-            except(requests.exceptions.TooManyRedirects, KeyError):
-                if not self.auto_recovery:
-                    self.logger.error('Unable to find cookies in the config file')
-                    self.logger.error('Trying to auto recovery')
-                    self.auto_recovery = True
-                    cookies = self.browser_bridge.get_cookies(url)
-
-                    self.config_parser.config[service_name + 'Cookies'] = cookies
-                    self.config_parser.write_config()
-                    self.network_session.update_cookies(cookies)
-                else:
-                    self.logger.error('Unable to get cookies.')
-                    return None
-            except(requests.exceptions.ConnectionError,
-                   requests.exceptions.RequestException,
-                   requests.exceptions.Timeout):
-                self.logger.error('Unable to connect. Trying again... ({}/3)'.format(i))
-                time.sleep(3)
-            else:
-                return response
-
     def check_steam_login(self):
         self.logger.info("Checking if you are logged in on Steam...")
-        response = self.try_connect('steam', 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about')
+        login_page = 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about'
+        response = self.network_session.try_get_response('steam', login_page)
         html = bs(response.content, 'html.parser')
 
         try:
@@ -89,7 +54,7 @@ class CheckLogins:
             sys.exit(1)
 
     def check_steamgifts_login(self):
-        response = self.try_connect('steamGifts', 'https://www.steamgifts.com/account/profile/sync')
+        response = self.network_session.try_get_response('steamGifts', 'https://www.steamgifts.com/account/profile/sync')
         html = bs(response.content, 'html.parser')
 
         try:
@@ -102,7 +67,7 @@ class CheckLogins:
                               '\nwww.steamgifts.com')
 
     def check_steamcompanion_login(self):
-        response = self.try_connect('steamCompanion', 'https://steamcompanion.com/settings')
+        response = self.network_session.try_get_response('steamCompanion', 'https://steamcompanion.com/settings')
 
         try:
             html = bs(response.content, 'html.parser')
