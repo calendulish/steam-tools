@@ -42,17 +42,16 @@ def signal_handler(signal, frame):
 def getBadges(profile):
     fullPage = stnetwork.tryConnect(profile+"/badges/").content
     html = bs(fullPage, 'html.parser')
-    badges = []
+    badges = html.findAll('div', class_='badge_title_row')
 
     try:
         pageCount = int(html.findAll('a', class_='pagelink')[-1].text)
         LOGGER.verbose("I found %d pages of badges", pageCount)
-        for currentPage in range(1, pageCount):
+        for currentPage in range(2, pageCount+1):
             page = stnetwork.tryConnect(profile+"/badges/?p="+str(currentPage)).content
-            badges.append(bs(page, 'html.parser').findAll('div', class_='badge_title_row'))
+            badges.extend(bs(page, 'html.parser').findAll('div', class_='badge_title_row'))
     except IndexError:
         LOGGER.verbose("I found only 1 pages of badges")
-        badges = html.findAll('div', class_='badge_title_row')
 
     badgeSet = {k: [] for k in ['gameID', 'gameName', 'cardCount', 'cardValue']}
     for badge in badges:
