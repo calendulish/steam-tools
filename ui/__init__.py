@@ -3,11 +3,13 @@ from ui import (console,
                 logins,
                 main,
                 signals,
-                timers)
+                timers,
+                card_farming)
 
 __all__ = ['console',
            'libsteam',
            'logins',
            'main',
            'signals',
-           'timers']
+           'timers'
+           'card_farming']
