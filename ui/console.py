@@ -24,58 +24,6 @@ import stlib
 import ui
 
 
-class CheckLogins:
-    def __init__(self, session):
-        self.browser_bridge = stlib.cookie.BrowserBridge()
-        self.network_session = stlib.network.Session(session)
-        self.auto_recovery = False
-        self.config_parser = stlib.config.Parser()
-        self.logger = logging.getLogger('root')
-
-        self.steam_login_pages = [
-            'https://steamcommunity.com/login/home/',
-            'https://store.steampowered.com//login/',
-        ]
-
-    def check_steam_login(self):
-        self.logger.info("Checking if you are logged in on Steam...")
-        login_page = 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about'
-        html = self.network_session.try_get_html('steam', login_page)
-
-        try:
-            self.steam_user = html.find('a', class_='username').text.strip()
-        except(AttributeError, IndexError):
-            self.logger.error('Steam login status: Cookies not found' +
-                              '\nPlease, check if you are logged in on' +
-                              '\nsteampowered.com or steamcommunity.com')
-            sys.exit(1)
-
-    def check_steamgifts_login(self):
-        html = self.network_session.try_get_html('steamGifts', 'https://www.steamgifts.com/account/profile/sync')
-
-        try:
-            data = {}
-            form = html.findAll('form')[1]
-            self.steamgifts_user = form.find('input', {'name':'username'}).get('value')
-        except(AttributeError, IndexError):
-            self.logger.error('SteamGifts login status: Cookies not found' +
-                              '\nPlease, check if you are logged in on' +
-                              '\nwww.steamgifts.com')
-
-    def check_steamcompanion_login(self):
-        html = self.network_session.try_get_html('steamCompanion', 'https://steamcompanion.com/settings')
-
-        try:
-            self.steamcompanion_user = html.find('div', class_='profile').find('a').text.strip()
-
-            if not self.steamcompanion_user:
-                raise AttributeError
-        except(AttributeError, IndexError):
-            self.logger.error('SteamCompanion login status: Cookies not found' +
-                              '\nPlease, check if you are logged in on' +
-                              '\nsteamcompanion.com')
-
-
 class SteamTools:
     def __init__(self, session, cParams):
         self.logger = logging.getLogger('root')
@@ -85,7 +33,7 @@ class SteamTools:
         self.libsteam = ui.libsteam.LibSteam()
         self.farm = ui.card_farming.Farm(session)
         self.network_session = stlib.network.Session(session)
-        self.logins = CheckLogins(session)
+        self.check = ui.logins.CheckLogins(session)
 
         if self.module in dir(self):
             eval('self.' + self.module + '()')
@@ -94,11 +42,11 @@ class SteamTools:
             self.logger.critical("The module %s don't exist", self.module)
 
     def cardfarming(self):
-        self.logins.check_steam_login()
+        user = self.check.steam_login()
 
-        profile = 'https://steamcommunity.com/login/checkstoredlogin/?redirectURL=id/' + self.logins.steam_user
+        profile = 'https://steamcommunity.com/login/checkstoredlogin/?redirectURL=id/' + user
 
-        self.logger.info('Hello {}'.format(self.logins.steam_user))
+        self.logger.info('Hello {}'.format(user))
         self.logger.info('Getting badges info...')
 
         badge_set = self.farm.get_badges(profile)

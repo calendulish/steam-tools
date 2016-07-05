@@ -36,7 +36,7 @@ class SteamTools:
         self.config_parser.read_config()
 
         self.signals = ui.signals.WindowSignals(self)
-        self.logins = ui.logins.CheckLogins(session, self)
+        self.check_login_status = ui.logins.CheckStatus(session, self)
 
         builder = Gtk.Builder()
         builder.add_from_file('ui/interface.xml')
@@ -110,7 +110,7 @@ class SteamTools:
             self.config_parser.config.set('Config', 'chromeProfile', profiles[self.selected_profile])
             self.config_parser.write_config()
 
-        self.logins.start()
+        self.check_login_status.start()
 
     def update_statusBar(self, message):
         id = random.randrange(500)

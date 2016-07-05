@@ -18,38 +18,82 @@
 
 import logging
 import os
-import time
 from threading import Thread
 
 import stlib
 
 
-class CheckLogins(Thread):
-    def __init__(self, session, window):
-        Thread.__init__(self)
-        self.window = window
-        self.steam_connected = False
-        self.steamgifts_connected = False
-        self.steamcompanion_connected = False
+class CheckLogins:
+    def __init__(self, session):
         self.browser_bridge = stlib.cookie.BrowserBridge()
         self.network_session = stlib.network.Session(session)
-        self.auto_recovery = False
         self.config_parser = stlib.config.Parser()
         self.logger = logging.getLogger('root')
 
-    def check_steam_login(self):
-        status_context = self.window.update_statusBar("Checking if you are logged in on Steam...")
-        self.window.sLoginStatus.set_from_file(os.path.join(self.window.icons_path, self.window.steam_icon_busy))
+    def steam_login(self):
+        self.logger.info("Checking if you are logged in on Steam...")
         login_page = 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about'
         html = self.network_session.try_get_html('steam', login_page)
 
         try:
-            user = html.find('a', class_='username').text.strip()
+            steam_user = html.find('a', class_='username').text.strip()
+            return steam_user
+        except(AttributeError, IndexError):
+            self.logger.error('Steam login status: Cookies not found' +
+                              '\nPlease, check if you are logged in on' +
+                              '\nsteampowered.com or steamcommunity.com')
+
+    def steamgifts_login(self):
+        login_page = 'https://www.steamgifts.com/account/profile/sync'
+        html = self.network_session.try_get_html('steamGifts', login_page)
+
+        try:
+            data = {}
+            form = html.findAll('form')[1]
+            steamgifts_user = form.find('input', {'name':'username'}).get('value')
+            return steamgifts_user
+        except(AttributeError, IndexError):
+            self.logger.error('SteamGifts login status: Cookies not found' +
+                              '\nPlease, check if you are logged in on' +
+                              '\nwww.steamgifts.com')
+
+    def steamcompanion_login(self):
+        html = self.network_session.try_get_html('steamCompanion', 'https://steamcompanion.com/settings')
+
+        try:
+            steamcompanion_user = html.find('div', class_='profile').find('a').text.strip()
+
+            if not steamcompanion_user:
+                raise AttributeError
+
+            return steamcompanion_user
+        except(AttributeError, IndexError):
+            self.logger.error('SteamCompanion login status: Cookies not found' +
+                              '\nPlease, check if you are logged in on' +
+                              '\nsteamcompanion.com')
+
+
+class CheckStatus(Thread):
+    def __init__(self, session, window):
+        Thread.__init__(self)
+        self.window = window
+        self.check = CheckLogins(session)
+        self.steam_connected = False
+        self.steamgifts_connected = False
+        self.steamcompanion_connected = False
+
+    def check_steam_login(self):
+        status_context = self.window.update_statusBar("Checking if you are logged in on Steam...")
+        self.window.sLoginStatus.set_from_file(os.path.join(self.window.icons_path, self.window.steam_icon_busy))
+
+        user = self.check.steam_login()
+
+        if user:
             self.window.sLoginStatus.set_from_file(
                     os.path.join(self.window.icons_path, self.window.steam_icon_available))
             self.window.sLoginStatus.set_tooltip_text("Steam Login status:\nConnected as {}".format(user))
             self.steam_connected = True
-        except(AttributeError, IndexError):
+        else:
             self.window.sLoginStatus.set_from_file(
                     os.path.join(self.window.icons_path, self.window.steam_icon_unavailable))
             self.window.sLoginStatus.set_tooltip_text("Steam Login status: Cookies not found" +
@@ -62,17 +106,15 @@ class CheckLogins(Thread):
     def check_steamgifts_login(self):
         status_context = self.window.update_statusBar("Checking if you are logged in on SteamGifts...")
         self.window.sgLoginStatus.set_from_file(os.path.join(self.window.icons_path, self.window.steamgifts_icon_busy))
-        html = self.network_session.try_get_html('steamGifts', 'https://www.steamgifts.com/account/profile/sync')
 
-        try:
-            data = {}
-            form = html.findAll('form')[1]
-            user = form.find('input', {'name':'username'}).get('value')
+        user = self.check.steamgifts_login()
+
+        if user:
             self.window.sgLoginStatus.set_from_file(
                     os.path.join(self.window.icons_path, self.window.steamgifts_icon_available))
             self.window.sgLoginStatus.set_tooltip_text("SteamGifts Login status:\nConnected as {}".format(user))
             self.steamgifts_connected = True
-        except(AttributeError, IndexError):
+        else:
             self.window.sgLoginStatus.set_from_file(
                     os.path.join(self.window.icons_path, self.window.steamgifts_icon_unavailable))
             self.window.sgLoginStatus.set_tooltip_text("SteamGifts Login status: Cookies not found" +
@@ -84,21 +126,17 @@ class CheckLogins(Thread):
 
     def check_steamcompanion_login(self):
         status_context = self.window.update_statusBar("Checking if you are logged in on SteamCompanion...")
-        self.window.scLoginStatus.set_from_file(
-                os.path.join(self.window.icons_path, self.window.steamcompanion_icon_busy))
-        html = self.network_session.try_get_html('steamCompanion', 'https://steamcompanion.com/settings')
+        self.window.scLoginStatus.set_from_file(os.path.join(self.window.icons_path,
+                                                             self.window.steamcompanion_icon_busy))
 
-        try:
-            user = html.find('div', class_='profile').find('a').text.strip()
+        user = self.check.steamcompanion_login()
 
-            if not user:
-                raise AttributeError
-
+        if user:
             self.window.scLoginStatus.set_from_file(
                     os.path.join(self.window.icons_path, self.window.steamcompanion_icon_available))
             self.window.scLoginStatus.set_tooltip_text("SteamCompanion Login status:\nConnected as {}".format(user))
             self.steamcompanion_connected = True
-        except(AttributeError, IndexError):
+        else:
             self.window.scLoginStatus.set_from_file(
                     os.path.join(self.window.icons_path, self.window.steamcompanion_icon_unavailable))
             self.window.scLoginStatus.set_tooltip_text("SteamCompanion Login status: Cookies not found" +
