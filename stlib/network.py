@@ -32,6 +32,11 @@ class Session:
         self.config_parser = stlib.config.Parser()
         self.browser_bridge = stlib.cookie.BrowserBridge()
 
+        self.steam_login_pages = [
+            'https://steamcommunity.com/login/home/',
+            'https://store.steampowered.com//login/',
+        ]
+
     def new_session(self):
         self.session = requests.Session()
         self.session.headers.update({'user-agent':'Unknown/0.0.0'})
@@ -62,6 +67,11 @@ class Session:
                 cookies = self.config_parser.config._sections[service_name + 'Cookies']
                 self.update_cookies(cookies)
                 response = self.get_response(url)
+
+                if service_name is 'steam':
+                    if any(page in str(response.content) for page in self.steam_login_pages):
+                        raise requests.exceptions.TooManyRedirects
+
             except(requests.exceptions.TooManyRedirects, KeyError):
                 if not auto_recovery:
                     self.logger.error('Unable to find cookies in the config file')
