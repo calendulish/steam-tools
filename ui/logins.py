@@ -28,14 +28,14 @@ import stlib
 
 
 class CheckLogins(Thread):
-    def __init__(self, window):
+    def __init__(self, session, window):
         Thread.__init__(self)
         self.window = window
         self.steam_connected = False
         self.steamgifts_connected = False
         self.steamcompanion_connected = False
         self.browser_bridge = stlib.cookie.BrowserBridge()
-        self.network_session = stlib.network.Session()
+        self.network_session = stlib.network.Session(session)
         self.auto_recovery = False
         self.config_parser = stlib.config.Parser()
         self.logger = logging.getLogger('root')

@@ -31,12 +31,12 @@ import ui.signals
 
 
 class SteamTools:
-    def __init__(self):
+    def __init__(self, session):
         self.config_parser = stlib.config.Parser()
         self.config_parser.read_config()
 
         self.signals = ui.signals.WindowSignals(self)
-        self.logins = ui.logins.CheckLogins(self)
+        self.logins = ui.logins.CheckLogins(session, self)
 
         builder = Gtk.Builder()
         builder.add_from_file('ui/interface.xml')

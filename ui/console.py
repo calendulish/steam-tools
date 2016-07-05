@@ -24,7 +24,7 @@ import stlib
 import ui
 
 class SteamTools:
-    def __init__(self, cParams):
+    def __init__(self, session, cParams):
         self.logger = logging.getLogger('root')
         self.module = cParams.cli[0]
         self.parameters = cParams

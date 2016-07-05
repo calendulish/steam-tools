@@ -20,9 +20,14 @@ import requests
 
 
 class Session:
-    def __init__(self):
+    def __init__(self, session):
+        self.session = session
+
+    def new_session(self):
         self.session = requests.Session()
         self.session.headers.update({'user-agent': 'Unknown/0.0.0'})
+
+        return self.session
 
     def update_headers(self, data):
         self.session.headers.update(data)
