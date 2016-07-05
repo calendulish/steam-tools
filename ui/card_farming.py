@@ -19,8 +19,6 @@
 import logging
 import time
 
-from bs4 import BeautifulSoup as bs
-
 import stlib
 
 
@@ -31,8 +29,7 @@ class Farm:
         self.network_session = stlib.network.Session(session)
 
     def get_badges(self, profile):
-        response = self.network_session.get_response('{}/badges/'.format(profile))
-        html = bs(response.content, 'html.parser')
+        html = self.network_session.try_get_html('steam', '{}/badges/'.format(profile))
         badges = html.findAll('div', class_='badge_title_row')
 
         try:
@@ -41,8 +38,7 @@ class Farm:
 
             for page_number in range(2, page_count + 1):
                 url = '{}/badges/?p={}'.format(profile, page_number)
-                response = self.network_session.get_response(url)
-                html = bs(response.content, 'html.parser')
+                html = self.network_session.try_get_html('steam', url)
                 badges.extend(html.findAll('div', class_='badge_title_row'))
         except IndexError:
             self.logger.verbose('I found only 1 page of badges')
@@ -76,8 +72,7 @@ class Farm:
     def get_card_values(self):
         price_set = {k:[] for k in ['game', 'avg']}
         price_page = 'http://www.steamcardexchange.net/index.php?badgeprices'
-        response = self.network_session.get_response(price_page)
-        html = bs(response.content, 'html.parser')
+        html = self.network_session.try_get_html('cardexchange', price_page)
 
         for game in html.findAll('tr')[1:]:
             price_set['game'].append(game.find('a').text)
@@ -92,8 +87,7 @@ class Farm:
         dry_run = self.config_parser.config.getboolean('Debug', 'DryRun', fallback=False)
 
         for i in range(5):
-            response = self.network_session.get_response('{}/gamecards/{}'.format(profile, game_id))
-            html = bs(response.content, 'html.parser')
+            html = self.network_session.try_get_html('steam', '{}/gamecards/{}'.format(profile, game_id))
             stats = html.find('div', class_='badge_title_stats_drops')
 
             if stats:

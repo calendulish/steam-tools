@@ -20,8 +20,6 @@ import logging
 import sys
 import time
 
-from bs4 import BeautifulSoup as bs
-
 import stlib
 import ui
 
@@ -42,8 +40,7 @@ class CheckLogins:
     def check_steam_login(self):
         self.logger.info("Checking if you are logged in on Steam...")
         login_page = 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about'
-        response = self.network_session.try_get_response('steam', login_page)
-        html = bs(response.content, 'html.parser')
+        html = self.network_session.try_get_html('steam', login_page)
 
         try:
             self.steam_user = html.find('a', class_='username').text.strip()
@@ -54,8 +51,7 @@ class CheckLogins:
             sys.exit(1)
 
     def check_steamgifts_login(self):
-        response = self.network_session.try_get_response('steamGifts', 'https://www.steamgifts.com/account/profile/sync')
-        html = bs(response.content, 'html.parser')
+        html = self.network_session.try_get_html('steamGifts', 'https://www.steamgifts.com/account/profile/sync')
 
         try:
             data = {}
@@ -67,10 +63,9 @@ class CheckLogins:
                               '\nwww.steamgifts.com')
 
     def check_steamcompanion_login(self):
-        response = self.network_session.try_get_response('steamCompanion', 'https://steamcompanion.com/settings')
+        html = self.network_session.try_get_html('steamCompanion', 'https://steamcompanion.com/settings')
 
         try:
-            html = bs(response.content, 'html.parser')
             self.steamcompanion_user = html.find('div', class_='profile').find('a').text.strip()
 
             if not self.steamcompanion_user:

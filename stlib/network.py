@@ -82,3 +82,13 @@ class Session:
                 time.sleep(3)
             else:
                 return response
+
+    def get_html(self, url):
+        response = self.get_response(url)
+
+        return bs(response.content, 'html.parser')
+
+    def try_get_html(self, service_name, url):
+        response = self.try_get_response(service_name, url)
+
+        return bs(response.content, 'html.parser')

@@ -21,8 +21,6 @@ import os
 import time
 from threading import Thread
 
-from bs4 import BeautifulSoup as bs
-
 import stlib
 
 
@@ -43,10 +41,10 @@ class CheckLogins(Thread):
         status_context = self.window.update_statusBar("Checking if you are logged in on Steam...")
         self.window.sLoginStatus.set_from_file(os.path.join(self.window.icons_path, self.window.steam_icon_busy))
         login_page = 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about'
-        response = self.network_session.try_get_response('steam', login_page)
+        html = self.network_session.try_get_html('steam', login_page)
 
         try:
-            user = bs(response.content, 'html.parser').find('a', class_='username').text.strip()
+            user = html.find('a', class_='username').text.strip()
             self.window.sLoginStatus.set_from_file(
                     os.path.join(self.window.icons_path, self.window.steam_icon_available))
             self.window.sLoginStatus.set_tooltip_text("Steam Login status:\nConnected as {}".format(user))
@@ -64,11 +62,11 @@ class CheckLogins(Thread):
     def check_steamgifts_login(self):
         status_context = self.window.update_statusBar("Checking if you are logged in on SteamGifts...")
         self.window.sgLoginStatus.set_from_file(os.path.join(self.window.icons_path, self.window.steamgifts_icon_busy))
-        response = self.network_session.try_get_response('steamGifts', 'https://www.steamgifts.com/account/profile/sync')
+        html = self.network_session.try_get_html('steamGifts', 'https://www.steamgifts.com/account/profile/sync')
 
         try:
             data = {}
-            form = bs(response.content, 'html.parser').findAll('form')[1]
+            form = html.findAll('form')[1]
             user = form.find('input', {'name':'username'}).get('value')
             self.window.sgLoginStatus.set_from_file(
                     os.path.join(self.window.icons_path, self.window.steamgifts_icon_available))
@@ -88,10 +86,10 @@ class CheckLogins(Thread):
         status_context = self.window.update_statusBar("Checking if you are logged in on SteamCompanion...")
         self.window.scLoginStatus.set_from_file(
                 os.path.join(self.window.icons_path, self.window.steamcompanion_icon_busy))
-        response = self.network_session.try_get_response('steamCompanion', 'https://steamcompanion.com/settings')
+        html = self.network_session.try_get_html('steamCompanion', 'https://steamcompanion.com/settings')
 
         try:
-            user = bs(response.content, 'html.parser').find('div', class_='profile').find('a').text.strip()
+            user = html.find('div', class_='profile').find('a').text.strip()
 
             if not user:
                 raise AttributeError
