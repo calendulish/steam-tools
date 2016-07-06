@@ -79,7 +79,11 @@ def build(version, system, arch):
                          'FORCELIN']
     elif system == 'WIN':
         com = WCOM + WCOMPARAMS
-        setup_options = ['py2exe', 'FORCEWIN']
+        options = ['py2exe', 'FORCEWIN']
+        if arch == 32:
+            options += ['FORCE32']
+
+        setup_options = options
     else:
         com = CCOM + CCOMPARAMS
         mkcall = [CMAKE, 'PYTHONPATH=' + os.path.dirname(interpreter)]

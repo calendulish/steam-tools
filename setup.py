@@ -22,7 +22,7 @@ from distutils.command.build import build
 from distutils.command.install_scripts import install_scripts
 from distutils.core import setup
 
-CMK, FORCELIN, FORCEWIN, FORCECYG = [0 for _ in range(4)]
+CMK, FORCELIN, FORCEWIN, FORCECYG, FORCE64, FORCE32 = [0 for _ in range(6)]
 
 if 'CMK' in sys.argv:
     CMK = 1
@@ -37,6 +37,13 @@ elif 'FORCEWIN' in sys.argv:
 elif 'FORCECYG' in sys.argv:
     FORCECYG = 1
     sys.argv.remove('FORCECYG')
+
+if 'FORCE64' in sys.argv:
+    FORCE64 = 1
+    sys.argv.remove('FORCE64')
+elif 'FORCE32' in sys.argv:
+    FORCE32 = 1
+    sys.argv.remove('FORCE32')
 
 
 def what():
@@ -57,18 +64,32 @@ def what():
 
     return ret
 
+def arch():
+    if sys.maxsize > 2 ** 32:
+        ret = 64
+    else:
+        ret = 32
+
+    if FORCE64:
+        ret = 64
+    elif FORCE32:
+        ret = 32
+
+    return ret
 
 if what() == 'win' or what() == 'cyg':
     import site
-    import shutil
-    import tempfile
     import atexit
     import textwrap
     # noinspection PyUnresolvedReferences
     import py2exe
     import requests.certs
     from compileall import compile_file
-    from py_compile import compile
+
+    if sys.maxsize > 2 ** 32:
+        site.addsitedir('lib64')
+    else:
+        site.addsitedir('lib32')
 elif 'py2exe' in sys.argv:
     print("You cannot use py2exe without a Windows Python")
     print("Rerun with the correct python version")
@@ -95,30 +116,40 @@ class winpty(build):
         build.run(self)
 
 
-data_files = [('lib64', ['lib64/libsteam_api.dll',
-                         'lib64/libsteam_api.so']),
-              ('lib32', ['lib32/libsteam_api.dll',
-                         'lib32/libsteam_api.so']),
+data_files = [('lib64', [os.path.join('lib64', 'libsteam_api.dll'),
+                         os.path.join('lib64', 'libsteam_api.so')]),
+              ('lib32', [os.path.join('lib32', 'libsteam_api.dll'),
+                         os.path.join('lib32', 'libsteam_api.so')]),
               ('ui', ['ui/interface.xml'])]
 
-winpty_files = ['winpty/build/console.exe',
-                'winpty/build/winpty.dll',
-                'winpty/build/winpty-agent.exe']
+# Include icons
+icons_path = os.path.join('ui', 'icons')
+for icon in os.listdir(icons_path):
+    data_files.append((icons_path, [os.path.join(icons_path, icon)]))
+
+winpty_build_path = os.path.join('winpty', 'build')
+winpty_files = [os.path.join(winpty_build_path, 'console.exe'),
+                os.path.join(winpty_build_path, 'winpty.dll'),
+                os.path.join(winpty_build_path, 'winpty-agent.exe')]
 
 console_programs = ['steam-tools.py']
 
+
 def py2exe_options():
     if what() == 'win' or what() == 'cyg':
-        options = {'py2exe':{'bundle_files':3,
-                             'optimize':1,
-                             'compressed':0,
-                             'packages':'gi'}}
+        options = {'py2exe': {'bundle_files': 3,
+                              'optimize': 1,
+                              'compressed': 0,
+                              'packages': ['gi',
+                                           'psutil',
+                                           'requests',
+                                           'bs4']}}
 
-        return {'console':[{'script':'steam-tools.py',
-                            # 'icon_resources': [(1, 'steam-tools.ico')]
-                            },
-                           {'script':'ui/libsteam_wrapper.py'}],
-                'options':options}
+        return {'console': [{'script': 'steam-tools.py',
+                             # 'icon_resources': [(1, 'steam-tools.ico')]
+                             },
+                            {'script': 'libsteam_wrapper.py'}],
+                'options': options}
     else:
         return {}
 
@@ -157,11 +188,13 @@ def fix_cacert():
 
 
 def fix_gtk():
-    gnome_dir = os.path.join(site.getsitepackages()[1], 'gnome')
+    if arch() == 64:
+        gnome_dir = os.path.join('lib64', 'gnome')
+    else:
+        gnome_dir = os.path.join('lib32', 'gnome')
 
-    gtk_dirs = ['lib\\girepository-1.0',
-                'share\\icons',
-                'share\\themes\\MS-Windows-XP']
+    gtk_dirs = [os.path.join('lib', 'girepository-1.0'),
+                os.path.join('share', 'icons')]
 
     for _file in os.listdir(gnome_dir):
         if _file.endswith('.dll'):
@@ -173,21 +206,9 @@ def fix_gtk():
                 data_files.append((root[len(gnome_dir) + 1:], [os.path.join(root, _file)]))
 
 
-def fix_libsteam():
-    tempDir = tempfile.mkdtemp()
-    temp_libsteam = os.path.join(tempDir, 'libsteam_wrapper.py')
-
-    shutil.copyfile('ui/libsteam_wrapper.py', temp_libsteam)
-    compiled_libsteam = compile(temp_libsteam)
-    os.rename(compiled_libsteam, os.path.join(tempDir, 'libsteam_wrapper.pyc'))
-
-    data_files.append(('ui', ['libsteam_wrapper.pyc']))
-
-
 if what() == 'cyg' or what() == 'win':
     fix_cacert()
     fix_gtk()
-    fix_libsteam()
 
 if what() == 'cyg':
     data_files.append(('winpty', winpty_files))
@@ -203,7 +224,11 @@ setup(
         data_files=data_files,
         scripts=console_programs,
         packages=['stlib'],
-        cmdclass={'build':winpty,
-                  'install_scripts':check_ext},
+        cmdclass={'build': winpty,
+                  'install_scripts': check_ext},
+        requires=['gi',
+                  'requests',
+                  'bs4',
+                  'Crypto'],
         **py2exe_options()
 )
