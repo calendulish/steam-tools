@@ -1,6 +1,3 @@
 [submodule "winpty"]
 	path = winpty
 	url = https://github.com/rprichard/winpty
-[submodule "steamauth"]
-	path = steamauth
-	url = https://github.com/ShyPixie/steamauth
