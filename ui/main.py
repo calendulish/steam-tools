@@ -21,13 +21,8 @@ import json
 import os
 import random
 
-import gi
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
-
 import stlib
-import ui.signals
+import ui
 
 
 class SteamTools:
@@ -38,17 +33,17 @@ class SteamTools:
         self.signals = ui.signals.WindowSignals(self)
         self.check_login_status = ui.logins.CheckStatus(session, self)
 
-        builder = Gtk.Builder()
+        builder = ui.Gtk.Builder()
         builder.add_from_file('ui/interface.xml')
         builder.connect_signals(self.signals)
 
         for _object in builder.get_objects():
-            if issubclass(type(_object), Gtk.Buildable):
-                name = Gtk.Buildable.get_name(_object)
+            if issubclass(type(_object), ui.Gtk.Buildable):
+                name = ui.Gtk.Buildable.get_name(_object)
                 setattr(self, name, _object)
 
-        self.fsa_currentGame.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('black'))
-        self.fsa_currentTime.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('black'))
+        self.fsa_currentGame.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
+        self.fsa_currentTime.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
 
         self.icons_path = 'ui/icons'
 
@@ -79,7 +74,7 @@ class SteamTools:
 
         if not len(profiles):
             self.update_statusBar('I cannot find your chrome/Chromium profile')
-            self.new_dialog(Gtk.MesageType.ERROR,
+            self.new_dialog(ui.Gtk.MesageType.ERROR,
                             'Network Error',
                             'I cannot find your Chrome/Chromium profile',
                             'Some functions will be disabled.')
@@ -96,7 +91,7 @@ class SteamTools:
 
                 account_name = prefs['account_info'][0]['full_name']
                 profile_name = os.path.basename(profiles[i])
-                temp_radiobutton = Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
+                temp_radiobutton = ui.Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
                                                                               '{} ({})'.format(account_name,
                                                                                                profile_name))
 
@@ -119,11 +114,11 @@ class SteamTools:
         return id
 
     def new_dialog(self, msg_type, title, markup, secondary_markup=None):
-        dialog = Gtk.MessageDialog(transient_for=self.mainWindow,
-                                   flags=Gtk.DialogFlags.MODAL,
+        dialog = ui.Gtk.MessageDialog(transient_for=self.mainWindow,
+                                   flags=ui.Gtk.DialogFlags.MODAL,
                                    destroy_with_parent=True,
                                    type=msg_type,
-                                   buttons=Gtk.ButtonsType.OK,
+                                   buttons=ui.Gtk.ButtonsType.OK,
                                    text=markup)
         dialog.set_title(title)
         dialog.format_secondary_markup(secondary_markup)

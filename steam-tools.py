@@ -21,11 +21,6 @@ import os
 import sys
 import subprocess
 
-import gi
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-
 import stlib
 import ui
 
@@ -81,4 +76,4 @@ if __name__ == "__main__":
         ST = ui.console.SteamTools(main_session, cParams)
     else:
         ST = ui.main.SteamTools(main_session)
-        Gtk.main()
+        ui.Gtk.main()

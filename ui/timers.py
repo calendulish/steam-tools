@@ -18,11 +18,6 @@
 
 import datetime
 
-import gi
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-
 class WindowTimers:
     def __init__(self, signals, window):
         self.signals = signals
@@ -39,7 +34,7 @@ class WindowTimers:
         if self.signals.is_fake_app_running:
             if self.signals.fake_app.poll():
                 self.window.update_statusBar("This is not a valid gameID.")
-                self.window.new_dialog(Gtk.MessageType.ERROR,
+                self.window.new_dialog(ui.Gtk.MessageType.ERROR,
                                          'Fake Steam App',
                                          'This is not a valid gameID.',
                                          "Please, check if you write correctly and try again.")

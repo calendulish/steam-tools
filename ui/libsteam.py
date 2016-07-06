@@ -17,20 +17,14 @@
 #
 
 import atexit
-import locale
-import os
-import sys
 import ctypes
 import logging
+import os
 import subprocess
+import sys
 
 if os.name is 'posix':
     import site
-
-import gi
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GLib
 
 class LibSteam:
     def __init__(self):

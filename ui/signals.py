@@ -26,11 +26,6 @@
 import locale
 import subprocess
 
-import gi
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GLib
-
 import ui
 
 class WindowSignals:
@@ -41,7 +36,7 @@ class WindowSignals:
         self.is_fake_app_running = False
 
     def on_window_destroy(self, *args):
-        Gtk.main_quit(*args)
+        ui.Gtk.main_quit(*args)
 
     def on_start_clicked(self, data):
         current_page = self.window.tabs.get_current_page()
@@ -52,7 +47,7 @@ class WindowSignals:
             self.fake_app_id = self.window.fsa_appID.get_text().strip()
             if not self.fake_app_id:
                 self.window.update_statusBar("No AppID found!")
-                self.window.new_dialog(Gtk.MessageType.ERROR,
+                self.window.new_dialog(ui.Gtk.MessageType.ERROR,
                                          'Fake Steam App',
                                          'No AppID found!',
                                          "You must specify an AppID!")
@@ -68,14 +63,14 @@ class WindowSignals:
                     self.window.stop.set_sensitive(True)
                 else:
                     self.window.update_statusBar("Unable to locate a running instance of steam.")
-                    self.window.new_dialog(Gtk.MessageType.ERROR,
+                    self.window.new_dialog(ui.Gtk.MessageType.ERROR,
                                              'Fake Steam App',
                                              'Unable to locate a running instance of steam.',
                                              "Please, start the Steam Client and try again.")
                     self.window.start.set_sensitive(True)
             #### FIXME
             self.timers.fake_app_elapsed_time = 0
-            GLib.timeout_add_seconds(1, self.timers.fake_app_timer)
+            ui.GLib.timeout_add_seconds(1, self.timers.fake_app_timer)
 
         elif current_page == 2:
             pass
@@ -105,7 +100,7 @@ class WindowSignals:
 
             if self.fake_app.returncode is None:
                 error = self.fake_app.stderr.read()
-                self.window.new_dialog(Gtk.MessageType.ERROR,
+                self.window.new_dialog(ui.Gtk.MessageType.ERROR,
                                          'Fake Steam App',
                                          'An Error occured ({}).'.format(self.fake_app.returncode),
                                          error.decode(locale.getpreferredencoding()))
@@ -139,7 +134,7 @@ class WindowSignals:
             pass
 
     def on_statusBar_text_pushed(self, object, context, text):
-        GLib.timeout_add_seconds(10, self.timers.statusBar_text_pushed_timer, context)
+        ui.GLib.timeout_add_seconds(10, self.timers.statusBar_text_pushed_timer, context)
 
     def on_select_profile_button_toggled(self, object, id):
         if object.get_active():
