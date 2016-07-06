@@ -145,7 +145,7 @@ if what() == 'cyg' or what() == 'win':
 
 setup(
     name='Steam Tools',
-    version='0.7',
+    version='0.8.3',
     description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
     author='Lara Maia',
     author_email='dev@lara.click',
