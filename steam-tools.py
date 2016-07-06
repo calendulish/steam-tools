@@ -17,9 +17,10 @@
 #
 
 import argparse
+import logging
 import os
-import sys
 import subprocess
+import sys
 
 import stlib
 import ui
@@ -34,6 +35,7 @@ if os.name is 'posix':
         LOGGER.warning('Use --cli <module> for the commmand line interface.')
         sys.exit(1)
 
+
 def safeCall(call):
     try:
         return subprocess.check_call(call)
@@ -44,6 +46,7 @@ def safeCall(call):
         LOGGER.critical(e)
         return 1
 
+
 # if is executing from a Cygwin console:
 if os.name is 'nt' and os.getenv('PWD'):
     # noinspection PyUnresolvedReferences
@@ -53,8 +56,9 @@ if os.name is 'nt' and os.getenv('PWD'):
     shell = interpreter.parent()
 
     if shell.name() != 'console.exe':
-        stlib.logger.close_all()
-        wrapper = [ 'winpty/console.exe', sys.executable ]
+        logging.shutdown()
+
+        wrapper = ['winpty/console.exe', sys.executable]
 
         # If is not a compiled version
         if sys.executable != sys.argv[0]:
@@ -65,7 +69,6 @@ if os.name is 'nt' and os.getenv('PWD'):
 
         return_code = safeCall(wrapper)
         sys.exit(return_code)
-
 
 if __name__ == "__main__":
     network_session = stlib.network.Session(None)

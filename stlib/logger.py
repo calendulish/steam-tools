@@ -110,10 +110,3 @@ def get_logger(logFileLevel):
     ### ### ### ### ### ### ### ### ### ###
 
     return logger
-
-
-def close_all():
-    logger = logging.getLogger('root')
-    for handler in logger.handlers[:]:
-        handler.close()
-        logger.removeHandler(handler)
