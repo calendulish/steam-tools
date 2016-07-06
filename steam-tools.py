@@ -52,12 +52,12 @@ if os.name is 'nt' and os.getenv('PWD'):
     interpreter = psutil.Process(os.getppid())
     shell = interpreter.parent()
 
-    if shell.name() is not 'console.exe':
+    if shell.name() != 'console.exe':
         stlib.logger.close_all()
         wrapper = [ 'winpty/console.exe', sys.executable ]
 
         # If is not a compiled version
-        if sys.executable is not sys.argv[0]:
+        if sys.executable != sys.argv[0]:
             wrapper.append(sys.argv[0])
 
         if len(sys.argv) != 1:
