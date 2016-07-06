@@ -58,7 +58,10 @@ if os.name is 'nt' and os.getenv('PWD'):
 
         # If is not a compiled version
         if sys.executable is not sys.argv[0]:
-            wrapper += [ sys.argv[0] ]
+            wrapper.append(sys.argv[0])
+
+        if len(sys.argv) != 1:
+            wrapper.extend(sys.argv[1:])
 
         return_code = safeCall(wrapper)
         sys.exit(return_code)
