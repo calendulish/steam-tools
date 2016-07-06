@@ -85,6 +85,10 @@ class Session:
                 else:
                     self.logger.error('Unable to get cookies.')
                     return None
+            except requests.exceptions.SSLError:
+                self.logger.critical('INSECURE CONNECTION DETECTED!')
+                self.logger.critical('Invalid SSL Certificates.')
+                return None
             except(requests.exceptions.ConnectionError,
                    requests.exceptions.RequestException,
                    requests.exceptions.Timeout):
