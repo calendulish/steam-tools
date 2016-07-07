@@ -123,7 +123,7 @@ class SteamTools:
             self.logger.info('Closing %s', badge_set['gameName'][index])
 
             if not dry_run:
-                fake_app._safe_exit()
+                self.libsteam.stop_wrapper(fake_app)
 
         self.logger.warning('There\'s nothing else to do. Leaving.')
 

@@ -28,27 +28,15 @@ if os.name is 'posix':
 
 class LibSteam:
     def __init__(self):
-        atexit.register(self._safe_exit)
+        atexit.register(self.__safe_exit)
         self.logger = logging.getLogger('root')
         self.libsteam_path = self._find_libsteam()
         self.steam_api = ctypes.CDLL(self.libsteam_path)
 
-    def _safe_exit(self, SIG=None, FRM=None):
+    def __safe_exit(self, SIG=None, FRM=None):
         self.logger.warning('Exiting...')
         if 'wrapper_process' in dir(self):
-            self.wrapper_process.terminate()
-            self.logger.debug("Waiting to libsteam_wrapper terminate.")
-            try:
-                self.wrapper_process.communicate(timeout=20)
-            except subprocess.TimeoutExpired:
-                self.logger.debug("Force Killing libsteam_wrapper.")
-                self.wrapper_process.kill()
-                self.wrapper_process.communicate()
-
-            if self.wrapper_process.returncode:
-                return 1
-            else:
-                return 0
+            return self.stop_wrapper(self.wrapper_process)
 
     def _find_libsteam(self):
         if os.name == 'nt':
@@ -106,3 +94,21 @@ class LibSteam:
         self.wrapper_process = subprocess.Popen(wrapper_exec, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         return self.wrapper_process
+
+    def stop_wrapper(self, wrapper):
+        self.logger.verbose('Closing subprocess...')
+
+        wrapper.terminate()
+
+        try:
+            self.logger.debug("Waiting to libsteam_wrapper terminate.")
+            wrapper.communicate(timeout=20)
+        except subprocess.TimeoutExpired:
+            self.logger.debug("Force Killing libsteam_wrapper.")
+            wrapper.kill()
+            wrapper.communicate()
+
+        if wrapper.returncode:
+            return 1
+        else:
+            return 0
