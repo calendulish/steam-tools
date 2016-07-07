@@ -41,8 +41,11 @@ class SteamTools:
 
         self.select_profile()
 
-        if self.module in dir(self):
-            eval('self.' + self.module + '()')
+        class_name = self.__class__.__name__
+        module_function = ''.join(['_', class_name, '__', self.module])
+
+        if module_function in dir(self):
+            eval(''.join(['self.', module_function, '()']))
         else:
             self.logger.critical("Please, check the command line.")
             self.logger.critical("The module %s don't exist", self.module)
@@ -93,7 +96,7 @@ class SteamTools:
                 self.config_parser.config.set('Config', 'chromeProfile', profiles[selected_profile -1])
                 self.config_parser.write_config()
 
-    def cardfarming(self):
+    def __cardfarming(self):
         user = self.check.steam_login()
 
         profile = 'https://steamcommunity.com/login/checkstoredlogin/?redirectURL=id/' + user
@@ -179,7 +182,7 @@ class SteamTools:
 
         self.logger.warning('There\'s nothing else to do. Leaving.')
 
-    def fakeapp(self):
+    def __fakeapp(self):
         try:
             game_id = self.parameters.cli[1]
         except IndexError:
