@@ -18,6 +18,9 @@
 
 import datetime
 
+import ui
+
+
 class WindowTimers:
     def __init__(self, signals, window):
         self.signals = signals
@@ -28,16 +31,15 @@ class WindowTimers:
         self.window.statusBar.pop(context)
         return False
 
-
     def fake_app_timer(self):
         self.fake_app_elapsed_time += 1
         if self.signals.is_fake_app_running:
             if self.signals.fake_app.poll():
                 self.window.update_statusBar("This is not a valid gameID.")
                 self.window.new_dialog(ui.Gtk.MessageType.ERROR,
-                                         'Fake Steam App',
-                                         'This is not a valid gameID.',
-                                         "Please, check if you write correctly and try again.")
+                                       'Fake Steam App',
+                                       'This is not a valid gameID.',
+                                       "Please, check if you write correctly and try again.")
                 self.signals.is_fake_app_running = False
                 self.window.start.set_sensitive(True)
                 self.window.stop.set_sensitive(False)
