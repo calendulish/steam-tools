@@ -24,12 +24,10 @@ import random
 import stlib
 import ui
 
-
 class SteamTools:
     def __init__(self, session):
         self.config_parser = stlib.config.Parser()
-        self.config_parser.read_config()
-
+        self.browser_bridge = stlib.cookie.BrowserBridge()
         self.signals = ui.signals.WindowSignals(self)
         self.check_login_status = ui.logins.CheckStatus(session, self)
 
@@ -61,7 +59,10 @@ class SteamTools:
 
         self.mainWindow.show_all()
 
-        self.browser_bridge = stlib.cookie.BrowserBridge()
+        self.select_profile()
+        self.check_login_status.start()
+
+    def select_profile(self):
         self.config_parser.read_config()
 
         try:
@@ -83,7 +84,7 @@ class SteamTools:
             self.config_parser.write_config()
         else:
             self.selectProfile_dialog.add_button('Ok', 1)
-            self.selected_profile = 0
+            selected_profile = 0
 
             temp_radiobutton = None
             for i in range(len(profiles)):
@@ -107,10 +108,8 @@ class SteamTools:
             self.selectProfile_dialog.run()
             self.selectProfile_dialog.destroy()
 
-            self.config_parser.config.set('Config', 'chromeProfile', profiles[self.selected_profile])
+            self.config_parser.config.set('Config', 'chromeProfile', profiles[selected_profile])
             self.config_parser.write_config()
-
-        self.check_login_status.start()
 
     def update_statusBar(self, message):
         id = random.randrange(500)

@@ -39,6 +39,15 @@ class SteamTools:
         self.browser_bridge = stlib.cookie.BrowserBridge()
         self.check = ui.logins.CheckLogins(session)
 
+        self.select_profile()
+
+        if self.module in dir(self):
+            eval('self.' + self.module + '()')
+        else:
+            self.logger.critical("Please, check the command line.")
+            self.logger.critical("The module %s don't exist", self.module)
+
+    def select_profile(self):
         self.config_parser.read_config()
 
         try:
@@ -86,12 +95,6 @@ class SteamTools:
 
             self.config_parser.config.set('Config', 'chromeProfile', profiles[selected_profile -1])
             self.config_parser.write_config()
-
-        if self.module in dir(self):
-            eval('self.' + self.module + '()')
-        else:
-            self.logger.critical("Please, check the command line.")
-            self.logger.critical("The module %s don't exist", self.module)
 
     def cardfarming(self):
         user = self.check.steam_login()
