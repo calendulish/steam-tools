@@ -72,7 +72,7 @@ class Farm:
     def get_card_values(self):
         price_set = {k:[] for k in ['game', 'avg']}
         price_page = 'http://www.steamcardexchange.net/index.php?badgeprices'
-        html = self.network_session.try_get_html('cardexchange', price_page)
+        html = self.network_session.get_html(price_page)
 
         for game in html.findAll('tr')[1:]:
             price_set['game'].append(game.find('a').text)
