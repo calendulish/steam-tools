@@ -90,7 +90,7 @@ class Session:
 
             except(requests.exceptions.TooManyRedirects, KeyError):
                 if not auto_recovery:
-                    self.logger.error('Unable to find cookies in the config file')
+                    self.logger.error('Unable to find cookies for {}'.format(service_name))
                     self.logger.error('Trying to auto recovery')
                     auto_recovery = True
                     cookies = self.browser_bridge.get_cookies(url)
@@ -99,7 +99,7 @@ class Session:
                     self.config_parser.write_config()
                     self.update_cookies(cookies)
                 else:
-                    self.logger.error('Unable to get cookies.')
+                    self.logger.error('Unable to get cookies for {}'.format(service_name))
                     return None
             else:
                 return response
