@@ -49,24 +49,40 @@ class Session:
     def update_cookies(self, cookies):
         self.session.cookies = requests.utils.cookiejar_from_dict(cookies)
 
-    def get_response(self, url, data=None, timeout=10, verify='cacert.pem', stream=False):
-        if data:
-            response = self.session.post(url, data=data, timeout=timeout, verify=verify, stream=stream)
+    def get_response(self, url, data=None, cookies=None, timeout=10, verify='cacert.pem', stream=False):
+        if cookies:
+            self.update_cookies(cookies)
         else:
-            response = self.session.get(url, timeout=timeout, verify=verify, stream=stream)
-
-        response.raise_for_status()
-        return response
-
-    def try_get_response(self, service_name, url):
-        auto_recovery = False
+            self.session.cookies.clear()
 
         for i in range(1, 4):
             try:
+                if data:
+                    response = self.session.post(url, data=data, timeout=timeout, verify=verify, stream=stream)
+                else:
+                    response = self.session.get(url, timeout=timeout, verify=verify, stream=stream)
+
+                response.raise_for_status()
+            except requests.exceptions.SSLError:
+                self.logger.critical('INSECURE CONNECTION DETECTED!')
+                self.logger.critical('Invalid SSL Certificates.')
+                return None
+            except(requests.exceptions.ConnectionError,
+                   requests.exceptions.RequestException,
+                   requests.exceptions.Timeout):
+                self.logger.error('Unable to connect. Trying again... ({}/3)'.format(i))
+                time.sleep(3)
+            else:
+                return response
+
+    def try_get_response(self, service_name, url, data):
+        auto_recovery = False
+
+        while True:
+            try:
                 self.config_parser.read_config()
                 cookies = self.config_parser.config._sections[service_name + 'Cookies']
-                self.update_cookies(cookies)
-                response = self.get_response(url)
+                response = self.get_response(url, data, cookies)
 
                 if service_name is 'steam':
                     if any(page in str(response.content) for page in self.steam_login_pages):
@@ -85,24 +101,15 @@ class Session:
                 else:
                     self.logger.error('Unable to get cookies.')
                     return None
-            except requests.exceptions.SSLError:
-                self.logger.critical('INSECURE CONNECTION DETECTED!')
-                self.logger.critical('Invalid SSL Certificates.')
-                return None
-            except(requests.exceptions.ConnectionError,
-                   requests.exceptions.RequestException,
-                   requests.exceptions.Timeout):
-                self.logger.error('Unable to connect. Trying again... ({}/3)'.format(i))
-                time.sleep(3)
             else:
                 return response
 
-    def get_html(self, url):
-        response = self.get_response(url)
+    def get_html(self, url, data=None, cookies=None):
+        response = self.get_response(url, data, cookies)
 
         return bs(response.content, 'html.parser')
 
-    def try_get_html(self, service_name, url):
-        response = self.try_get_response(service_name, url)
+    def try_get_html(self, service_name, url, data=None):
+        response = self.try_get_response(service_name, url, data)
 
         return bs(response.content, 'html.parser')
