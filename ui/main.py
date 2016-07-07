@@ -89,7 +89,11 @@ class SteamTools:
                 with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
                     prefs = json.load(prefs_file)
 
-                account_name = prefs['account_info'][0]['full_name']
+                try:
+                    account_name = prefs['account_info'][0]['full_name']
+                except KeyError:
+                    account_name = prefs['profile']['name']
+
                 profile_name = os.path.basename(profiles[i])
                 temp_radiobutton = ui.Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
                                                                               '{} ({})'.format(account_name,
