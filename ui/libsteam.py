@@ -26,6 +26,9 @@ import sys
 if os.name is 'posix':
     import site
 
+import stlib
+
+
 class LibSteam:
     def __init__(self):
         atexit.register(self.__safe_exit)
@@ -34,6 +37,7 @@ class LibSteam:
         self.steam_api = ctypes.CDLL(self.libsteam_path)
 
     def __safe_exit(self, SIG=None, FRM=None):
+        stlib.logger.console_fixer()
         self.logger.warning('Exiting...')
         if 'wrapper_process' in dir(self):
             return self.stop_wrapper(self.wrapper_process)
