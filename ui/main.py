@@ -80,6 +80,7 @@ class SteamTools:
                             'Some functions will be disabled.')
         elif len(profiles) == 1:
             self.config_parser.config.set('Config', 'chromeProfile', profiles[0])
+            self.config_parser.write_config()
         else:
             self.selectProfile_dialog.add_button('Ok', 1)
             self.selected_profile = 0
