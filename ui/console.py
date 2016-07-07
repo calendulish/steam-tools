@@ -98,34 +98,11 @@ class SteamTools:
 
     def __cardfarming(self):
         user = self.check.steam_login()
-
         profile = 'https://steamcommunity.com/login/checkstoredlogin/?redirectURL=id/' + user
 
         self.logger.info('Hello {}'.format(user))
-        self.logger.info('Getting badges info...')
 
         badge_set = self.farm.get_badges(profile)
-
-        if self.config_parser.config.getboolean('Config', 'MostValuableFirst', fallback=True):
-            self.logger.info('Getting cards values...')
-            price_set = self.farm.get_card_values()
-
-            for game in badge_set['gameName']:
-                try:
-                    badge_set['cardValue'].append(price_set['avg'][price_set['game'].index(game)])
-                except ValueError:
-                    badge_set['cardValue'].append(0)
-
-            self.logger.info('Rearranging cards')
-            cards_count = len(badge_set['cardValue'])
-            cards_order = sorted(range(cards_count),
-                                 key=lambda key: badge_set['cardValue'][key],
-                                 reverse=True)
-
-            for item, value in badge_set.items():
-                badge_set[item] = [value[index] for index in cards_order]
-        else:
-            badge_set['cardValue'] = [0 for _ in badge_set['gameID']]
 
         self.logger.warning('Ready to start.')
         game_count = len(badge_set['gameID'])
@@ -135,6 +112,7 @@ class SteamTools:
                 self.logger.verbose('%s have no cards to drop. Ignoring.', badge_set['gameName'][index])
                 continue
 
+            stlib.logger.console_fixer()
             self.logger.info('Starting game %s (%s)', badge_set['gameName'][index], badge_set['gameID'][index])
             dry_run = self.config_parser.config.getboolean('Debug', 'DryRun', fallback=False)
 
