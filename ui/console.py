@@ -54,47 +54,44 @@ class SteamTools:
             profile_name = self.config_parser.config.get('Config', 'chromeProfile')
         except configparser.NoOptionError:
             profiles = self.browser_bridge.get_chrome_profile()
-        else:
-            profile_path = os.path.join(self.browser_bridge.get_chrome_dir(), profile_name)
-            profiles = [profile_path]
 
-        if not len(profiles):
-            self.logger.error('I cannot find your chrome/Chromium profile')
-            self.logger.error('Some functions will be disabled.')
-        elif len(profiles) == 1:
-            self.config_parser.config.set('Config', 'chromeProfile', profiles[0])
-            self.config_parser.write_config()
-        else:
-            self.logger.warning("Who are you?")
-            for i in range(len(profiles)):
-                with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
-                    prefs = json.load(prefs_file)
+            if not len(profiles):
+                self.logger.error('I cannot find your chrome/Chromium profile')
+                self.logger.error('Some functions will be disabled.')
+            elif len(profiles) == 1:
+                self.config_parser.config.set('Config', 'chromeProfile', profiles[0])
+                self.config_parser.write_config()
+            else:
+                self.logger.warning("Who are you?")
+                for i in range(len(profiles)):
+                    with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
+                        prefs = json.load(prefs_file)
 
-                try:
-                    profile_name = prefs['account_info'][0]['full_name']
-                except KeyError:
-                    profile_name = prefs['profile']['name']
+                    try:
+                        profile_name = prefs['account_info'][0]['full_name']
+                    except KeyError:
+                        profile_name = prefs['profile']['name']
 
-                self.logger.warning('  - [%d] %s (%s)',
-                                    i + 1,
-                                    profile_name,
-                                    os.path.basename(profiles[i]))
+                    self.logger.warning('  - [%d] %s (%s)',
+                                        i + 1,
+                                        profile_name,
+                                        os.path.basename(profiles[i]))
 
-            while True:
-                try:
-                    user_input = input("Please, input an number [1-{}]:".format(len(profiles)))
-                    selected_profile = int(user_input - 1)
-                    if selected_profile >= len(profiles) or selected_profile < 0:
-                        raise ValueError
-                except ValueError:
-                    self.logger.error('Please, choose an valid option.')
-                    continue
+                while True:
+                    try:
+                        user_input = input("Please, input an number [1-{}]:".format(len(profiles)))
+                        selected_profile = int(user_input - 1)
+                        if selected_profile >= len(profiles) or selected_profile < 0:
+                            raise ValueError
+                    except ValueError:
+                        self.logger.error('Please, choose an valid option.')
+                        continue
 
-                self.logger.warning("Okay, I'll remember that next time.")
-                break
+                    self.logger.warning("Okay, I'll remember that next time.")
+                    break
 
-            self.config_parser.config.set('Config', 'chromeProfile', profiles[selected_profile -1])
-            self.config_parser.write_config()
+                self.config_parser.config.set('Config', 'chromeProfile', profiles[selected_profile -1])
+                self.config_parser.write_config()
 
     def cardfarming(self):
         user = self.check.steam_login()

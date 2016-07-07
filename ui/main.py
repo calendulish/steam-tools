@@ -69,47 +69,44 @@ class SteamTools:
             profile_name = self.config_parser.config.get('Config', 'chromeProfile')
         except configparser.NoOptionError:
             profiles = self.browser_bridge.get_chrome_profile()
-        else:
-            profile_path = os.path.join(self.browser_bridge.get_chrome_dir(), profile_name)
-            profiles = [ profile_path ]
 
-        if not len(profiles):
-            self.update_statusBar('I cannot find your chrome/Chromium profile')
-            self.new_dialog(ui.Gtk.MesageType.ERROR,
-                            'Network Error',
-                            'I cannot find your Chrome/Chromium profile',
-                            'Some functions will be disabled.')
-        elif len(profiles) == 1:
-            self.config_parser.config.set('Config', 'chromeProfile', profiles[0])
-            self.config_parser.write_config()
-        else:
-            self.selectProfile_dialog.add_button('Ok', 1)
-            selected_profile = 0
+            if not len(profiles):
+                self.update_statusBar('I cannot find your chrome/Chromium profile')
+                self.new_dialog(ui.Gtk.MesageType.ERROR,
+                                'Network Error',
+                                'I cannot find your Chrome/Chromium profile',
+                                'Some functions will be disabled.')
+            elif len(profiles) == 1:
+                self.config_parser.config.set('Config', 'chromeProfile', profiles[0])
+                self.config_parser.write_config()
+            else:
+                self.selectProfile_dialog.add_button('Ok', 1)
+                selected_profile = 0
 
-            temp_radiobutton = None
-            for i in range(len(profiles)):
-                with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
-                    prefs = json.load(prefs_file)
+                temp_radiobutton = None
+                for i in range(len(profiles)):
+                    with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
+                        prefs = json.load(prefs_file)
 
-                try:
-                    account_name = prefs['account_info'][0]['full_name']
-                except KeyError:
-                    account_name = prefs['profile']['name']
+                    try:
+                        account_name = prefs['account_info'][0]['full_name']
+                    except KeyError:
+                        account_name = prefs['profile']['name']
 
-                profile_name = os.path.basename(profiles[i])
-                temp_radiobutton = ui.Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
-                                                                              '{} ({})'.format(account_name,
-                                                                                               profile_name))
+                    profile_name = os.path.basename(profiles[i])
+                    temp_radiobutton = ui.Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
+                                                                                  '{} ({})'.format(account_name,
+                                                                                                   profile_name))
 
-                temp_radiobutton.connect('toggled', self.signals.on_select_profile_button_toggled, i)
-                self.radiobutton_box.pack_start(temp_radiobutton, False, False, 0)
+                    temp_radiobutton.connect('toggled', self.signals.on_select_profile_button_toggled, i)
+                    self.radiobutton_box.pack_start(temp_radiobutton, False, False, 0)
 
-            self.selectProfile_dialog.show_all()
-            self.selectProfile_dialog.run()
-            self.selectProfile_dialog.destroy()
+                self.selectProfile_dialog.show_all()
+                self.selectProfile_dialog.run()
+                self.selectProfile_dialog.destroy()
 
-            self.config_parser.config.set('Config', 'chromeProfile', profiles[selected_profile])
-            self.config_parser.write_config()
+                self.config_parser.config.set('Config', 'chromeProfile', profiles[selected_profile])
+                self.config_parser.write_config()
 
     def update_statusBar(self, message):
         id = random.randrange(500)
