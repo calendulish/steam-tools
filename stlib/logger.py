@@ -72,7 +72,7 @@ def get_logger(logFileLevel):
     logging.addLevelName(logging.TRACE, 'TRACE')
 
     ### --- Internal logger control --- ###
-    logger = logging.getLogger("root")
+    logger = logging.getLogger('SteamTools')
     logger.verbose = lambda msg, *args:logger._log(logging.VERBOSE, msg, args)
     logger.trace = lambda msg, *args:logger._log(logging.TRACE, msg, args)
     logger.setLevel(logging.TRACE)
@@ -105,8 +105,13 @@ def get_logger(logFileLevel):
 
     requests = logging.getLogger("requests.packages.urllib3")
     requests.setLevel(logging.DEBUG)
-    requests.removeHandler("root")
+    #requests.removeHandler('SteamTools')
     requests.addHandler(httpfile)
     ### ### ### ### ### ### ### ### ### ###
+
+    ### -- stlib --- ###
+    stlib = logging.getLogger('stlib')
+    stlib.setLevel(logging.DEBUG)
+    stlib.addHandler(console)
 
     return logger

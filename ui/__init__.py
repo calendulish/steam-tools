@@ -14,12 +14,14 @@ from ui import (console,
                 main,
                 signals,
                 timers,
-                card_farming)
+                card_farming,
+                globals)
 
 __all__ = ['console',
            'libsteam',
            'logins',
            'main',
            'signals',
-           'timers'
-           'card_farming']
+           'timers',
+           'card_farming',
+           'globals']

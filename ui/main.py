@@ -24,12 +24,13 @@ import random
 import stlib
 import ui
 
+
 class SteamTools:
-    def __init__(self, session):
-        self.config_parser = stlib.config.Parser()
-        self.browser_bridge = stlib.cookie.BrowserBridge()
-        self.signals = ui.signals.WindowSignals(self)
-        self.check_login_status = ui.logins.CheckStatus(session, self)
+    def __init__(self):
+        ui.globals.Window.main = self
+        self.signals = ui.signals.WindowSignals()
+        self.check_login_status = ui.logins.CheckStatus()
+        self.config_parser = stlib.config.read()
 
         builder = ui.Gtk.Builder()
         builder.add_from_file('ui/interface.xml')
@@ -63,12 +64,12 @@ class SteamTools:
         self.check_login_status.start()
 
     def select_profile(self):
-        self.config_parser.read_config()
+        stlib.config.read()
 
         try:
-            profile_name = self.config_parser.config.get('Config', 'chromeProfile')
+            profile_name = self.config_parser.get('Config', 'chromeProfile')
         except configparser.NoOptionError:
-            profiles = self.browser_bridge.get_chrome_profile()
+            profiles = stlib.browser.get_chrome_profile()
 
             if not len(profiles):
                 self.update_statusBar('I cannot find your chrome/Chromium profile')
@@ -77,11 +78,10 @@ class SteamTools:
                                 'I cannot find your Chrome/Chromium profile',
                                 'Some functions will be disabled.')
             elif len(profiles) == 1:
-                self.config_parser.config.set('Config', 'chromeProfile', profiles[0])
-                self.config_parser.write_config()
+                self.config_parser.set('Config', 'chromeProfile', profiles[0])
+                stlib.config.write()
             else:
                 self.selectProfile_dialog.add_button('Ok', 1)
-                selected_profile = 0
 
                 temp_radiobutton = None
                 for i in range(len(profiles)):
@@ -95,8 +95,8 @@ class SteamTools:
 
                     profile_name = os.path.basename(profiles[i])
                     temp_radiobutton = ui.Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
-                                                                                  '{} ({})'.format(account_name,
-                                                                                                   profile_name))
+                                                                                     '{} ({})'.format(account_name,
+                                                                                                      profile_name))
 
                     temp_radiobutton.connect('toggled', self.signals.on_select_profile_button_toggled, i)
                     self.radiobutton_box.pack_start(temp_radiobutton, False, False, 0)
@@ -105,8 +105,8 @@ class SteamTools:
                 self.selectProfile_dialog.run()
                 self.selectProfile_dialog.destroy()
 
-                self.config_parser.config.set('Config', 'chromeProfile', profiles[selected_profile])
-                self.config_parser.write_config()
+                self.config_parser.set('Config', 'chromeProfile', profiles[ui.globals.Window.profile])
+                stlib.config.write()
 
     def update_statusBar(self, message):
         id = random.randrange(500)
@@ -116,11 +116,11 @@ class SteamTools:
 
     def new_dialog(self, msg_type, title, markup, secondary_markup=None):
         dialog = ui.Gtk.MessageDialog(transient_for=self.mainWindow,
-                                   flags=ui.Gtk.DialogFlags.MODAL,
-                                   destroy_with_parent=True,
-                                   type=msg_type,
-                                   buttons=ui.Gtk.ButtonsType.OK,
-                                   text=markup)
+                                      flags=ui.Gtk.DialogFlags.MODAL,
+                                      destroy_with_parent=True,
+                                      type=msg_type,
+                                      buttons=ui.Gtk.ButtonsType.OK,
+                                      text=markup)
         dialog.set_title(title)
         dialog.format_secondary_markup(secondary_markup)
         dialog.connect('response', lambda d, _:d.destroy())

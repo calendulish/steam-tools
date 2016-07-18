@@ -18,7 +18,6 @@
 
 import configparser
 import json
-import logging
 import os
 import sys
 import time
@@ -28,16 +27,10 @@ import ui
 
 
 class SteamTools:
-    def __init__(self, session, cParams):
-        self.logger = logging.getLogger('root')
-        self.config_parser = stlib.config.Parser()
+    def __init__(self, cParams):
+        self.config_parser = stlib.config.read()
         self.module = cParams.cli[0]
         self.parameters = cParams
-        self.libsteam = ui.libsteam.LibSteam()
-        self.farm = ui.card_farming.Farm(session)
-        self.network_session = stlib.network.Session(session)
-        self.browser_bridge = stlib.cookie.BrowserBridge()
-        self.check = ui.logins.CheckLogins(session)
 
         self.select_profile()
 
@@ -47,25 +40,23 @@ class SteamTools:
         if module_function in dir(self):
             eval(''.join(['self.', module_function, '()']))
         else:
-            self.logger.critical("Please, check the command line.")
-            self.logger.critical("The module %s don't exist", self.module)
+            ui.globals.logger.critical("Please, check the command line.")
+            ui.globals.logger.critical("The module %s don't exist", self.module)
 
     def select_profile(self):
-        self.config_parser.read_config()
-
         try:
-            profile_name = self.config_parser.config.get('Config', 'chromeProfile')
+            profile_name = self.config_parser.get('Config', 'chromeProfile')
         except configparser.NoOptionError:
-            profiles = self.browser_bridge.get_chrome_profile()
+            profiles = stlib.browser.get_chrome_profile()
 
             if not len(profiles):
-                self.logger.error('I cannot find your chrome/Chromium profile')
-                self.logger.error('Some functions will be disabled.')
+                ui.globals.logger.error('I cannot find your chrome/Chromium profile')
+                ui.globals.logger.error('Some functions will be disabled.')
             elif len(profiles) == 1:
-                self.config_parser.config.set('Config', 'chromeProfile', profiles[0])
-                self.config_parser.write_config()
+                self.config_parser.set('Config', 'chromeProfile', profiles[0])
+                stlib.config.write()
             else:
-                self.logger.warning("Who are you?")
+                ui.globals.logger.warning("Who are you?")
                 for i in range(len(profiles)):
                     with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
                         prefs = json.load(prefs_file)
@@ -75,67 +66,69 @@ class SteamTools:
                     except KeyError:
                         profile_name = prefs['profile']['name']
 
-                    self.logger.warning('  - [%d] %s (%s)',
-                                        i + 1,
-                                        profile_name,
-                                        os.path.basename(profiles[i]))
+                    ui.globals.logger.warning('  - [%d] %s (%s)',
+                                              i + 1,
+                                              profile_name,
+                                              os.path.basename(profiles[i]))
 
                 while True:
                     try:
                         user_input = input("Please, input an number [1-{}]:".format(len(profiles)))
-                        selected_profile = int(user_input - 1)
+                        selected_profile = int(user_input) - 1
                         if selected_profile >= len(profiles) or selected_profile < 0:
                             raise ValueError
                     except ValueError:
-                        self.logger.error('Please, choose an valid option.')
+                        ui.globals.logger.error('Please, choose an valid option.')
                         continue
 
-                    self.logger.warning("Okay, I'll remember that next time.")
+                    print(selected_profile)
+                    print(profiles[selected_profile])
+                    ui.globals.logger.warning("Okay, I'll remember that next time.")
                     break
 
-                self.config_parser.config.set('Config', 'chromeProfile', profiles[selected_profile -1])
-                self.config_parser.write_config()
+                self.config_parser.set('Config', 'chromeProfile', profiles[selected_profile])
+                stlib.config.write()
 
     def __cardfarming(self):
-        user = self.check.steam_login()
+        user = ui.logins.check_steam_login()
         profile = 'https://steamcommunity.com/login/checkstoredlogin/?redirectURL=id/' + user
 
-        self.logger.info('Hello {}'.format(user))
+        ui.globals.logger.info('Hello {}'.format(user))
 
-        badge_set = self.farm.get_badges(profile)
+        badge_set = ui.card_farming.get_badges(profile)
 
-        self.logger.warning('Ready to start.')
+        ui.globals.logger.warning('Ready to start.')
         game_count = len(badge_set['gameID'])
 
         for index in range(game_count):
             if badge_set['cardCount'][index] < 1:
-                self.logger.verbose('%s have no cards to drop. Ignoring.', badge_set['gameName'][index])
+                ui.globals.logger.verbose('%s have no cards to drop. Ignoring.', badge_set['gameName'][index])
                 continue
 
             stlib.logger.console_fixer()
-            self.logger.info('Starting game %s (%s)', badge_set['gameName'][index], badge_set['gameID'][index])
-            dry_run = self.config_parser.config.getboolean('Debug', 'DryRun', fallback=False)
+            ui.globals.logger.info('Starting game %s (%s)', badge_set['gameName'][index], badge_set['gameID'][index])
+            dry_run = self.config_parser.getboolean('Debug', 'DryRun', fallback=False)
 
             if not dry_run:
-                if not self.libsteam.is_steam_running():
-                    self.logger.critical('Unable to locate a running instance of steam.')
-                    self.logger.critical('Please, start Steam and try again.')
+                if not ui.libsteam.is_steam_running():
+                    ui.globals.logger.critical('Unable to locate a running instance of steam.')
+                    ui.globals.logger.critical('Please, start Steam and try again.')
                     sys.exit(1)
 
-                self.logger.info('Preparing. Please wait...')
-                fake_app = self.libsteam.run_wrapper(badge_set['gameID'][index])
-                self.logger.info('Running {}'.format(badge_set['gameID'][index]))
+                ui.globals.logger.info('Preparing. Please wait...')
+                ui.globals.FakeApp.process = ui.libsteam.run_wrapper(badge_set['gameID'][index])
+                ui.globals.logger.info('Running {}'.format(badge_set['gameID'][index]))
 
             while True:
                 card_count = badge_set['cardCount'][index]
                 stlib.logger.console_msg('{:2d} cards drop remaining. Waiting...'.format(card_count), end='\r')
-                self.logger.verbose('Waiting card drop loop')
-                self.logger.trace("Current: %s", [badge_set[i][index] for i, v in badge_set.items()])
+                ui.globals.logger.verbose('Waiting card drop loop')
+                ui.globals.logger.trace("Current: %s", [badge_set[i][index] for i, v in badge_set.items()])
 
                 for i in range(40):
-                    if not dry_run and fake_app.poll():
+                    if not dry_run and ui.globals.FakeApp.process.poll():
                         stlib.logger.console_fixer()
-                        self.logger.critical(fake_app.stderr.read().decode('utf-8'))
+                        ui.globals.logger.critical(ui.globals.FakeApp.process.stderr.read().decode('utf-8'))
                         sys.exit(1)
 
                     try:
@@ -145,46 +138,46 @@ class SteamTools:
 
                 stlib.logger.console_fixer('\r')
                 stlib.logger.console_msg('Checking if game have more cards drops...', end='\r')
-                badge_set['cardCount'][index] = self.farm.update_card_count(profile, badge_set['gameID'][index])
+                badge_set['cardCount'][index] = ui.card_farming.update_card_count(profile, badge_set['gameID'][index])
                 stlib.logger.console_fixer('\r')
 
                 if badge_set['cardCount'][index] < 1:
                     stlib.logger.console_fixer('\r')
-                    self.logger.warning('No more cards to drop.')
+                    ui.globals.logger.warning('No more cards to drop.')
                     break
 
-            self.logger.info('Closing %s', badge_set['gameName'][index])
+            ui.globals.logger.info('Closing %s', badge_set['gameName'][index])
 
             if not dry_run:
-                self.libsteam.stop_wrapper(fake_app)
+                ui.libsteam.stop_wrapper()
 
-        self.logger.warning('There\'s nothing else to do. Leaving.')
+        ui.globals.logger.warning('There\'s nothing else to do. Leaving.')
 
     def __fakeapp(self):
         try:
-            game_id = self.parameters.cli[1]
+            ui.globals.FakeApp.id = self.parameters.cli[1]
         except IndexError:
-            self.logger.critical("Unable to locate the gameID.")
-            self.logger.critical("Please, check the command line.")
+            ui.globals.logger.critical("Unable to locate the gameID.")
+            ui.globals.logger.critical("Please, check the command line.")
             sys.exit(1)
 
-        if self.libsteam.is_steam_running():
-            self.logger.info("Preparing. Please wait...")
-            fake_app = self.libsteam.run_wrapper(game_id)
+        if ui.libsteam.is_steam_running():
+            ui.globals.logger.info("Preparing. Please wait...")
+            ui.globals.FakeApp.process = ui.libsteam.run_wrapper(ui.globals.FakeApp.id)
 
             time.sleep(3)
-            if fake_app.poll():
-                self.logger.critical("This is not a valid gameID.")
+            if ui.globals.FakeApp.process.poll():
+                ui.globals.logger.critical("This is not a valid gameID.")
                 sys.exit(1)
 
             try:
-                self.logger.info("Running {}".format(game_id))
-                fake_app.wait()
+                ui.globals.logger.info("Running {}".format(ui.globals.FakeApp.id))
+                ui.globals.FakeApp.process.wait()
             except KeyboardInterrupt:
                 pass
         else:
-            self.logger.critical("Unable to locate a running instance of steam.")
-            self.logger.critical("Please, start Steam and try again.")
+            ui.globals.logger.critical("Unable to locate a running instance of steam.")
+            ui.globals.logger.critical("Please, start Steam and try again.")
             sys.exit(1)
 
         sys.exit(0)

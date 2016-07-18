@@ -24,92 +24,74 @@ from bs4 import BeautifulSoup as bs
 
 import stlib
 
+LOGGER = logging.getLogger(__name__)
 
-class Session:
-    def __init__(self, session):
-        self.session = session
-        self.logger = logging.getLogger('root')
-        self.config_parser = stlib.config.Parser()
-        self.browser_bridge = stlib.cookie.BrowserBridge()
+STEAM_LOGIN_PAGES = [
+    'https://steamcommunity.com/login/home/',
+    'https://store.steampowered.com//login/',
+]
 
-        self.steam_login_pages = [
-            'https://steamcommunity.com/login/home/',
-            'https://store.steampowered.com//login/',
-        ]
+USER_AGENT = {'User-Agent': 'Unknown/0.0.0' }
 
-    def new_session(self):
-        self.session = requests.Session()
-        self.session.headers.update({'user-agent':'Unknown/0.0.0'})
+def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, verify='cacert.pem', stream=False):
+    if headers:
+        headers.update(USER_AGENT)
 
-        return self.session
-
-    def update_headers(self, data):
-        self.session.headers.update(data)
-
-    def update_cookies(self, cookies):
-        self.session.cookies = requests.utils.cookiejar_from_dict(cookies)
-
-    def get_response(self, url, data=None, cookies=None, timeout=10, verify='cacert.pem', stream=False):
-        if cookies:
-            self.update_cookies(cookies)
+    for i in range(1, 4):
+        try:
+            if data:
+                response = requests.post(url, data=data, headers=headers, cookies=cookies, timeout=timeout, verify=verify, stream=stream)
+            else:
+                response = requests.get(url, cookies=cookies, headers=headers, timeout=timeout, verify=verify, stream=stream)
+            response.raise_for_status()
+        except requests.exceptions.SSLError:
+            LOGGER.critical('INSECURE CONNECTION DETECTED!')
+            LOGGER.critical('Invalid SSL Certificates.')
+            return None
+        except(requests.exceptions.ConnectionError,
+               requests.exceptions.RequestException,
+               requests.exceptions.Timeout):
+            LOGGER.error('Unable to connect. Trying again... ({}/3)'.format(i))
+            time.sleep(3)
         else:
-            self.session.cookies.clear()
+            return response
 
-        for i in range(1, 4):
-            try:
-                if data:
-                    response = self.session.post(url, data=data, timeout=timeout, verify=verify, stream=stream)
-                else:
-                    response = self.session.get(url, timeout=timeout, verify=verify, stream=stream)
 
-                response.raise_for_status()
-            except requests.exceptions.SSLError:
-                self.logger.critical('INSECURE CONNECTION DETECTED!')
-                self.logger.critical('Invalid SSL Certificates.')
+def try_get_response(service_name, url, data=None):
+    config_parser = stlib.config.read()
+    auto_recovery = False
+
+    while True:
+        try:
+            cookies = config_parser._sections[service_name + 'Cookies']
+            response = get_response(url, data, cookies)
+
+            if service_name is 'steam':
+                if any(page in str(response.content) for page in STEAM_LOGIN_PAGES):
+                    raise requests.exceptions.TooManyRedirects
+        except(requests.exceptions.TooManyRedirects, KeyError):
+            if not auto_recovery:
+                LOGGER.error('Unable to find cookies for {}'.format(service_name))
+                LOGGER.error('Trying to auto recovery')
+                auto_recovery = True
+                cookies = stlib.browser.get_cookies(url)
+
+                config_parser[service_name + 'Cookies'] = cookies
+                stlib.config.write()
+            else:
+                LOGGER.error('Unable to get cookies for {}'.format(service_name))
                 return None
-            except(requests.exceptions.ConnectionError,
-                   requests.exceptions.RequestException,
-                   requests.exceptions.Timeout):
-                self.logger.error('Unable to connect. Trying again... ({}/3)'.format(i))
-                time.sleep(3)
-            else:
-                return response
+        else:
+            return response
 
-    def try_get_response(self, service_name, url, data):
-        auto_recovery = False
 
-        while True:
-            try:
-                self.config_parser.read_config()
-                cookies = self.config_parser.config._sections[service_name + 'Cookies']
-                response = self.get_response(url, data, cookies)
+def get_html(url, data=None, cookies=None):
+    response = get_response(url, data, cookies)
 
-                if service_name is 'steam':
-                    if any(page in str(response.content) for page in self.steam_login_pages):
-                        raise requests.exceptions.TooManyRedirects
+    return bs(response.content, 'html.parser')
 
-            except(requests.exceptions.TooManyRedirects, KeyError):
-                if not auto_recovery:
-                    self.logger.error('Unable to find cookies for {}'.format(service_name))
-                    self.logger.error('Trying to auto recovery')
-                    auto_recovery = True
-                    cookies = self.browser_bridge.get_cookies(url)
 
-                    self.config_parser.config[service_name + 'Cookies'] = cookies
-                    self.config_parser.write_config()
-                    self.update_cookies(cookies)
-                else:
-                    self.logger.error('Unable to get cookies for {}'.format(service_name))
-                    return None
-            else:
-                return response
+def try_get_html(service_name, url, data=None):
+    response = try_get_response(service_name, url, data)
 
-    def get_html(self, url, data=None, cookies=None):
-        response = self.get_response(url, data, cookies)
-
-        return bs(response.content, 'html.parser')
-
-    def try_get_html(self, service_name, url, data=None):
-        response = self.try_get_response(service_name, url, data)
-
-        return bs(response.content, 'html.parser')
+    return bs(response.content, 'html.parser')

@@ -71,15 +71,12 @@ if os.name is 'nt' and os.getenv('PWD'):
         sys.exit(return_code)
 
 if __name__ == "__main__":
-    network_session = stlib.network.Session(None)
-    main_session = network_session.new_session()
-
     aParser = argparse.ArgumentParser()
     aParser.add_argument('-c', '--cli', nargs='+')
     cParams = aParser.parse_args()
 
     if cParams.cli:
-        ST = ui.console.SteamTools(main_session, cParams)
+        ST = ui.console.SteamTools(cParams)
     else:
-        ST = ui.main.SteamTools(main_session)
+        ST = ui.main.SteamTools()
         ui.Gtk.main()

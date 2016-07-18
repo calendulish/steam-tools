@@ -1,9 +1,11 @@
-from stlib import (config,
-                   cookie,
-                   logger,
-                   network)
+#  Keep the import order, please
 
-__all__ = ['config',
-           'cookie',
-           'logger',
-           'network']
+from stlib import (logger,
+                   config,
+                   network,
+                   browser)
+
+__all__ = ['logger',
+           'config',
+           'network',
+           'browser']

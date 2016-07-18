@@ -21,33 +21,36 @@ import logging
 import os
 import sys
 
+LOGGER = logging.getLogger(__name__)
 
-class Parser:
-    def __init__(self):
-        self.logger = logging.getLogger('root')
-        self.config = configparser.RawConfigParser()
-        self.config.optionxform = str
+if os.name == 'nt':
+    DATA_DIR = os.getenv('LOCALAPPDATA')
+else:
+    DATA_DIR = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
 
-        if os.name == 'nt':
-            data_dir = os.getenv('LOCALAPPDATA')
-        else:
-            data_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
+CONFIG_FILE_NAME = os.path.splitext(os.path.basename(sys.argv[0]))[0] + '.config'
+CONFIG_FILE_PATH = os.path.join(DATA_DIR, 'steam-tools', CONFIG_FILE_NAME)
 
-        self.config_file_name = os.path.splitext(os.path.basename(sys.argv[0]))[0] + '.config'
-        self.config_file_path = os.path.join(data_dir, 'steam-tools', self.config_file_name)
+CONFIG_PARSER = configparser.RawConfigParser()
+CONFIG_PARSER.optionxform = str
 
-        os.makedirs(os.path.dirname(self.config_file_path), exist_ok=True)
+os.makedirs(os.path.dirname(CONFIG_FILE_PATH), exist_ok=True)
 
-        if not os.path.isfile(self.config_file_path):
-            self.logger.warn("No config file found.")
-            self.logger.warn("Creating a new at %s", self.config_file_path)
-            self.config.add_section('Config')
-            with open(self.config_file_path, 'w') as fp:
-                self.config.write(fp)
+if not os.path.isfile(CONFIG_FILE_PATH):
+    LOGGER.warn("No config file found.")
+    LOGGER.warn("Creating a new at %s", CONFIG_FILE_PATH)
 
-    def read_config(self):
-        self.config.read(self.config_file_path)
+    CONFIG_PARSER.add_section('Config')
 
-    def write_config(self):
-        with open(self.config_file_path, 'w') as fp:
-            self.config.write(fp)
+    with open(CONFIG_FILE_PATH, 'w') as FP:
+        CONFIG_PARSER.write(FP)
+
+
+def read():
+    CONFIG_PARSER.read(CONFIG_FILE_PATH)
+    return CONFIG_PARSER
+
+
+def write():
+    with open(CONFIG_FILE_PATH, 'w') as config_file:
+        CONFIG_PARSER.write(config_file)

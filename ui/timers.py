@@ -17,38 +17,41 @@
 #
 
 import datetime
+import time
 
 import ui
 
 
-class WindowTimers:
-    def __init__(self, signals, window):
-        self.signals = signals
-        self.window = window
-        self.fake_app_elapsed_time = 0
+def statusBar_text_pushed_timer(context):
+    window = ui.globals.Window.main
+    window.statusBar.pop(context)
+    return False
 
-    def statusBar_text_pushed_timer(self, context):
-        self.window.statusBar.pop(context)
-        return False
 
-    def fake_app_timer(self):
-        self.fake_app_elapsed_time += 1
-        if self.signals.is_fake_app_running:
-            if self.signals.fake_app.poll():
-                self.window.update_statusBar("This is not a valid gameID.")
-                self.window.new_dialog(ui.Gtk.MessageType.ERROR,
-                                       'Fake Steam App',
-                                       'This is not a valid gameID.',
-                                       "Please, check if you write correctly and try again.")
-                self.signals.is_fake_app_running = False
-                self.window.start.set_sensitive(True)
-                self.window.stop.set_sensitive(False)
-                self.window.fsa_currentGame.set_text('')
-                self.window.fsa_currentTime.set_text('')
-                return False
-            else:
-                self.window.fsa_currentGame.set_text(self.signals.fake_app_id)
-                self.window.fsa_currentTime.set_text(str(datetime.timedelta(seconds=self.fake_app_elapsed_time)))
-                return True
-        else:
+def fake_app_timer(start_time):
+    window = ui.globals.Window.main
+    elapsed_seconds = round(time.time() - start_time)
+    elapsed_time = datetime.timedelta(seconds=elapsed_seconds)
+
+    if ui.globals.FakeApp.is_running:
+        if not ui.libsteam.is_wrapper_running():
+            window.update_statusBar("This is not a valid gameID.")
+            window.new_dialog(ui.Gtk.MessageType.ERROR,
+                              'Fake Steam App',
+                              'This is not a valid gameID.',
+                              "Please, check if you write correctly and try again.")
+
+            ui.globals.FakeApp.is_running = False
+            window.start.set_sensitive(True)
+            window.stop.set_sensitive(False)
+            window.fsa_currentGame.set_text('')
+            window.fsa_currentTime.set_text('')
+
             return False
+        else:
+            window.fsa_currentGame.set_text(ui.globals.FakeApp.id)
+            window.fsa_currentTime.set_text(str(elapsed_time))
+
+            return True
+    else:
+        return False

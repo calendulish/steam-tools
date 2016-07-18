@@ -18,7 +18,6 @@
 
 import atexit
 import ctypes
-import logging
 import os
 import subprocess
 import sys
@@ -27,92 +26,103 @@ if os.name is 'posix':
     import site
 
 import stlib
+import ui
 
 
-class LibSteam:
-    def __init__(self):
-        atexit.register(self.__safe_exit)
-        self.logger = logging.getLogger('root')
-        self.libsteam_path = self._find_libsteam()
-        self.steam_api = ctypes.CDLL(self.libsteam_path)
+def _find_libsteam():
+    if os.name == 'nt':
+        ext = '.dll'
+    else:
+        ext = '.so'
 
-    def __safe_exit(self, SIG=None, FRM=None):
-        stlib.logger.console_fixer()
-        self.logger.warning('Exiting...')
-        if 'wrapper_process' in dir(self):
-            return self.stop_wrapper(self.wrapper_process)
+    if sys.maxsize > 2 ** 32:
+        libsteam_path = os.path.join('lib64', 'libsteam_api' + ext)
+    else:
+        libsteam_path = os.path.join('lib32', 'libsteam_api' + ext)
 
-    def _find_libsteam(self):
+    if not os.path.isfile(libsteam_path):
         if os.name == 'nt':
-            ext = '.dll'
-        else:
-            ext = '.so'
-
-        if sys.maxsize > 2 ** 32:
-            libsteam_path = os.path.join('lib64', 'libsteam_api' + ext)
-        else:
-            libsteam_path = os.path.join('lib32', 'libsteam_api' + ext)
-
-        if not os.path.isfile(libsteam_path):
-            if os.name == 'nt':
-                return False
-            else:
-                lib_dir = 'share/steam-tools'
-                if os.path.isfile(os.path.join('/usr/local', lib_dir, libsteam_path)):
-                    STEAM_API = os.path.join('/usr/local', lib_dir, libsteam_path)
-                elif os.path.isfile(os.path.join('/usr', lib_dir, libsteam_path)):
-                    STEAM_API = os.path.join('/usr', lib_dir, libsteam_path)
-                else:
-                    return False
-
-        return libsteam_path
-
-    def _find_wrapper(self):
-        paths = []
-        paths.append(os.path.dirname(os.path.abspath(sys.argv[0])))
-        paths.append(os.path.join(paths[0], 'ui'))
-
-        if os.name is 'posix':
-            paths.append(os.path.join(site.getsitepackages()[1], 'stlib'))
-
-        for path in paths:
-            for ext in ['', '.exe', '.py']:
-                full_path = os.path.join(path, 'libsteam_wrapper' + ext)
-
-                if os.path.isfile(full_path):
-                    return full_path
-
-    def is_steam_running(self):
-        if self.steam_api.SteamAPI_IsSteamRunning():
-            return True
-        else:
             return False
-
-    def run_wrapper(self, app_id):
-        wrapper_path = self._find_wrapper()
-        wrapper_exec = [wrapper_path, app_id, self.libsteam_path]
-
-        if wrapper_path[-3:] != 'exe':
-            wrapper_exec = ['python'] + wrapper_exec
-
-        self.wrapper_process = subprocess.Popen(wrapper_exec, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        return self.wrapper_process
-
-    def stop_wrapper(self, wrapper):
-        self.logger.verbose('Closing subprocess...')
-
-        wrapper.terminate()
-
-        try:
-            self.logger.debug("Waiting to libsteam_wrapper terminate.")
-            wrapper.communicate(timeout=20)
-        except subprocess.TimeoutExpired:
-            self.logger.debug("Force Killing libsteam_wrapper.")
-            wrapper.kill()
-            wrapper.communicate()
-
-        if wrapper.returncode:
-            return 1
         else:
-            return 0
+            lib_dir = 'share/steam-tools'
+            if os.path.isfile(os.path.join('/usr/local', lib_dir, libsteam_path)):
+                libsteam_path = os.path.join('/usr/local', lib_dir, libsteam_path)
+            elif os.path.isfile(os.path.join('/usr', lib_dir, libsteam_path)):
+                libsteam_path = os.path.join('/usr', lib_dir, libsteam_path)
+            else:
+                return False
+
+    return libsteam_path
+
+
+def _find_wrapper():
+    paths = []
+    paths.append(os.path.dirname(os.path.abspath(sys.argv[0])))
+    paths.append(os.path.join(paths[0], 'ui'))
+
+    if os.name is 'posix':
+        paths.append(os.path.join(site.getsitepackages()[1], 'stlib'))
+
+    for path in paths:
+        for ext in ['', '.exe', '.py']:
+            full_path = os.path.join(path, 'libsteam_wrapper' + ext)
+
+            if os.path.isfile(full_path):
+                return full_path
+
+
+def run_wrapper(app_id):
+    wrapper_path = _find_wrapper()
+    wrapper_exec = [wrapper_path, app_id, _find_libsteam()]
+
+    if wrapper_path[-3:] != 'exe':
+        wrapper_exec = ['python'] + wrapper_exec
+
+    ui.globals.FakeApp.process = subprocess.Popen(wrapper_exec, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    return ui.globals.FakeApp.process
+
+
+def stop_wrapper():
+    ui.globals.logger.verbose('Closing subprocess...')
+
+    ui.globals.FakeApp.process.terminate()
+
+    try:
+        ui.globals.logger.debug("Waiting to libsteam_wrapper terminate.")
+        ui.globals.FakeApp.process.communicate(timeout=20)
+    except subprocess.TimeoutExpired:
+        ui.globals.logger.debug("Force Killing libsteam_wrapper.")
+        ui.globals.FakeApp.process.kill()
+        ui.globals.FakeApp.process.communicate()
+
+    if ui.globals.FakeApp.process.returncode:
+        return 1
+    else:
+        return 0
+
+
+def is_steam_running():
+    steam_api = ctypes.CDLL(_find_libsteam())
+    if steam_api.SteamAPI_IsSteamRunning():
+        return True
+    else:
+        return False
+
+
+def is_wrapper_running():
+    if ui.globals.FakeApp.process.poll():
+        return False
+    else:
+        return True
+
+
+def __safe_exit():
+    stlib.logger.console_fixer()
+    ui.globals.logger.warning('Exiting...')
+
+    if ui.globals.FakeApp.process:
+        return stop_wrapper()
+
+
+atexit.register(__safe_exit)
