@@ -41,7 +41,7 @@ WCOMPARAMS = ['/C']
 CCOMPARAMS = ['-w', 'hide', '-l', '-', '-e']
 
 
-def safeCall(call):
+def safe_call(call):
     try:
         check_call(call)
     except CalledProcessError as e:
@@ -54,9 +54,9 @@ def safeCall(call):
         sys.exit(1)
 
 
-def build(version, system, arch):
+def build(version, system_, arch_):
     try:
-        interpreter = eval(system + str(arch))
+        interpreter = eval(system_ + str(arch_))
     except NameError:
         return
 
@@ -69,10 +69,10 @@ def build(version, system, arch):
 
     if system == 'LIN':
         com = CCOM + CCOMPARAMS
-        startDir = os.path.dirname(os.path.abspath(sys.argv[0]))
+        start_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
         setup_options = ['build',
                          'install',
-                         '--root', os.path.join(startDir, 'dist'),
+                         '--root', os.path.join(start_dir, 'dist'),
                          '--install-data', '.',
                          '--install-scripts', '.',
                          '--install-lib', '.',
@@ -91,36 +91,36 @@ def build(version, system, arch):
             mkcall += ['FORCE32BITS=1']
 
         print("Building...")
-        safeCall(com + mkcall + ['clean'])
-        safeCall(com + mkcall)
+        safe_call(com + mkcall + ['clean'])
+        safe_call(com + mkcall)
         return
 
     print("Building...")
     pycall = [interpreter, '-u', 'setup.py']
-    safeCall(com + pycall + setup_options)
+    safe_call(com + pycall + setup_options)
 
 
-def archive(version, system, arch):
-    startDir = os.path.dirname(os.path.abspath(sys.argv[0]))
-    outDir = os.path.join(startDir, 'dist')
-    archiveName = 'steam_tools_' + version + '_' + system + '_' + str(arch)
-    archiveDir = os.path.join(startDir, archiveName)
+def archive(version, system_, arch_):
+    start_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+    out_dir = os.path.join(start_dir, 'dist')
+    archive_name = 'steam_tools_' + version + '_' + system_ + '_' + str(arch_)
+    archive_dir = os.path.join(start_dir, archive_name)
 
-    if not os.path.isdir(outDir):
+    if not os.path.isdir(out_dir):
         return
 
     print('Preparing for archive')
 
-    if os.path.isfile(archiveDir + '.zip'):
-        os.remove(archiveDir + '.zip')
+    if os.path.isfile(archive_dir + '.zip'):
+        os.remove(archive_dir + '.zip')
 
-    if os.path.isdir(archiveDir):
-        shutil.rmtree(archiveDir)
+    if os.path.isdir(archive_dir):
+        shutil.rmtree(archive_dir)
 
-    os.rename(outDir, archiveDir)
-    shutil.make_archive(archiveName, 'zip', startDir, os.path.basename(archiveDir))
-    shutil.rmtree(archiveDir)
-    print('Archiving complete: {}'.format(archiveDir + '.zip'))
+    os.rename(out_dir, archive_dir)
+    shutil.make_archive(archive_name, 'zip', start_dir, os.path.basename(archive_dir))
+    shutil.rmtree(archive_dir)
+    print('Archiving complete: {}'.format(archive_dir + '.zip'))
 
 
 if __name__ == "__main__":

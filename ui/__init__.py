@@ -7,7 +7,7 @@ if len(sys.argv) == 1:
     # noinspection PyUnresolvedReferences
     from gi.repository import Gtk, Gdk, GLib
 
-
+# noinspection PyPep8
 from ui import (console,
                 libsteam,
                 logins,

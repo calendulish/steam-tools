@@ -42,9 +42,8 @@ def check_steamgifts_login():
     html = stlib.network.try_get_html('steamGifts', login_page)
 
     try:
-        data = {}
         form = html.findAll('form')[1]
-        steamgifts_user = form.find('input', {'name':'username'}).get('value')
+        steamgifts_user = form.find('input', {'name': 'username'}).get('value')
         return steamgifts_user
     except(AttributeError, IndexError):
         ui.globals.logger.error('SteamGifts login status: Cookies not found' +
@@ -83,37 +82,38 @@ class CheckStatus(Thread):
         user = check_steam_login()
 
         if user:
-            self.window.steam_login_status.set_from_file(
-                    os.path.join(self.window.icons_path, self.window.steam_icon_available))
+            self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path,
+                                                                      self.window.steam_icon_available))
             self.window.steam_login_status.set_tooltip_text("Steam Login status:\nConnected as {}".format(user))
             self.steam_connected = True
         else:
-            self.window.steam_login_status.set_from_file(
-                    os.path.join(self.window.icons_path, self.window.steam_icon_unavailable))
+            self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path,
+                                                                      self.window.steam_icon_unavailable))
             self.window.steam_login_status.set_tooltip_text("Steam Login status: Cookies not found" +
-                                                      "\nPlease, check if you are logged in on" +
-                                                      "\nsteampowered.com or steamcommunity.com")
+                                                            "\nPlease, check if you are logged in on" +
+                                                            "\nsteampowered.com or steamcommunity.com")
             self.steam_connected = False
 
         self.window.status_bar.pop(status_context)
 
     def SG_login_status(self):
         status_context = self.window.update_status_bar("Checking if you are logged in on SteamGifts...")
-        self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path, self.window.steamgifts_icon_busy))
+        self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
+                                                               self.window.steamgifts_icon_busy))
 
         user = check_steamgifts_login()
 
         if user:
-            self.window.SG_login_status.set_from_file(
-                    os.path.join(self.window.icons_path, self.window.steamgifts_icon_available))
+            self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
+                                                                   self.window.steamgifts_icon_available))
             self.window.SG_login_status.set_tooltip_text("SteamGifts Login status:\nConnected as {}".format(user))
             self.steamgifts_connected = True
         else:
-            self.window.SG_login_status.set_from_file(
-                    os.path.join(self.window.icons_path, self.window.steamgifts_icon_unavailable))
+            self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
+                                                                   self.window.steamgifts_icon_unavailable))
             self.window.SG_login_status.set_tooltip_text("SteamGifts Login status: Cookies not found" +
-                                                       "\nPlease, check if you are logged in on" +
-                                                       "\nwww.steamgifts.com")
+                                                         "\nPlease, check if you are logged in on" +
+                                                         "\nwww.steamgifts.com")
             self.steamgifts_connected = False
 
         self.window.status_bar.pop(status_context)
@@ -121,21 +121,21 @@ class CheckStatus(Thread):
     def SC_login_status(self):
         status_context = self.window.update_status_bar("Checking if you are logged in on SteamCompanion...")
         self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,
-                                                             self.window.steamcompanion_icon_busy))
+                                                               self.window.steamcompanion_icon_busy))
 
         user = check_steamcompanion_login()
 
         if user:
-            self.window.SC_login_status.set_from_file(
-                    os.path.join(self.window.icons_path, self.window.steamcompanion_icon_available))
+            self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,
+                                                                   self.window.steamcompanion_icon_available))
             self.window.SC_login_status.set_tooltip_text("SteamCompanion Login status:\nConnected as {}".format(user))
             self.steamcompanion_connected = True
         else:
-            self.window.SC_login_status.set_from_file(
-                    os.path.join(self.window.icons_path, self.window.steamcompanion_icon_unavailable))
+            self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,
+                                                                   self.window.steamcompanion_icon_unavailable))
             self.window.SC_login_status.set_tooltip_text("SteamCompanion Login status: Cookies not found" +
-                                                       "\nPlease, check if you are logged in on" +
-                                                       "\nsteamcompanion.com")
+                                                         "\nPlease, check if you are logged in on" +
+                                                         "\nsteamcompanion.com")
             self.steamcompanion_connected = False
 
         self.window.status_bar.pop(status_context)

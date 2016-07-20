@@ -16,7 +16,6 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import configparser
 import json
 import os
 import sys
@@ -27,10 +26,10 @@ import ui
 
 
 class SteamTools:
-    def __init__(self, cParams):
+    def __init__(self, console_params):
         self.config_parser = stlib.config.read()
-        self.module = cParams.cli[0]
-        self.parameters = cParams
+        self.module = console_params.cli[0]
+        self.parameters = console_params
 
         self.select_profile()
 
@@ -44,9 +43,7 @@ class SteamTools:
             ui.globals.logger.critical("The module %s don't exist", self.module)
 
     def select_profile(self):
-        try:
-            profile_name = self.config_parser.get('Config', 'chromeProfile')
-        except configparser.NoOptionError:
+        if not self.config_parser.has_option('Config', 'chromeProfile'):
             profiles = stlib.browser.get_chrome_profile()
 
             if not len(profiles):
@@ -56,6 +53,7 @@ class SteamTools:
                 self.config_parser.set('Config', 'chromeProfile', profiles[0])
                 stlib.config.write()
             else:
+                selected_profile = 0
                 ui.globals.logger.warning("Who are you?")
                 for i in range(len(profiles)):
                     with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:

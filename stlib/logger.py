@@ -28,19 +28,19 @@ import tempfile
 
 class ColoredFormatter(logging.Formatter):
     def format(self, log):
-        colorMap = {
-            'INFO':37,
-            'WARNING':33,
-            'ERROR':35,
-            'CRITICAL':31,
+        color_map = {
+            'INFO': 37,
+            'WARNING': 33,
+            'ERROR': 35,
+            'CRITICAL': 31,
         }
 
-        colorNumber = colorMap.get(log.levelname, 37)
+        color_number = color_map.get(log.levelname, 37)
 
         if os.name == 'nt' and not os.getenv('PWD'):
             msg = ' --> {}'.format(log.getMessage())
         else:
-            msg = '\033[32m --> \033[{}m{}\033[m'.format(colorNumber, log.getMessage())
+            msg = '\033[32m --> \033[{}m{}\033[m'.format(color_number, log.getMessage())
 
         return msg
 
@@ -59,44 +59,44 @@ def console_msg(*objs, sep='', end='\n', out=sys.stdout):
     print(*objs, sep=sep, end=end, file=encoder(out.buffer), flush=True)
 
 
-def get_logger(logFileLevel):
-    dataDir = tempfile.gettempdir()
+def get_logger(log_file_level):
+    data_dir = tempfile.gettempdir()
 
-    logFileName = os.path.splitext(os.path.basename(sys.argv[0]))[0] + '.log'
-    logFilePath = os.path.join(dataDir, 'steam-tools')
-    os.makedirs(logFilePath, exist_ok=True)
+    log_file_name = os.path.splitext(os.path.basename(sys.argv[0]))[0] + '.log'
+    log_file_path = os.path.join(data_dir, 'steam-tools')
+    os.makedirs(log_file_path, exist_ok=True)
 
     logging.VERBOSE = 15
     logging.TRACE = 5
     logging.addLevelName(logging.VERBOSE, 'VERBOSE')
     logging.addLevelName(logging.TRACE, 'TRACE')
 
-    ### --- Internal logger control --- ###
+    # --- Internal logger control --- #
     logger = logging.getLogger('SteamTools')
-    logger.verbose = lambda msg, *args:logger._log(logging.VERBOSE, msg, args)
-    logger.trace = lambda msg, *args:logger._log(logging.TRACE, msg, args)
+    logger.verbose = lambda msg, *args: logger._log(logging.VERBOSE, msg, args)
+    logger.trace = lambda msg, *args: logger._log(logging.TRACE, msg, args)
     logger.setLevel(logging.TRACE)
-    ### ### ### ### ### ### ### ### ### ###
+    # --- ~ --- ~ --- ~ --- ~ --- ~ --- #
 
-    ### --- Logfile Handler --- ###
-    logFile = logging.handlers.RotatingFileHandler(os.path.join(logFilePath, logFileName),
-                                                   backupCount=1,
-                                                   encoding='utf-8')
-    logFile.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
-    logFile.setLevel(eval('logging.' + logFileLevel.upper()))
-    logFile.doRollover()
-    logger.addHandler(logFile)
-    ### ### ### ### ### ### ### ###
+    # --- Logfile Handler --- #
+    log_file = logging.handlers.RotatingFileHandler(os.path.join(log_file_path, log_file_name),
+                                                    backupCount=1,
+                                                    encoding='utf-8')
+    log_file.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+    log_file.setLevel(eval('logging.' + log_file_level.upper()))
+    log_file.doRollover()
+    logger.addHandler(log_file)
+    # --- ~ --- ~ --- ~ --- ~ #
 
-    ### --- Console Handler --- ###
+    # --- Console Handler --- #
     console = logging.StreamHandler(encoder(sys.stdout.buffer))
     console.setFormatter(ColoredFormatter())
     console.setLevel(logging.INFO)
     logger.addHandler(console)
-    ### ### ### ### ### ### ### ###
+    # --- ~ --- ~ --- ~ --- ~ #
 
-    ### --- Requests Logfile handler --- ###
-    httpfile = logging.handlers.RotatingFileHandler(os.path.join(logFilePath, 'requests_' + logFileName),
+    # --- Requests Logfile handler --- #
+    httpfile = logging.handlers.RotatingFileHandler(os.path.join(log_file_path, 'requests_' + log_file_name),
                                                     backupCount=1,
                                                     encoding='utf-8')
     httpfile.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
@@ -105,11 +105,11 @@ def get_logger(logFileLevel):
 
     requests = logging.getLogger("requests.packages.urllib3")
     requests.setLevel(logging.DEBUG)
-    #requests.removeHandler('SteamTools')
+    # requests.removeHandler('SteamTools')
     requests.addHandler(httpfile)
-    ### ### ### ### ### ### ### ### ### ###
+    # --- ~ --- ~ --- ~ --- ~ --- ~ --- #
 
-    ### -- stlib --- ###
+    # -- stlib --- #
     stlib = logging.getLogger('stlib')
     stlib.setLevel(logging.DEBUG)
     stlib.addHandler(console)

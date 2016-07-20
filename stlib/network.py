@@ -19,8 +19,8 @@
 import logging
 import time
 
+import bs4
 import requests
-from bs4 import BeautifulSoup as bs
 
 import stlib
 
@@ -31,7 +31,8 @@ STEAM_LOGIN_PAGES = [
     'https://store.steampowered.com//login/',
 ]
 
-USER_AGENT = {'User-Agent': 'Unknown/0.0.0' }
+USER_AGENT = {'User-Agent': 'Unknown/0.0.0'}
+
 
 def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, verify='cacert.pem', stream=False):
     if headers:
@@ -40,9 +41,20 @@ def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, v
     for i in range(1, 4):
         try:
             if data:
-                response = requests.post(url, data=data, headers=headers, cookies=cookies, timeout=timeout, verify=verify, stream=stream)
+                response = requests.post(url,
+                                         data=data,
+                                         headers=headers,
+                                         cookies=cookies,
+                                         timeout=timeout,
+                                         verify=verify,
+                                         stream=stream)
             else:
-                response = requests.get(url, cookies=cookies, headers=headers, timeout=timeout, verify=verify, stream=stream)
+                response = requests.get(url,
+                                        cookies=cookies,
+                                        headers=headers,
+                                        timeout=timeout,
+                                        verify=verify,
+                                        stream=stream)
             response.raise_for_status()
         except requests.exceptions.SSLError:
             LOGGER.critical('INSECURE CONNECTION DETECTED!')
@@ -88,10 +100,10 @@ def try_get_response(service_name, url, data=None):
 def get_html(url, data=None, cookies=None):
     response = get_response(url, data, cookies)
 
-    return bs(response.content, 'html.parser')
+    return bs4.BeautifulSoup(response.content, 'html.parser')
 
 
 def try_get_html(service_name, url, data=None):
     response = try_get_response(service_name, url, data)
 
-    return bs(response.content, 'html.parser')
+    return bs4.BeautifulSoup(response.content, 'html.parser')

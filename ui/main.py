@@ -16,7 +16,6 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import configparser
 import json
 import os
 import random
@@ -66,9 +65,7 @@ class SteamTools:
     def select_profile(self):
         stlib.config.read()
 
-        try:
-            profile_name = self.config_parser.get('Config', 'chromeProfile')
-        except configparser.NoOptionError:
+        if self.config_parser.has_option('Config', 'chromeProfile'):
             profiles = stlib.browser.get_chrome_profile()
 
             if not len(profiles):
@@ -109,8 +106,8 @@ class SteamTools:
                 stlib.config.write()
 
     def update_status_bar(self, message):
-        id = random.randrange(500)
-        self.status_bar.push(id, message)
+        message_id = random.randrange(500)
+        self.status_bar.push(message_id, message)
 
         return id
 
@@ -123,5 +120,5 @@ class SteamTools:
                                       text=markup)
         dialog.set_title(title)
         dialog.format_secondary_markup(secondary_markup)
-        dialog.connect('response', lambda d, _:d.destroy())
+        dialog.connect('response', lambda d, _: d.destroy())
         dialog.show()

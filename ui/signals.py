@@ -97,10 +97,11 @@ class WindowSignals:
         self.start_module = StartModule()
         self.stop_module = StopModule()
 
-    def on_window_destroy(self, *args):
+    @staticmethod
+    def on_window_destroy(*args):
         ui.Gtk.main_quit(*args)
 
-    def on_start_clicked(self, data):
+    def on_start_clicked(self, button):
         current_page = self.window.tabs.get_current_page()
         if current_page == 0:
             pass
@@ -113,7 +114,7 @@ class WindowSignals:
         elif current_page == 4:
             pass
 
-    def on_stop_clicked(self, data):
+    def on_stop_clicked(self, button):
         current_page = self.window.tabs.get_current_page()
         if current_page == 0:
             pass
@@ -126,7 +127,7 @@ class WindowSignals:
         elif current_page == 4:
             pass
 
-    def on_tabs_switch_page(self, object, page, current_page):
+    def on_tabs_switch_page(self, tab, box, current_page):
         if current_page == 0:
             pass
         elif current_page == 1:
@@ -143,9 +144,11 @@ class WindowSignals:
         elif current_page == 4:
             pass
 
-    def on_status_bar_text_pushed(self, object, context, text):
+    @staticmethod
+    def on_status_bar_text_pushed(status_bar, context, text):
         ui.GLib.timeout_add_seconds(10, ui.timers.status_bar_text_pushed_timer, context)
 
-    def on_select_profile_button_toggled(self, object, id):
-        if object.get_active():
-            ui.globals.Window.profile = id
+    @staticmethod
+    def on_select_profile_button_toggled(radio_button, profile_id):
+        if radio_button.get_active():
+            ui.globals.Window.profile = profile_id

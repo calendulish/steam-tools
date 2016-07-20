@@ -32,11 +32,11 @@ if os.name is 'posix':
         import ui.main
     else:
         LOGGER.warning('The DISPLAY is not set!')
-        LOGGER.warning('Use --cli <module> for the commmand line interface.')
+        LOGGER.warning('Use --cli <module> for the command line interface.')
         sys.exit(1)
 
 
-def safeCall(call):
+def safe_call(call):
     try:
         return subprocess.check_call(call)
     except subprocess.CalledProcessError as e:
@@ -67,7 +67,7 @@ if os.name is 'nt' and os.getenv('PWD'):
         if len(sys.argv) != 1:
             wrapper.extend(sys.argv[1:])
 
-        return_code = safeCall(wrapper)
+        return_code = safe_call(wrapper)
         sys.exit(return_code)
 
 if __name__ == "__main__":

@@ -22,11 +22,11 @@ import os
 import subprocess
 import sys
 
-if os.name is 'posix':
-    import site
-
 import stlib
 import ui
+
+if os.name is 'posix':
+    import site
 
 
 def _find_libsteam():
@@ -56,9 +56,8 @@ def _find_libsteam():
 
 
 def _find_wrapper():
-    paths = []
-    paths.append(os.path.dirname(os.path.abspath(sys.argv[0])))
-    paths.append(os.path.join(paths[0], 'ui'))
+    current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+    paths = [current_directory, os.path.join(current_directory, 'ui')]
 
     if os.name is 'posix':
         paths.append(os.path.join(site.getsitepackages()[1], 'stlib'))

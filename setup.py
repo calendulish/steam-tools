@@ -64,6 +64,7 @@ def what():
 
     return ret
 
+
 def arch():
     if sys.maxsize > 2 ** 32:
         ret = 64
@@ -76,6 +77,7 @@ def arch():
         ret = 32
 
     return ret
+
 
 if what() == 'win' or what() == 'cyg':
     import site
@@ -96,7 +98,7 @@ elif 'py2exe' in sys.argv:
     sys.exit(1)
 
 
-class check_ext(install_scripts):
+class CheckExtension(install_scripts):
     def run(self):
         install_scripts.run(self)
         for script in self.get_outputs():
@@ -104,7 +106,7 @@ class check_ext(install_scripts):
                 os.rename(script, script[:-3])
 
 
-class winpty(build):
+class Winpty(build):
     def run(self):
         if what() == 'cyg':
             if not CMK:
@@ -140,10 +142,10 @@ def py2exe_options():
         options = {'py2exe': {'bundle_files': 3,
                               'optimize': 1,
                               'compressed': 0,
-                              'packages': ['gi',
+                              'packages': ['pygobject',
                                            'psutil',
                                            'requests',
-                                           'bs4']}}
+                                           'beautifulsoup4']}}
 
         return {'console': [{'script': 'steam-tools.py',
                              # 'icon_resources': [(1, 'steam-tools.ico')]
@@ -213,22 +215,20 @@ if what() == 'cyg' or what() == 'win':
 if what() == 'cyg':
     data_files.append(('winpty', winpty_files))
 
-setup(
-        name='Steam Tools',
-        version='GIT',
-        description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
-        author='Lara Maia',
-        author_email='dev@lara.click',
-        url='http://github.com/ShyPixie/steam-tools',
-        license='GPL',
-        data_files=data_files,
-        scripts=console_programs,
-        packages=['stlib'],
-        cmdclass={'build': winpty,
-                  'install_scripts': check_ext},
-        requires=['gi',
-                  'requests',
-                  'bs4',
-                  'Crypto'],
-        **py2exe_options()
-)
+setup(name='Steam Tools',
+      version='GIT',
+      description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
+      author='Lara Maia',
+      author_email='dev@lara.click',
+      url='http://github.com/ShyPixie/steam-tools',
+      license='GPL',
+      data_files=data_files,
+      scripts=console_programs,
+      packages=['stlib'],
+      cmdclass={'build': Winpty,
+                'install_scripts': CheckExtension},
+      requires=['pygobject',
+                'requests',
+                'beautifulsoup4',
+                'pycrypto'],
+      **py2exe_options())

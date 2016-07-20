@@ -32,7 +32,7 @@ else:
     from ctypes.wintypes import DWORD
 
 
-    class DATA_BLOB(Structure):
+    class DataBlob(Structure):
         _fields_ = [
             ('cb_data', DWORD),
             ('pb_data', POINTER(c_char))
@@ -43,8 +43,8 @@ def __decrypt_data(encrypted_data):
     if os.name == 'nt':
         # Thanks to Crusher Joe (crusherjoe <at> eudoramail.com)
         buffer_in = c_buffer(encrypted_data, len(encrypted_data))
-        blob_in = DATA_BLOB(len(encrypted_data), buffer_in)
-        blob_out = DATA_BLOB()
+        blob_in = DataBlob(len(encrypted_data), buffer_in)
+        blob_out = DataBlob()
 
         windll.crypt32.CryptUnprotectData(byref(blob_in), None, None, None, None, 0x01, byref(blob_out))
         cb_data = int(blob_out.cb_data)
@@ -73,7 +73,9 @@ def get_cookies(url):
     connection = sqlite3.connect(temp_cookies_path)
     query = 'SELECT name, value, encrypted_value FROM cookies WHERE host_key LIKE ?'
     for key, data, encrypted_data in connection.execute(query, (get_domain_name(url),)):
-        if key == '_ga': continue
+        if key == '_ga':
+            continue
+
         if encrypted_data[:3] != b'v10' and encrypted_data[:3] != b'\x01\x00\x00':
             if data:
                 cookies[key] = data

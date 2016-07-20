@@ -21,6 +21,7 @@ import time
 import stlib
 import ui
 
+
 def get_badges(profile, add_prices=True):
     stlib.logger.console_msg('Getting badges info...', end='\r')
     config_parser = stlib.config.read()
@@ -40,7 +41,7 @@ def get_badges(profile, add_prices=True):
         ui.globals.logger.verbose('I found only 1 page of badges')
 
     stlib.logger.console_msg('Searching card list...', end='\r')
-    badge_set = {k:[] for k in ['gameID', 'gameName', 'cardCount', 'cardValue']}
+    badge_set = {k: [] for k in ['gameID', 'gameName', 'cardCount', 'cardValue']}
     for badge in badges:
         progress = badge.find('span', class_='progress_info_bold')
         title = badge.find('div', class_='badge_title')
@@ -73,7 +74,7 @@ def get_badges(profile, add_prices=True):
     if add_prices:
         stlib.logger.console_fixer('\r')
         stlib.logger.console_msg('Getting cards values...', end='\r')
-        price_set = {k:[] for k in ['game', 'avg']}
+        price_set = {k: [] for k in ['game', 'avg']}
         price_page = 'http://www.steamcardexchange.net/index.php?badgeprices'
         html = stlib.network.get_html(price_page)
 
@@ -100,7 +101,7 @@ def get_badges(profile, add_prices=True):
             stlib.logger.console_msg('Rearranging cards to get the most valuable first...', end='\r')
             cards_count = len(badge_set['cardValue'])
             cards_order = sorted(range(cards_count),
-                                 key=lambda key:badge_set['cardValue'][key],
+                                 key=lambda key: badge_set['cardValue'][key],
                                  reverse=True)
 
             # reorder all items from badge_set
