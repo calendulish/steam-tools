@@ -31,7 +31,7 @@
     </child>
   </object>
   <object class="GtkListStore" id="liststore1"/>
-  <object class="GtkWindow" id="mainWindow">
+  <object class="GtkWindow" id="main_window">
     <property name="width_request">640</property>
     <property name="height_request">480</property>
     <property name="can_focus">False</property>
@@ -193,7 +193,7 @@
                 <property name="tab_pos">left</property>
                 <signal name="switch-page" handler="on_tabs_switch_page" swapped="no"/>
                 <child>
-                  <object class="GtkBox" id="scf_box">
+                  <object class="GtkBox" id="card_farming_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
@@ -314,7 +314,7 @@
                                 <property name="orientation">vertical</property>
                                 <property name="homogeneous">True</property>
                                 <child>
-                                  <object class="GtkEntry" id="scf_currentGame">
+                                  <object class="GtkEntry" id="card_farming_current_game">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
@@ -326,7 +326,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="scf_cardLeft">
+                                  <object class="GtkEntry" id="card_farming_card_left">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
@@ -338,7 +338,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="scf_totalCardLeft">
+                                  <object class="GtkEntry" id="card_farming_total_card_left">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
@@ -350,7 +350,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="scf_currentGameTime">
+                                  <object class="GtkEntry" id="card_farming_current_gameTime">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
@@ -362,7 +362,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="scf_totalTime">
+                                  <object class="GtkEntry" id="card_farming_total_time">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
@@ -480,7 +480,7 @@
                                 <property name="spacing">3</property>
                                 <property name="homogeneous">True</property>
                                 <child>
-                                  <object class="GtkSwitch" id="scf_mostValuable First">
+                                  <object class="GtkSwitch" id="card_farming_most_valuable_first">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <signal name="activate" handler="on_MostValuableFirst_activate" swapped="no"/>
@@ -492,7 +492,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="scf_chromeProfile">
+                                  <object class="GtkEntry" id="card_farming_chrome_profile">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">●</property>
@@ -504,7 +504,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkComboBoxText" id="scf_logLevelCombo">
+                                  <object class="GtkComboBoxText" id="card_farming_log_level">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="active">4</property>
@@ -517,7 +517,7 @@
                                       <item translatable="yes">Debug</item>
                                       <item translatable="yes">Trace</item>
                                     </items>
-                                    <signal name="changed" handler="on_scf_logLevelCombo_changed" swapped="no"/>
+                                    <signal name="changed" handler="on_card_farming_log_level_changed" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -526,7 +526,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSwitch" id="scf_dryRun">
+                                  <object class="GtkSwitch" id="card_farming_dry_run">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">True</property>
@@ -567,7 +567,7 @@
                   </packing>
                 </child>
                 <child type="tab">
-                  <object class="GtkLabel" id="scf_tab">
+                  <object class="GtkLabel" id="card_farming_tab">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Card Farming</property>
@@ -577,7 +577,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="fsa_box">
+                  <object class="GtkBox" id="fake_app_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -666,7 +666,7 @@
                                     <property name="spacing">5</property>
                                     <property name="homogeneous">True</property>
                                     <child>
-                                      <object class="GtkEntry" id="fsa_currentGame">
+                                      <object class="GtkEntry" id="fake_app_current_game">
                                         <property name="visible">True</property>
                                         <property name="sensitive">False</property>
                                         <property name="can_focus">False</property>
@@ -678,7 +678,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="fsa_currentTime">
+                                      <object class="GtkEntry" id="fake_app_current_time">
                                         <property name="visible">True</property>
                                         <property name="sensitive">False</property>
                                         <property name="can_focus">False</property>
@@ -745,7 +745,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="fsa_appID">
+                                      <object class="GtkEntry" id="fake_app_game_id">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                       </object>
@@ -792,7 +792,7 @@
                   </packing>
                 </child>
                 <child type="tab">
-                  <object class="GtkLabel" id="fsa_tab">
+                  <object class="GtkLabel" id="fake_app_tab">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Fake App</property>
@@ -803,7 +803,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="sgb_box">
+                  <object class="GtkBox" id="SG_bump_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -965,7 +965,7 @@
                                     <property name="spacing">3</property>
                                     <property name="homogeneous">True</property>
                                     <child>
-                                      <object class="GtkEntry" id="sgb_tradeID">
+                                      <object class="GtkEntry" id="SG_bump_trade_id">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -977,7 +977,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="sgj_minTime1">
+                                      <object class="GtkEntry" id="SG_join_min_time1">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -989,7 +989,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="sgj_maxTime1">
+                                      <object class="GtkEntry" id="SG_join_max_time1">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -1001,7 +1001,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="sgj_chromeProfile1">
+                                      <object class="GtkEntry" id="SG_join_chrome_profile1">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -1013,7 +1013,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkComboBoxText" id="sgj_logLevelCombo1">
+                                      <object class="GtkComboBoxText" id="SG_join_log_level1">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="active">4</property>
@@ -1034,7 +1034,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSwitch" id="sgj_dryRun1">
+                                      <object class="GtkSwitch" id="SG_join_dry_run1">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                       </object>
@@ -1081,7 +1081,7 @@
                   </packing>
                 </child>
                 <child type="tab">
-                  <object class="GtkLabel" id="sgb_tab">
+                  <object class="GtkLabel" id="SG_bump_tab">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">SG Bump</property>
@@ -1092,7 +1092,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="sgj_box">
+                  <object class="GtkBox" id="SG_join_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -1266,7 +1266,7 @@
                                     <property name="spacing">3</property>
                                     <property name="homogeneous">True</property>
                                     <child>
-                                      <object class="GtkEntry" id="sgj_typeList">
+                                      <object class="GtkEntry" id="SG_join_type_list">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -1278,7 +1278,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSwitch" id="sgj_developerGiveaways">
+                                      <object class="GtkSwitch" id="SG_join_developer_giveaways">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                       </object>
@@ -1289,7 +1289,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="sgj_minTime">
+                                      <object class="GtkEntry" id="SG_join_min_time">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -1301,7 +1301,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="sgj_maxTime">
+                                      <object class="GtkEntry" id="SG_join_max_time">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -1313,7 +1313,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="sgj_chromeProfile">
+                                      <object class="GtkEntry" id="SG_join_chrome_profile">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -1325,7 +1325,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkComboBoxText" id="sgj_logLevelCombo">
+                                      <object class="GtkComboBoxText" id="SG_join_log_level">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="active">4</property>
@@ -1346,7 +1346,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSwitch" id="sgj_dryRun">
+                                      <object class="GtkSwitch" id="SG_join_dry_run">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                       </object>
@@ -1393,7 +1393,7 @@
                   </packing>
                 </child>
                 <child type="tab">
-                  <object class="GtkLabel" id="sgj_tab">
+                  <object class="GtkLabel" id="SG_join_tab">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">SG Join</property>
@@ -1404,7 +1404,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="scj_box">
+                  <object class="GtkBox" id="SC_join_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -1577,7 +1577,7 @@
                                     <property name="spacing">3</property>
                                     <property name="homogeneous">True</property>
                                     <child>
-                                      <object class="GtkEntry" id="scj_typeList">
+                                      <object class="GtkEntry" id="SC_join_type_list">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -1589,7 +1589,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="scj_maxPages">
+                                      <object class="GtkEntry" id="SC_join_max_pages">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -1601,7 +1601,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="scj_minTime">
+                                      <object class="GtkEntry" id="SC_join_min_time">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -1613,7 +1613,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="scj_maxTime">
+                                      <object class="GtkEntry" id="SC_join_max_time">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -1625,7 +1625,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkEntry" id="scj_chromeProfile">
+                                      <object class="GtkEntry" id="SC_join_chrome_profile">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">●</property>
@@ -1637,7 +1637,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkComboBoxText" id="scj_logLevelCombo">
+                                      <object class="GtkComboBoxText" id="SC_join_log_level">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="active">4</property>
@@ -1658,7 +1658,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSwitch" id="scj_dryRun">
+                                      <object class="GtkSwitch" id="SC_join_dry_run">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                       </object>
@@ -1705,7 +1705,7 @@
                   </packing>
                 </child>
                 <child type="tab">
-                  <object class="GtkLabel" id="scj_tab">
+                  <object class="GtkLabel" id="SC_join_tab">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">SC Join</property>
@@ -1731,13 +1731,13 @@
           </packing>
         </child>
         <child>
-          <object class="GtkStatusbar" id="statusBar">
+          <object class="GtkStatusbar" id="status_bar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="spacing">2</property>
-            <signal name="text-pushed" handler="on_statusBar_text_pushed" swapped="no"/>
+            <signal name="text-pushed" handler="on_status_bar_text_pushed" swapped="no"/>
             <child>
-              <object class="GtkImage" id="sLoginStatus">
+              <object class="GtkImage" id="steam_login_status">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">SteamLogin status:You are not logged in</property>
@@ -1750,7 +1750,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkImage" id="sgLoginStatus">
+              <object class="GtkImage" id="SG_login_status">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">SteamGifts Login Status:You are not logged in</property>
@@ -1763,7 +1763,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkImage" id="scLoginStatus">
+              <object class="GtkImage" id="SC_login_status">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">SteamCompanion Login status:You are not logged in</property>
@@ -1785,12 +1785,12 @@
       </object>
     </child>
   </object>
-  <object class="GtkDialog" id="selectProfile_dialog">
+  <object class="GtkDialog" id="select_profille_dialog">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">StCookie</property>
     <property name="modal">True</property>
     <property name="type_hint">normal</property>
-    <property name="transient_for">mainWindow</property>
+    <property name="transient_for">main_window</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox1">
         <property name="can_focus">False</property>

@@ -22,9 +22,9 @@ import time
 import ui
 
 
-def statusBar_text_pushed_timer(context):
+def status_bar_text_pushed_timer(context):
     window = ui.globals.Window.main
-    window.statusBar.pop(context)
+    window.status_bar.pop(context)
     return False
 
 
@@ -35,7 +35,7 @@ def fake_app_timer(start_time):
 
     if ui.globals.FakeApp.is_running:
         if not ui.libsteam.is_wrapper_running():
-            window.update_statusBar("This is not a valid gameID.")
+            window.update_status_bar("This is not a valid gameID.")
             window.new_dialog(ui.Gtk.MessageType.ERROR,
                               'Fake Steam App',
                               'This is not a valid gameID.',
@@ -44,13 +44,13 @@ def fake_app_timer(start_time):
             ui.globals.FakeApp.is_running = False
             window.start.set_sensitive(True)
             window.stop.set_sensitive(False)
-            window.fsa_currentGame.set_text('')
-            window.fsa_currentTime.set_text('')
+            window.fake_app_current_game.set_text('')
+            window.fake_app_current_time.set_text('')
 
             return False
         else:
-            window.fsa_currentGame.set_text(ui.globals.FakeApp.id)
-            window.fsa_currentTime.set_text(str(elapsed_time))
+            window.fake_app_current_game.set_text(ui.globals.FakeApp.id)
+            window.fake_app_current_time.set_text(str(elapsed_time))
 
             return True
     else:

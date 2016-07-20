@@ -41,8 +41,8 @@ class SteamTools:
                 name = ui.Gtk.Buildable.get_name(_object)
                 setattr(self, name, _object)
 
-        self.fsa_currentGame.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
-        self.fsa_currentTime.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
+        self.fake_app_current_game.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
+        self.fake_app_current_time.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
 
         self.icons_path = 'ui/icons'
 
@@ -58,7 +58,7 @@ class SteamTools:
         self.steamcompanion_icon_busy = 'steamcompanion_yellow.png'
         self.steamcompanion_icon_unavailable = 'steamcompanion_red.png'
 
-        self.mainWindow.show_all()
+        self.main_window.show_all()
 
         self.select_profile()
         self.check_login_status.start()
@@ -72,7 +72,7 @@ class SteamTools:
             profiles = stlib.browser.get_chrome_profile()
 
             if not len(profiles):
-                self.update_statusBar('I cannot find your chrome/Chromium profile')
+                self.update_status_bar('I cannot find your chrome/Chromium profile')
                 self.new_dialog(ui.Gtk.MesageType.ERROR,
                                 'Network Error',
                                 'I cannot find your Chrome/Chromium profile',
@@ -81,7 +81,7 @@ class SteamTools:
                 self.config_parser.set('Config', 'chromeProfile', profiles[0])
                 stlib.config.write()
             else:
-                self.selectProfile_dialog.add_button('Ok', 1)
+                self.select_profille_dialog.add_button('Ok', 1)
 
                 temp_radiobutton = None
                 for i in range(len(profiles)):
@@ -101,21 +101,21 @@ class SteamTools:
                     temp_radiobutton.connect('toggled', self.signals.on_select_profile_button_toggled, i)
                     self.radiobutton_box.pack_start(temp_radiobutton, False, False, 0)
 
-                self.selectProfile_dialog.show_all()
-                self.selectProfile_dialog.run()
-                self.selectProfile_dialog.destroy()
+                self.select_profille_dialog.show_all()
+                self.select_profille_dialog.run()
+                self.select_profille_dialog.destroy()
 
                 self.config_parser.set('Config', 'chromeProfile', profiles[ui.globals.Window.profile])
                 stlib.config.write()
 
-    def update_statusBar(self, message):
+    def update_status_bar(self, message):
         id = random.randrange(500)
-        self.statusBar.push(id, message)
+        self.status_bar.push(id, message)
 
         return id
 
     def new_dialog(self, msg_type, title, markup, secondary_markup=None):
-        dialog = ui.Gtk.MessageDialog(transient_for=self.mainWindow,
+        dialog = ui.Gtk.MessageDialog(transient_for=self.main_window,
                                       flags=ui.Gtk.DialogFlags.MODAL,
                                       destroy_with_parent=True,
                                       type=msg_type,

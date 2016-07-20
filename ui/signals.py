@@ -34,11 +34,11 @@ class StartModule:
         self.window = ui.globals.Window.main
 
     def fake_app(self):
-        self.window.update_statusBar("Preparing. Please wait...")
-        ui.globals.FakeApp.id = self.window.fsa_appID.get_text().strip()
+        self.window.update_status_bar("Preparing. Please wait...")
+        ui.globals.FakeApp.id = self.window.fake_app_game_id.get_text().strip()
 
         if not ui.globals.FakeApp.id:
-            self.window.update_statusBar("No AppID found!")
+            self.window.update_status_bar("No AppID found!")
             self.window.new_dialog(ui.Gtk.MessageType.ERROR,
                                    'Fake Steam App',
                                    'No AppID found!',
@@ -54,7 +54,7 @@ class StartModule:
                 ui.globals.FakeApp.is_running = True
                 self.window.stop.set_sensitive(True)
             else:
-                self.window.update_statusBar("Unable to locate a running instance of steam.")
+                self.window.update_status_bar("Unable to locate a running instance of steam.")
                 self.window.new_dialog(ui.Gtk.MessageType.ERROR,
                                        'Fake Steam App',
                                        'Unable to locate a running instance of steam.',
@@ -74,7 +74,7 @@ class StopModule:
         # Prevents bad behaviour when the user click
         # on the start button before the fake_app is ready
         self.window.start.set_sensitive(False)
-        self.window.update_statusBar("Waiting to fakeapp terminate.")
+        self.window.update_status_bar("Waiting to fakeapp terminate.")
         ui.libsteam.stop_wrapper()
 
         if ui.globals.FakeApp.process.returncode is None:
@@ -85,10 +85,10 @@ class StopModule:
                                    error.decode(locale.getpreferredencoding()))
 
         ui.globals.FakeApp.is_running = False
-        self.window.update_statusBar("Done!")
+        self.window.update_status_bar("Done!")
         self.window.start.set_sensitive(True)
-        self.window.fsa_currentGame.set_text('')
-        self.window.fsa_currentTime.set_text('')
+        self.window.fake_app_current_game.set_text('')
+        self.window.fake_app_current_time.set_text('')
 
 
 class WindowSignals:
@@ -143,8 +143,8 @@ class WindowSignals:
         elif current_page == 4:
             pass
 
-    def on_statusBar_text_pushed(self, object, context, text):
-        ui.GLib.timeout_add_seconds(10, ui.timers.statusBar_text_pushed_timer, context)
+    def on_status_bar_text_pushed(self, object, context, text):
+        ui.GLib.timeout_add_seconds(10, ui.timers.status_bar_text_pushed_timer, context)
 
     def on_select_profile_button_toggled(self, object, id):
         if object.get_active():
