@@ -88,12 +88,11 @@ class SteamTools:
                 stlib.config.write()
 
     def __cardfarming(self):
-        user = ui.logins.check_steam_login()
-        profile = 'https://steamcommunity.com/login/checkstoredlogin/?redirectURL=id/' + user
+        ui.logins.check_steam_login()
 
-        ui.globals.logger.info('Hello {}'.format(user))
+        ui.globals.logger.info('Hello {}'.format(ui.globals.Logins.steam_user))
 
-        badge_set = ui.card_farming.get_badges(profile)
+        badge_set = ui.card_farming.get_badges()
 
         ui.globals.logger.warning('Ready to start.')
         game_count = len(badge_set['gameID'])
@@ -136,7 +135,7 @@ class SteamTools:
 
                 stlib.logger.console_fixer('\r')
                 stlib.logger.console_msg('Checking if game have more cards drops...', end='\r')
-                badge_set['cardCount'][index] = ui.card_farming.update_card_count(profile, badge_set['gameID'][index])
+                badge_set['cardCount'][index] = ui.card_farming.update_card_count(badge_set['gameID'][index])
                 stlib.logger.console_fixer('\r')
 
                 if badge_set['cardCount'][index] < 1:

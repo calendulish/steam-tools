@@ -29,9 +29,9 @@ def check_steam_login():
     html = stlib.network.try_get_html('steam', login_page)
 
     try:
-        steam_user = html.find('a', class_='username').text.strip()
-        return steam_user
+        ui.globals.Logins.steam_user = html.find('a', class_='username').text.strip()
     except(AttributeError, IndexError):
+        ui.globals.Logins.steam_user = None
         ui.globals.logger.error('Steam login status: Cookies not found' +
                                 '\nPlease, check if you are logged in on' +
                                 '\nsteampowered.com or steamcommunity.com')
@@ -43,9 +43,9 @@ def check_steamgifts_login():
 
     try:
         form = html.findAll('form')[1]
-        steamgifts_user = form.find('input', {'name': 'username'}).get('value')
-        return steamgifts_user
+        ui.globals.Logins.steamgifts_user = form.find('input', {'name': 'username'}).get('value')
     except(AttributeError, IndexError):
+        ui.globals.Logins.steam_user = None
         ui.globals.logger.error('SteamGifts login status: Cookies not found' +
                                 '\nPlease, check if you are logged in on' +
                                 '\nwww.steamgifts.com')
@@ -55,13 +55,14 @@ def check_steamcompanion_login():
     html = stlib.network.try_get_html('steamCompanion', 'https://steamcompanion.com/settings')
 
     try:
-        steamcompanion_user = html.find('div', class_='profile').find('a').text.strip()
+        user = html.find('div', class_='profile').find('a').text.strip()
 
-        if not steamcompanion_user:
+        if not user:
             raise AttributeError
 
-        return steamcompanion_user
+        ui.globals.Logins.steamcompanion_user = user
     except(AttributeError, IndexError):
+        ui.globals.Logins.steamcompanion_user = None
         ui.globals.logger.error('SteamCompanion login status: Cookies not found' +
                                 '\nPlease, check if you are logged in on' +
                                 '\nsteamcompanion.com')
@@ -79,12 +80,13 @@ class CheckStatus(Thread):
         status_context = self.window.update_status_bar("Checking if you are logged in on Steam...")
         self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path, self.window.steam_icon_busy))
 
-        user = check_steam_login()
+        check_steam_login()
 
-        if user:
+        if ui.globals.Logins.steam_user:
             self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path,
                                                                       self.window.steam_icon_available))
-            self.window.steam_login_status.set_tooltip_text("Steam Login status:\nConnected as {}".format(user))
+            self.window.steam_login_status.set_tooltip_text("Steam Login status:\n" +
+                                                            "Connected as {}".format(ui.globals.Logins.steam_user))
             self.steam_connected = True
         else:
             self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path,
@@ -101,12 +103,13 @@ class CheckStatus(Thread):
         self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
                                                                self.window.steamgifts_icon_busy))
 
-        user = check_steamgifts_login()
+        check_steamgifts_login()
 
-        if user:
+        if ui.globals.Logins.steamgifts_user:
             self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
                                                                    self.window.steamgifts_icon_available))
-            self.window.SG_login_status.set_tooltip_text("SteamGifts Login status:\nConnected as {}".format(user))
+            self.window.SG_login_status.set_tooltip_text("SteamGifts Login status:\n" +
+                                                         "Connected as {}".format(ui.globals.Logins.steamgifts_user))
             self.steamgifts_connected = True
         else:
             self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
@@ -123,12 +126,14 @@ class CheckStatus(Thread):
         self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,
                                                                self.window.steamcompanion_icon_busy))
 
-        user = check_steamcompanion_login()
+        check_steamcompanion_login()
 
-        if user:
+        if ui.globals.Logins.steamcompanion_user:
             self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,
                                                                    self.window.steamcompanion_icon_available))
-            self.window.SC_login_status.set_tooltip_text("SteamCompanion Login status:\nConnected as {}".format(user))
+            self.window.SC_login_status.set_tooltip_text("SteamCompanion Login status:\n" +
+                                                         "Connected as {}".format(ui.globals.Logins.steamcompanion_user)
+                                                         )
             self.steamcompanion_connected = True
         else:
             self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,

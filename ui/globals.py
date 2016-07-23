@@ -26,6 +26,12 @@ class Window:
     profile = 0
 
 
+class Logins:
+    steam_user = None
+    steamgifts_user = None
+    steamcompanion_user = None
+
+
 class FakeApp:
     id = None
     process = None
