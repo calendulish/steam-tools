@@ -78,7 +78,7 @@ class SteamTools:
                 self.config_parser.set('Config', 'chromeProfile', profiles[0])
                 stlib.config.write()
             else:
-                self.select_profille_dialog.add_button('Ok', 1)
+                self.select_profile_dialog.add_button('Ok', 1)
 
                 temp_radiobutton = None
                 for i in range(len(profiles)):
@@ -98,9 +98,9 @@ class SteamTools:
                     temp_radiobutton.connect('toggled', self.signals.on_select_profile_button_toggled, i)
                     self.radiobutton_box.pack_start(temp_radiobutton, False, False, 0)
 
-                self.select_profille_dialog.show_all()
-                self.select_profille_dialog.run()
-                self.select_profille_dialog.destroy()
+                self.select_profile_dialog.show_all()
+                self.select_profile_dialog.run()
+                self.select_profile_dialog.destroy()
 
                 self.config_parser.set('Config', 'chromeProfile', profiles[ui.globals.Window.profile])
                 stlib.config.write()
