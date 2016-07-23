@@ -27,6 +27,9 @@ class Window:
 
 
 class Logins:
+    steam_check_page = 'https://steamcommunity.com/login/checkstoredlogin'
+    steamgifts_check_page = 'https://www.steamgifts.com/account/profile/sync'
+    steamcompanion_check_page ='https://steamcompanion.com/settings'
     steam_user = None
     steamgifts_user = None
     steamcompanion_user = None

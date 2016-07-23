@@ -21,12 +21,12 @@ import time
 import stlib
 import ui
 
-LOGIN_PAGE = 'https://steamcommunity.com/login/checkstoredlogin'
 
 def get_badges(add_prices=True):
     stlib.logger.console_msg('Getting badges info...', end='\r')
     config_parser = stlib.config.read()
-    profile = '{}/?redirectURL=id/{}'.format(LOGIN_PAGE, ui.globals.Logins.steam_user)
+    profile = '{}/?redirectURL=id/{}'.format(ui.globals.Logins.steam_check_page,
+                                             ui.globals.Logins.steam_user)
     html = stlib.network.try_get_html('steam', '{}/badges/'.format(profile))
     badges = html.findAll('div', class_='badge_title_row')
 
@@ -119,7 +119,8 @@ def update_card_count(game_id):
     ui.globals.logger.verbose('Updating card count')
     config_parser = stlib.config.read()
     dry_run = config_parser.getboolean('Debug', 'DryRun', fallback=False)
-    profile = '{}/?redirectURL=id/{}'.format(LOGIN_PAGE, ui.globals.Logins.steam_user)
+    profile = '{}/?redirectURL=id/{}'.format(ui.globals.Logins.steam_check_page,
+                                             ui.globals.Logins.steam_user)
 
     for i in range(5):
         html = stlib.network.try_get_html('steam', '{}/gamecards/{}'.format(profile, game_id))

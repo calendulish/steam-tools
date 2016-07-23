@@ -25,8 +25,7 @@ import ui
 
 def check_steam_login():
     ui.globals.logger.info("Checking if you are logged in on Steam...")
-    login_page = 'https://store.steampowered.com/login/checkstoredlogin/?redirectURL=about'
-    html = stlib.network.try_get_html('steam', login_page)
+    html = stlib.network.try_get_html('steam', ui.globals.Logins.steam_check_page + '/?redirectURL=about')
 
     try:
         ui.globals.Logins.steam_user = html.find('a', class_='username').text.strip()
@@ -38,8 +37,7 @@ def check_steam_login():
 
 
 def check_steamgifts_login():
-    login_page = 'https://www.steamgifts.com/account/profile/sync'
-    html = stlib.network.try_get_html('steamGifts', login_page)
+    html = stlib.network.try_get_html('steamGifts', ui.globals.Logins.steamgifts_check_page)
 
     try:
         form = html.findAll('form')[1]
@@ -52,7 +50,7 @@ def check_steamgifts_login():
 
 
 def check_steamcompanion_login():
-    html = stlib.network.try_get_html('steamCompanion', 'https://steamcompanion.com/settings')
+    html = stlib.network.try_get_html('steamCompanion', ui.globals.Logins.steamcompanion_check_page)
 
     try:
         user = html.find('div', class_='profile').find('a').text.strip()
