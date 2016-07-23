@@ -29,11 +29,58 @@ import time
 import ui
 
 
-class StartModule:
+class WindowSignals:
     def __init__(self):
         self.window = ui.globals.Window.main
 
-    def fake_app(self):
+    @staticmethod
+    def on_window_destroy(*args):
+        ui.Gtk.main_quit(*args)
+
+    def on_start_clicked(self, button):
+        current_page = self.window.tabs.get_current_page()
+        if current_page == 0:
+            pass
+        elif current_page == 1:
+            self.on_fake_app_start()
+        elif current_page == 2:
+            pass
+        elif current_page == 3:
+            pass
+        elif current_page == 4:
+            pass
+
+    def on_stop_clicked(self, button):
+        current_page = self.window.tabs.get_current_page()
+        if current_page == 0:
+            pass
+        elif current_page == 1:
+            self.on_fake_app_stop()
+        elif current_page == 2:
+            pass
+        elif current_page == 3:
+            pass
+        elif current_page == 4:
+            pass
+
+    def on_tabs_switch_page(self, tab, box, current_page):
+        if current_page == 0:
+            pass
+        elif current_page == 1:
+            if ui.globals.FakeApp.is_running:
+                self.window.start.set_sensitive(False)
+                self.window.stop.set_sensitive(True)
+            else:
+                self.window.start.set_sensitive(True)
+                self.window.stop.set_sensitive(False)
+        elif current_page == 2:
+            pass
+        elif current_page == 3:
+            pass
+        elif current_page == 4:
+            pass
+
+    def on_fake_app_start(self):
         self.window.update_status_bar("Preparing. Please wait...")
         ui.globals.FakeApp.id = self.window.fake_app_game_id.get_text().strip()
 
@@ -64,12 +111,7 @@ class StartModule:
         start_time = time.time()
         ui.GLib.timeout_add_seconds(1, ui.timers.fake_app_timer, start_time)
 
-
-class StopModule:
-    def __init__(self):
-        self.window = ui.globals.Window.main
-
-    def fake_app(self):
+    def on_fake_app_stop(self):
         self.window.stop.set_sensitive(False)
         # Prevents bad behaviour when the user click
         # on the start button before the fake_app is ready
@@ -89,60 +131,6 @@ class StopModule:
         self.window.start.set_sensitive(True)
         self.window.fake_app_current_game.set_text('')
         self.window.fake_app_current_time.set_text('')
-
-
-class WindowSignals:
-    def __init__(self):
-        self.window = ui.globals.Window.main
-        self.start_module = StartModule()
-        self.stop_module = StopModule()
-
-    @staticmethod
-    def on_window_destroy(*args):
-        ui.Gtk.main_quit(*args)
-
-    def on_start_clicked(self, button):
-        current_page = self.window.tabs.get_current_page()
-        if current_page == 0:
-            pass
-        elif current_page == 1:
-            self.start_module.fake_app()
-        elif current_page == 2:
-            pass
-        elif current_page == 3:
-            pass
-        elif current_page == 4:
-            pass
-
-    def on_stop_clicked(self, button):
-        current_page = self.window.tabs.get_current_page()
-        if current_page == 0:
-            pass
-        elif current_page == 1:
-            self.stop_module.fake_app()
-        elif current_page == 2:
-            pass
-        elif current_page == 3:
-            pass
-        elif current_page == 4:
-            pass
-
-    def on_tabs_switch_page(self, tab, box, current_page):
-        if current_page == 0:
-            pass
-        elif current_page == 1:
-            if ui.globals.FakeApp.is_running:
-                self.window.start.set_sensitive(False)
-                self.window.stop.set_sensitive(True)
-            else:
-                self.window.start.set_sensitive(True)
-                self.window.stop.set_sensitive(False)
-        elif current_page == 2:
-            pass
-        elif current_page == 3:
-            pass
-        elif current_page == 4:
-            pass
 
     @staticmethod
     def on_status_bar_text_pushed(status_bar, context, text):
