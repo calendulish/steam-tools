@@ -114,7 +114,7 @@ class SteamTools:
                     sys.exit(1)
 
                 ui.globals.logger.info('Preparing. Please wait...')
-                ui.globals.FakeApp.process = ui.libsteam.run_wrapper(badge_set['gameID'][index])
+                ui.libsteam.run_wrapper(badge_set['gameID'][index])
                 ui.globals.logger.info('Running {}'.format(badge_set['gameID'][index]))
 
             while True:
@@ -161,7 +161,7 @@ class SteamTools:
 
         if ui.libsteam.is_steam_running():
             ui.globals.logger.info("Preparing. Please wait...")
-            ui.globals.FakeApp.process = ui.libsteam.run_wrapper(ui.globals.FakeApp.id)
+            ui.libsteam.run_wrapper(ui.globals.FakeApp.id)
 
             time.sleep(3)
             if ui.globals.FakeApp.process.poll():

@@ -79,8 +79,6 @@ def run_wrapper(app_id):
 
     ui.globals.FakeApp.process = subprocess.Popen(wrapper_exec, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    return ui.globals.FakeApp.process
-
 
 def stop_wrapper():
     ui.globals.logger.verbose('Closing subprocess...')

@@ -97,7 +97,7 @@ class WindowSignals:
             self.window.stop.set_sensitive(False)
 
             if ui.libsteam.is_steam_running():
-                ui.globals.FakeApp.process = ui.libsteam.run_wrapper(ui.globals.FakeApp.id)
+                ui.libsteam.run_wrapper(ui.globals.FakeApp.id)
                 ui.globals.FakeApp.is_running = True
                 self.window.stop.set_sensitive(True)
             else:
