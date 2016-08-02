@@ -25,10 +25,11 @@ import ui
 
 def check_steam_login():
     ui.globals.logger.info("Checking if you are logged in on Steam...")
-    html = stlib.network.try_get_html('steam', ui.globals.Logins.steam_check_page + '/?redirectURL=about')
+    html = stlib.network.try_get_html('steam', ui.globals.Logins.steam_check_page + '/?redirectURL=discussions')
 
     try:
-        ui.globals.Logins.steam_user = html.find('a', class_='username').text.strip()
+        supernav = html.find('div', class_='supernav_container')
+        ui.globals.Logins.steam_user = supernav.find('a', class_='username').text.strip()
     except(AttributeError, IndexError):
         ui.globals.Logins.steam_user = None
         ui.globals.logger.error('Steam login status: Cookies not found' +
