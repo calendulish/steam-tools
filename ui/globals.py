@@ -35,6 +35,10 @@ class Logins:
     steamcompanion_user = None
 
 
+class CardFarming:
+    badge_set = {key: [] for key in ['gameID', 'gameName', 'cardCount', 'cardValue']}
+
+
 class FakeApp:
     id = None
     process = None

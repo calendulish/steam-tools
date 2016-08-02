@@ -43,7 +43,6 @@ def get_badges(add_prices=True):
         ui.globals.logger.verbose('I found only 1 page of badges')
 
     stlib.logger.console_msg('Searching card list...', end='\r')
-    badge_set = {k: [] for k in ['gameID', 'gameName', 'cardCount', 'cardValue']}
     for badge in badges:
         progress = badge.find('span', class_='progress_info_bold')
         title = badge.find('div', class_='badge_title')
@@ -63,9 +62,9 @@ def get_badges(add_prices=True):
 
         game_name = title.text.split('\t\t\t\t\t\t\t\t\t', 2)[1]
 
-        badge_set['cardCount'].append(card_count)
-        badge_set['gameID'].append(game_id)
-        badge_set['gameName'].append(game_name)
+        ui.globals.CardFarming.badge_set['cardCount'].append(card_count)
+        ui.globals.CardFarming.badge_set['gameID'].append(game_id)
+        ui.globals.CardFarming.badge_set['gameName'].append(game_name)
 
         stlib.logger.console_fixer('\r')
         stlib.logger.console_msg('I found {} cards in the {}({}) badge'.format(card_count,
@@ -86,38 +85,37 @@ def get_badges(add_prices=True):
             card_price = float(game.findAll('td')[2].text[1:])
             price_set['avg'].append(card_price / card_count)
 
-        # Add prices to badge_set
+        # Add prices to ui.globals.CardFarming.badge_set
         stlib.logger.console_msg('Adding prices to their respective games...', end='\r')
-        for game in badge_set['gameName']:
+        for game in ui.globals.CardFarming.badge_set['gameName']:
             avg_price = price_set['avg'][price_set['game'].index(game)]
 
             try:
-                badge_set['cardValue'].append(avg_price)
+                ui.globals.CardFarming.badge_set['cardValue'].append(avg_price)
             except ValueError:
-                badge_set['cardValue'].append(0)
+                ui.globals.CardFarming.badge_set['cardValue'].append(0)
 
             stlib.logger.console_msg('{} worth currently {} (avg)'.format(game, avg_price),
                                      end='\r')
 
         if config_parser.getboolean('Config', 'MostValuableFirst', fallback=True):
             stlib.logger.console_msg('Rearranging cards to get the most valuable first...', end='\r')
-            cards_count = len(badge_set['cardValue'])
+            cards_count = len(ui.globals.CardFarming.badge_set['cardValue'])
             cards_order = sorted(range(cards_count),
-                                 key=lambda key: badge_set['cardValue'][key],
+                                 key=lambda key: ui.globals.CardFarming.badge_set['cardValue'][key],
                                  reverse=True)
 
-            # reorder all items from badge_set
-            for item, value in badge_set.items():
-                badge_set[item] = [value[index] for index in cards_order]
+            # reorder all items from ui.globals.CardFarming.badge_set
+            for item, value in ui.globals.CardFarming.badge_set.items():
+                ui.globals.CardFarming.badge_set[item] = [value[index] for index in cards_order]
 
     stlib.logger.console_fixer()
 
-    return badge_set
 
-
-def update_card_count(game_id):
+def update_card_count(index):
     ui.globals.logger.verbose('Updating card count')
     config_parser = stlib.config.read()
+    game_id = ui.globals.CardFarming.badge_set['GameID'][index]
     dry_run = config_parser.getboolean('Debug', 'DryRun', fallback=False)
     profile = '{}/?redirectURL=id/{}'.format(ui.globals.Logins.steam_check_page,
                                              ui.globals.Logins.steam_user)
@@ -133,7 +131,7 @@ def update_card_count(game_id):
                 return 0
             else:
                 card_count = int(progress.text.split(' ', 3)[0])
-                return card_count
+                ui.globals.CardFarming.badge_set['cardCount'][index] = card_count
         else:
             ui.globals.logger.warning('Something is wrong with the page, trying again')
             time.sleep(3)
@@ -141,4 +139,4 @@ def update_card_count(game_id):
     ui.globals.logger.error('I cannot find the progress info for this badge. (Connection problem?)')
     ui.globals.logger.error('I\'ll jump to the next this time and try again later.')
 
-    return 0
+    ui.globals.CardFarming.badge_set['cardCount'][index] = 0
