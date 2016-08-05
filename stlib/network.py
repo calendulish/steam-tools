@@ -106,4 +106,7 @@ def get_html(url, data=None, cookies=None):
 def try_get_html(service_name, url, data=None):
     response = try_get_response(service_name, url, data)
 
-    return bs4.BeautifulSoup(response.content, 'html.parser')
+    if response:
+        return bs4.BeautifulSoup(response.content, 'html.parser')
+    else:
+        return None
