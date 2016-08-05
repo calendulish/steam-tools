@@ -350,7 +350,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="card_farming_current_gameTime">
+                                  <object class="GtkEntry" id="card_farming_current_game_time">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
