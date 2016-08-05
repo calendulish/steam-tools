@@ -35,8 +35,8 @@ class WindowSignals:
         self.window = ui.globals.Window.main
         self.config_parser = stlib.config.read()
 
-    @staticmethod
-    def on_window_destroy(*args):
+    def on_window_destroy(self, *args):
+        self.window.main_window.hide()
         ui.Gtk.main_quit(*args)
 
     def on_start_clicked(self, button):
