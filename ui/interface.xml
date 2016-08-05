@@ -1787,9 +1787,16 @@
   </object>
   <object class="GtkDialog" id="select_profile_dialog">
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">StCookie</property>
+    <property name="title" translatable="yes">Select Profile</property>
+    <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="type_hint">normal</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon_name">dialog-question</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <property name="deletable">False</property>
     <property name="transient_for">main_window</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox1">
