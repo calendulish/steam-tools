@@ -113,7 +113,7 @@ class SteamTools:
         message_id = random.randrange(500)
         self.status_bar.push(message_id, message)
 
-        return id
+        return message_id
 
     def new_dialog(self, msg_type, title, markup, secondary_markup=None):
         dialog = ui.Gtk.MessageDialog(transient_for=self.main_window,
