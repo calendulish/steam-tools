@@ -28,6 +28,62 @@ def status_bar_text_pushed_timer(context):
     return False
 
 
+def card_farming_time_timer(start_time):
+    window = ui.globals.Window.main
+    elapsed_seconds = int(time.time() - start_time)
+    elapsed_time = datetime.timedelta(seconds=elapsed_seconds)
+
+    if ui.globals.CardFarming.is_running:
+        window.card_farming_total_time.set_text(str(elapsed_time))
+
+        if ui.globals.CardFarming.game_start_time:
+            elapsed_seconds = int(time.time() - ui.globals.CardFarming.game_start_time)
+            elapsed_time = datetime.timedelta(seconds=elapsed_seconds)
+            window.card_farming_current_game_time.set_text(str(elapsed_time))
+
+        return True
+    else:
+        return False
+
+def card_farming_timer(dry_run):
+    window = ui.globals.Window.main
+
+    if ui.globals.CardFarming.is_running:
+        # Update card drop
+        # If the current game have more cards, return and wait the new loop
+        # otherwise, close, go to next badge, and start new game (see bellow)
+        if ui.globals.FakeApp.id:
+            window.update_status_bar('Checking if the game has more cards to drop.')
+            ui.card_farming.update_card_count(ui.globals.CardFarming.badge_current)
+
+            if ui.globals.CardFarming.badge_set['cardCount'][ui.globals.CardFarming.badge_current] is 0:
+                if not dry_run:
+                    ui.libsteam.stop_wrapper()
+                    ui.globals.FakeApp.is_running = False
+
+                ui.globals.CardFarming.badge_current += 1
+            else:
+                return True
+
+        # Start new game because the last check don't found more cards or a fake id
+        if not dry_run:
+            ui.globals.logger.info('Preparing. Please wait...')
+            ui.globals.FakeApp.id = ui.globals.CardFarming.badge_set['gameID'][ui.globals.CardFarming.badge_current]
+
+            window.card_farming_current_game.set_text(ui.globals.FakeApp.id)
+            window.card_farming_card_left.set_text('{} cards'.format(
+                    ui.globals.CardFarming.badge_set['cardCount'][ui.globals.CardFarming.badge_current]))
+
+            ui.globals.CardFarming.game_start_time = time.time()
+            ui.libsteam.run_wrapper(ui.globals.FakeApp.id)
+            ui.globals.FakeApp.is_running = True
+            ui.globals.logger.info('Running {}'.format(ui.globals.FakeApp.id))
+            ui.GLib.timeout_add_seconds(1, fake_app_timer, ui.globals.CardFarming.game_start_time)
+        return True
+    else:
+        return False
+
+
 def fake_app_timer(start_time):
     window = ui.globals.Window.main
     elapsed_seconds = round(time.time() - start_time)

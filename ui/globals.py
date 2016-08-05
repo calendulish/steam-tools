@@ -37,6 +37,9 @@ class Logins:
 
 class CardFarming:
     badge_set = {key: [] for key in ['gameID', 'gameName', 'cardCount', 'cardValue']}
+    badge_current = 0
+    game_start_time = None
+    is_running = False
 
 
 class FakeApp:

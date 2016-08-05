@@ -49,13 +49,8 @@ def get_badges(add_prices=True):
         title.span.unwrap()
 
         if not progress or 'No' in progress.text:
-            try:
-                game_id = badge.find('a')['href'].split('_')[-3]
-            except(TypeError, IndexError):
-                # Ignore. It's an special badge (not from games/apps)
-                continue
-
-            card_count = 0
+            # Ignore all already completed badges
+            continue
         else:
             card_count = int(progress.text.split(' ', 3)[0])
             game_id = badge.find('a')['href'].split('/', 3)[3]
@@ -115,7 +110,7 @@ def get_badges(add_prices=True):
 def update_card_count(index):
     ui.globals.logger.verbose('Updating card count')
     config_parser = stlib.config.read()
-    game_id = ui.globals.CardFarming.badge_set['GameID'][index]
+    game_id = ui.globals.CardFarming.badge_set['gameID'][index]
     dry_run = config_parser.getboolean('Debug', 'DryRun', fallback=False)
     profile = '{}/?redirectURL=id/{}'.format(ui.globals.Logins.steam_check_page,
                                              ui.globals.Logins.steam_user)
@@ -128,10 +123,12 @@ def update_card_count(index):
             progress = stats.find('span', class_='progress_info_bold')
 
             if not progress or 'No' in progress.text or dry_run:
-                return 0
+                ui.globals.CardFarming.badge_set['cardCount'][index] = 0
+                return None
             else:
                 card_count = int(progress.text.split(' ', 3)[0])
                 ui.globals.CardFarming.badge_set['cardCount'][index] = card_count
+                return None
         else:
             ui.globals.logger.warning('Something is wrong with the page, trying again')
             time.sleep(3)
