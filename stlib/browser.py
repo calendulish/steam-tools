@@ -115,7 +115,9 @@ def get_chrome_profile():
         for dir_name in sorted(os.listdir(chrome_dir)):
             if 'Profile' in dir_name or 'Default' in dir_name:
                 if os.path.isfile(os.path.join(chrome_dir, dir_name, 'Cookies')):
-                    profiles.append(os.path.join(chrome_dir, dir_name))
+                    profile_path = os.path.join(chrome_dir, dir_name)
+                    profile_name = os.path.basename(profile_path)
+                    profiles.append(profile_name)
 
     return profiles
 

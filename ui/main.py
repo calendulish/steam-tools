@@ -69,7 +69,7 @@ class SteamTools:
     def select_profile(self):
         stlib.config.read()
 
-        if self.config_parser.has_option('Config', 'chromeProfile'):
+        if not self.config_parser.has_option('Config', 'chromeProfile'):
             profiles = stlib.browser.get_chrome_profile()
 
             if not len(profiles):
@@ -79,14 +79,15 @@ class SteamTools:
                                 'I cannot find your Chrome/Chromium profile',
                                 'Some functions will be disabled.')
             elif len(profiles) == 1:
-                self.config_parser.set('Config', 'chromeProfile', profiles[0])
+                profile_name = os.path.join(stlib.browser.get_chrome_dir(), profiles[0])
+                self.config_parser.set('Config', 'chromeProfile', profile_name)
                 stlib.config.write()
             else:
                 self.select_profile_dialog.add_button('Ok', 1)
 
                 temp_radiobutton = None
                 for i in range(len(profiles)):
-                    with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
+                    with open(os.path.join(stlib.browser.get_chrome_dir(), profiles[i], 'Preferences')) as prefs_file:
                         prefs = json.load(prefs_file)
 
                     try:
@@ -94,7 +95,7 @@ class SteamTools:
                     except KeyError:
                         account_name = prefs['profile']['name']
 
-                    profile_name = os.path.basename(profiles[i])
+                    profile_name = profiles[i]
                     temp_radiobutton = ui.Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
                                                                                      '{} ({})'.format(account_name,
                                                                                                       profile_name))

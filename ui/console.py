@@ -50,24 +50,26 @@ class SteamTools:
                 ui.globals.logger.error('I cannot find your chrome/Chromium profile')
                 ui.globals.logger.error('Some functions will be disabled.')
             elif len(profiles) == 1:
-                self.config_parser.set('Config', 'chromeProfile', profiles[0])
+                profile_name = os.path.join(stlib.browser.get_chrome_dir(), profiles[0])
+                self.config_parser.set('Config', 'chromeProfile', profile_name)
                 stlib.config.write()
             else:
                 selected_profile = 0
                 ui.globals.logger.warning("Who are you?")
                 for i in range(len(profiles)):
-                    with open(os.path.join(profiles[i], 'Preferences')) as prefs_file:
+                    with open(os.path.join(stlib.browser.get_chrome_dir(), profiles[i], 'Preferences')) as prefs_file:
                         prefs = json.load(prefs_file)
 
                     try:
-                        profile_name = prefs['account_info'][0]['full_name']
+                        account_name = prefs['account_info'][0]['full_name']
                     except KeyError:
-                        profile_name = prefs['profile']['name']
+                        account_name = prefs['profile']['name']
 
+                    profile_name = profiles[i]
                     ui.globals.logger.warning('  - [%d] %s (%s)',
                                               i + 1,
-                                              profile_name,
-                                              os.path.basename(profiles[i]))
+                                              account_name,
+                                              profile_name)
 
                 while True:
                     try:
