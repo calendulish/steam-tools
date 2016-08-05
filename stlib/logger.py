@@ -42,7 +42,7 @@ class ColoredFormatter(logging.Formatter):
         else:
             msg = '\033[32m --> \033[{}m{}\033[m'.format(color_number, log.getMessage())
 
-        return msg
+        return msg.replace('\n', '\n     ')
 
 
 def encoder(buffer, error='replace'):
