@@ -39,6 +39,10 @@ class WindowSignals:
         self.window.main_window.hide()
         ui.Gtk.main_quit(*args)
 
+    def on_about_activate(self, button):
+        self.window.about_dialog.run()
+        self.window.about_dialog.hide()
+
     def on_start_clicked(self, button):
         current_page = self.window.tabs.get_current_page()
         if current_page == 0:
