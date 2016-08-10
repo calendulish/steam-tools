@@ -95,7 +95,9 @@ class SteamTools:
         ui.globals.logger.info('Hello {}'.format(ui.globals.Logins.steam_user))
 
         ui.card_farming.get_badges()
-        ui.card_farming.get_card_prices()
+
+        if self.config_parser.getboolean('Config', 'MostValuableFirst', fallback=True):
+            ui.card_farming.get_card_prices()
 
         ui.globals.logger.warning('Ready to start.')
         game_count = len(ui.globals.CardFarming.badge_set['gameID'])

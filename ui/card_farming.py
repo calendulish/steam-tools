@@ -70,8 +70,6 @@ def get_badges():
 def get_card_prices():
     stlib.logger.console_fixer('\r')
     stlib.logger.console_msg('Getting cards values...', end='\r')
-
-    config_parser = stlib.config.read()
     price_page = 'http://www.steamcardexchange.net/index.php?badgeprices'
     html = stlib.network.get_html(price_page)
 
@@ -94,16 +92,15 @@ def get_card_prices():
         stlib.logger.console_msg('{} worth currently {} (avg)'.format(game, avg_price),
                                  end='\r')
 
-    if config_parser.getboolean('Config', 'MostValuableFirst', fallback=True):
-        stlib.logger.console_msg('Rearranging cards to get the most valuable first...', end='\r')
-        cards_count = len(ui.globals.CardFarming.badge_set['cardValue'])
-        cards_order = sorted(range(cards_count),
-                             key=lambda key: ui.globals.CardFarming.badge_set['cardValue'][key],
-                             reverse=True)
+    stlib.logger.console_msg('Rearranging cards to get the most valuable first...', end='\r')
+    cards_count = len(ui.globals.CardFarming.badge_set['cardValue'])
+    cards_order = sorted(range(cards_count),
+                         key=lambda key: ui.globals.CardFarming.badge_set['cardValue'][key],
+                         reverse=True)
 
-        # reorder all items from ui.globals.CardFarming.badge_set
-        for item, value in ui.globals.CardFarming.badge_set.items():
-            ui.globals.CardFarming.badge_set[item] = [value[index] for index in cards_order]
+    # reorder all items from ui.globals.CardFarming.badge_set
+    for item, value in ui.globals.CardFarming.badge_set.items():
+        ui.globals.CardFarming.badge_set[item] = [value[index] for index in cards_order]
 
 
 def update_card_count(index):
