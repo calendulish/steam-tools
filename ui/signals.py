@@ -110,6 +110,7 @@ class WindowSignals:
 
             # FIXME: Very slow function for GUI mode
             ui.card_farming.get_badges()
+            ui.card_farming.get_card_prices()
 
             ui.globals.logger.warning('Ready to start.')
             start_time = time.time()

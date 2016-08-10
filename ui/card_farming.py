@@ -22,7 +22,7 @@ import stlib
 import ui
 
 
-def get_badges(add_prices=True):
+def get_badges():
     stlib.logger.console_msg('Getting badges info...', end='\r')
     profile = '{}/?redirectURL=id/{}'.format(ui.globals.Logins.steam_check_page,
                                              ui.globals.Logins.steam_user)
@@ -65,11 +65,6 @@ def get_badges(add_prices=True):
                                                                                game_name,
                                                                                game_id),
                                  end='\r')
-
-    if add_prices:
-        get_card_prices()
-
-    stlib.logger.console_fixer()
 
 
 def get_card_prices():
