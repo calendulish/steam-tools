@@ -37,6 +37,7 @@ class Logins:
 
 class CardFarming:
     badge_set = {key: [] for key in ['gameID', 'gameName', 'cardCount', 'cardValue']}
+    price_set = {k: [] for k in ['game', 'avg']}
     badge_current = 0
     game_start_time = None
     is_running = False

@@ -73,24 +73,23 @@ def get_badges(add_prices=True):
 
 
 def get_card_prices():
-    config_parser = stlib.config.read()
-
     stlib.logger.console_fixer('\r')
     stlib.logger.console_msg('Getting cards values...', end='\r')
-    price_set = {k: [] for k in ['game', 'avg']}
+
+    config_parser = stlib.config.read()
     price_page = 'http://www.steamcardexchange.net/index.php?badgeprices'
     html = stlib.network.get_html(price_page)
 
     for game in html.findAll('tr')[1:]:
-        price_set['game'].append(game.find('a').text)
+        ui.globals.CardFarming.price_set['game'].append(game.find('a').text)
         card_count = int(game.findAll('td')[1].text)
         card_price = float(game.findAll('td')[2].text[1:])
-        price_set['avg'].append(card_price / card_count)
+        ui.globals.CardFarming.price_set['avg'].append(card_price / card_count)
 
     # Add prices to ui.globals.CardFarming.badge_set
     stlib.logger.console_msg('Adding prices to their respective games...', end='\r')
     for game in ui.globals.CardFarming.badge_set['gameName']:
-        avg_price = price_set['avg'][price_set['game'].index(game)]
+        avg_price = ui.globals.CardFarming.price_set['avg'][ui.globals.CardFarming.price_set['game'].index(game)]
 
         try:
             ui.globals.CardFarming.badge_set['cardValue'].append(avg_price)
