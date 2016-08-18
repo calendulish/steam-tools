@@ -21,33 +21,37 @@ import shutil
 from time import sleep
 from subprocess import check_call, CalledProcessError
 
-WIN32 = 'C:\\Python3486\\python.exe'
-WIN64 = 'C:\\Python34\\python.exe'
-CYG32 = '/cygdrive/c/Python3486/python.exe'
-CYG64 = '/cygdrive/c/Python34/python.exe'
-LINALL = '/usr/bin/python'
+WIN32 = 'C:\\Python34\\python.exe'
+WIN64 = 'C:\\Python34-x64\\python.exe'
+CYG32 = '/cygdrive/c/Python34/python.exe'
+CYG64 = '/cygdrive/c/Python34-x64/python.exe'
+LINALL = '/usr/bin/python3'
 CMAKE = '/usr/bin/make'
 
 if os.name == 'nt' and os.getenv('PWD') \
    or 'cygwin' in sys.platform:
     WCOM = [ '/cygdrive/c/Windows/System32/cmd.exe' ]
-    CCOM = [ '/cygdrive/c/cygwin64/bin/mintty.exe' ]
+    CCOM = []
+    CCOMPARAMS = []
 else:
     WCOM = [ 'C:\\Windows\\System32\\cmd.exe' ]
     CCOM = [ 'C:\\cygwin64\\bin\\mintty.exe' ]
+    CCOMPARAMS = [ '-w', 'hide', '-l', '-', '-e' ]
 
 WCOMPARAMS = [ '/C' ]
-CCOMPARAMS = [ '-w', 'hide', '-l', '-', '-e' ]
 
 def safeCall(call):
+    program = [ p for p in call if p is not '' ]
+
     try:
-        check_call(call)
+        print('\n\nCalling {}\n\n'.format(program))
+        check_call(program)
     except CalledProcessError as e:
-        print("command: {}\nrcode: {}".format(call, e.returncode))
+        print("command: {}\nrcode: {}".format(program, e.returncode))
         sys.exit(1)
     except FileNotFoundError as e:
         print("Something is missing in your system for make an complete release")
-        print("command: {}".format(call))
+        print("command: {}".format(program))
         print(e)
         sys.exit(1)
 
