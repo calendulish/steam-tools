@@ -1,7 +1,10 @@
 Steam Tools
 -----------
 
-[![wercker status](https://app.wercker.com/status/f414fee9b1aea1be537a6898e52392ab/s "wercker status")](https://app.wercker.com/project/bykey/f414fee9b1aea1be537a6898e52392ab)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/ShyPixie/steam-tools?svg=true)](https://ci.appveyor.com/project/ShyPixie/steam-tools)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/ShyPixie/steam-tools/badges/quality-score.png)](https://scrutinizer-ci.com/g/ShyPixie/steam-tools/)
+[![GitHub license](https://img.shields.io/badge/license-GPLv3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
+[![GitHub release](https://img.shields.io/github/release/ShyPixie/steam-tools.svg)](https://github.com/ShyPixie/steam-tools/releases)
 
 Some useful tools for use with steam client or compatible programs, websites.
 
