@@ -1,8 +1,0 @@
-box: acidhub/archmake
-build:
-  steps:
-    - script:
-        name: Building steam-tools
-        code: |
-            pacman -Sy --noconfirm python python-beautifulsoup4 python-crypto python-requests python-setuptools
-            python setup.py install --prefix=/usr
