@@ -68,10 +68,17 @@ def steamgifts_config():
 def getGiveaways(page):
     giveaways = []
     container = bs(page, 'html.parser').find('div', class_='widget-container')
-    pinned = container.find('div', class_='pinned-giveaways__outer-wrap').extract()
 
-    if CONFIG.getboolean('Config', 'DeveloperGiveaways', fallback=True):
-        giveaways = pinned.findAll('div', class_='giveaway__row-outer-wrap')
+    try:
+        pinned = container.find('div', class_='pinned-giveaways__outer-wrap').extract()
+
+        if CONFIG.getboolean('Config', 'DeveloperGiveaways', fallback=True):
+            giveaways = pinned.findAll('div', class_='giveaway__row-outer-wrap')
+
+            if not giveaways:
+                raise AttributeError
+    except AttributeError:
+        LOGGER.error("I didn't find developer giveaways. Ignoring.")
 
     giveaways += container.findAll('div', class_='giveaway__row-outer-wrap')
 
