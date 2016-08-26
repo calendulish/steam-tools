@@ -164,7 +164,11 @@ if __name__ == "__main__":
                         if points == 0:
                             break
 
-                        sleep(randint(5, 20))
+                        antiban_sleep = randint(5, 20)
+                        for i in range(0, antiban_sleep):
+                            stlogger.cmsg("[ANTI-BAN TIMER] Waiting {:2d} seconds".format(antiban_sleep-i), end='\r')
+                            sleep(1)
+                        stlogger.cfixer('\r')
                     else:
                         LOGGER.verbose("Ignoring %s bacause you don't have points to enter.", giveawaySet['Name'][index])
 
