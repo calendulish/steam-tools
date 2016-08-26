@@ -65,6 +65,10 @@ def tryConnect(url, data=False, headers=AGENT):
 
             autoRecovery = False
             return response
+        except requests.exceptions.SSLError:
+            LOGGER.critical('INSECURE CONNECTION DETECTED!')
+            LOGGER.critical('Invalid SSL Certificates.')
+            sys.exit(1)
         except requests.exceptions.TooManyRedirects:
             if not autoRecovery:
                 LOGGER.error("Invalid or expired cookies.")
