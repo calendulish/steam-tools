@@ -2,51 +2,6 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.0"/>
-  <object class="GtkAboutDialog" id="about_dialog">
-    <property name="can_focus">False</property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
-    <property name="window_position">center-on-parent</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="type_hint">dialog</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="skip_pager_hint">True</property>
-    <property name="transient_for">main_window</property>
-    <property name="has_resize_grip">True</property>
-    <property name="program_name">Steam Tools</property>
-    <property name="version">GIT - Development Version</property>
-    <property name="copyright" translatable="yes">Lara Maia © 2015 ~ 2016</property>
-    <property name="comments" translatable="yes">Steam Tools are some useful tools for use with
-Steam Client and some related websites.</property>
-    <property name="website">mailto:dev@lara.click</property>
-    <property name="website_label" translatable="no">dev@lara.click</property>
-    <property name="authors">Lara Maia
-Fernando Manfredi</property>
-    <property name="logo">icons/steam-tools.png</property>
-    <property name="license_type">gpl-3-0</property>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="aboutdialog-vbox1">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="aboutdialog-action_area1">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
-  </object>
   <object class="GtkListStore" id="liststore1"/>
   <object class="GtkWindow" id="main_window">
     <property name="width_request">640</property>
@@ -1799,6 +1754,51 @@ Fernando Manfredi</property>
             <property name="fill">True</property>
             <property name="position">3</property>
           </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkAboutDialog" id="about_dialog">
+    <property name="can_focus">False</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <property name="transient_for">main_window</property>
+    <property name="has_resize_grip">True</property>
+    <property name="program_name">Steam Tools</property>
+    <property name="version">GIT - Development Version</property>
+    <property name="copyright" translatable="yes">Lara Maia © 2015 ~ 2016</property>
+    <property name="comments" translatable="yes">Steam Tools are some useful tools for use with
+Steam Client and some related websites.</property>
+    <property name="website">mailto:dev@lara.click</property>
+    <property name="website_label">dev@lara.click</property>
+    <property name="authors">Lara Maia
+Fernando Manfredi</property>
+    <property name="logo">icons/steam-tools.png</property>
+    <property name="license_type">gpl-3-0</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="aboutdialog-vbox1">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="aboutdialog-action_area1">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>
