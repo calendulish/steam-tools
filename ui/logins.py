@@ -16,6 +16,8 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
+import bs4
+import gevent
 import os
 from threading import Thread
 
@@ -23,11 +25,9 @@ import stlib
 import ui
 
 
-def check_steam_login():
-    ui.globals.logger.info("Checking if you are logged in on Steam...")
-    html = stlib.network.try_get_html('steam', ui.globals.Logins.steam_check_page + '/?redirectURL=discussions')
-
+def check_steam_login(greenlet):
     try:
+        html = bs4.BeautifulSoup(greenlet.value.content, 'html.parser')
         supernav = html.find('div', class_='supernav_container')
         ui.globals.Logins.steam_user = supernav.find('a', class_='username').text.strip()
     except(AttributeError, IndexError):
@@ -37,23 +37,21 @@ def check_steam_login():
                                 '\nsteampowered.com or steamcommunity.com')
 
 
-def check_steamgifts_login():
-    html = stlib.network.try_get_html('steamGifts', ui.globals.Logins.steamgifts_check_page)
-
+def check_steamgifts_login(greenlet):
     try:
+        html = bs4.BeautifulSoup(greenlet.value.content, 'html.parser')
         form = html.findAll('form')[1]
         ui.globals.Logins.steamgifts_user = form.find('input', {'name': 'username'}).get('value')
     except(AttributeError, IndexError):
-        ui.globals.Logins.steam_user = None
+        ui.globals.Logins.steamgifts_user = None
         ui.globals.logger.error('SteamGifts login status: Cookies not found' +
                                 '\nPlease, check if you are logged in on' +
                                 '\nwww.steamgifts.com')
 
 
-def check_steamcompanion_login():
-    html = stlib.network.try_get_html('steamCompanion', ui.globals.Logins.steamcompanion_check_page)
-
+def check_steamcompanion_login(greenlet):
     try:
+        html = bs4.BeautifulSoup(greenlet.value.content, 'html.parser')
         user = html.find('div', class_='profile').find('a').text.strip()
 
         if not user:
@@ -66,20 +64,15 @@ def check_steamcompanion_login():
                                 '\nPlease, check if you are logged in on' +
                                 '\nsteamcompanion.com')
 
-
-class CheckStatus(Thread):
+class Status:
     def __init__(self):
-        Thread.__init__(self)
         self.window = ui.globals.Window.main
         self.steam_connected = False
         self.steamgifts_connected = False
         self.steamcompanion_connected = False
 
-    def steam_login_status(self):
-        status_context = self.window.update_status_bar("Checking if you are logged in on Steam...")
-        self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path, self.window.steam_icon_busy))
-
-        check_steam_login()
+    def __steam_callback(self, greenlet):
+        check_steam_login(greenlet)
 
         if ui.globals.Logins.steam_user:
             self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path,
@@ -95,14 +88,8 @@ class CheckStatus(Thread):
                                                             "\nsteampowered.com or steamcommunity.com")
             self.steam_connected = False
 
-        self.window.status_bar.pop(status_context)
-
-    def SG_login_status(self):
-        status_context = self.window.update_status_bar("Checking if you are logged in on SteamGifts...")
-        self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
-                                                               self.window.steamgifts_icon_busy))
-
-        check_steamgifts_login()
+    def __steamgifts_callback(self, greenlet):
+        check_steamgifts_login(greenlet)
 
         if ui.globals.Logins.steamgifts_user:
             self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
@@ -118,14 +105,8 @@ class CheckStatus(Thread):
                                                          "\nwww.steamgifts.com")
             self.steamgifts_connected = False
 
-        self.window.status_bar.pop(status_context)
-
-    def SC_login_status(self):
-        status_context = self.window.update_status_bar("Checking if you are logged in on SteamCompanion...")
-        self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,
-                                                               self.window.steamcompanion_icon_busy))
-
-        check_steamcompanion_login()
+    def __steamcompanion_callback(self, greenlet):
+        check_steamcompanion_login(greenlet)
 
         if ui.globals.Logins.steamcompanion_user:
             self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,
@@ -142,9 +123,9 @@ class CheckStatus(Thread):
                                                          "\nsteamcompanion.com")
             self.steamcompanion_connected = False
 
-        self.window.status_bar.pop(status_context)
-
-    def run(self):
-        self.steam_login_status()
-        self.SG_login_status()
-        self.SC_login_status()
+    def queue_connect(self, service_name, url):
+        greenlet = gevent.Greenlet(stlib.network.try_get_response, service_name, url)
+        class_name = self.__class__.__name__
+        callback_function = ''.join(['_', class_name, '__', service_name, '_callback'])
+        greenlet.link(eval(''.join(['self.', callback_function])))
+        greenlet.start()

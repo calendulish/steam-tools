@@ -76,6 +76,10 @@ def try_get_response(service_name, url, data=None):
     while True:
         try:
             cookies = config_parser._sections[service_name + 'Cookies']
+
+            if not cookies:
+                raise KeyError
+
             response = get_response(url, data, cookies)
 
             if service_name is 'steam':

@@ -16,6 +16,7 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
+import gevent
 import json
 import os
 import random
@@ -28,8 +29,8 @@ class SteamTools:
     def __init__(self):
         ui.globals.Window.main = self
         self.signals = ui.signals.WindowSignals()
-        self.check_login_status = ui.logins.CheckStatus()
         self.config_parser = stlib.config.read()
+        self.login_status = ui.logins.Status()
 
         builder = ui.Gtk.Builder()
         builder.add_from_file('ui/interface.xml')
@@ -64,7 +65,10 @@ class SteamTools:
         self.main_window.show_all()
 
         self.select_profile()
-        self.check_login_status.start()
+
+        self.login_status.queue_connect("steam", ui.globals.Logins.steam_check_page + '/?redirectURL=discussions')
+        self.login_status.queue_connect("steamgifts", ui.globals.Logins.steamgifts_check_page)
+        self.login_status.queue_connect("steamcompanion", ui.globals.Logins.steamcompanion_check_page)
 
     def select_profile(self):
         stlib.config.read()

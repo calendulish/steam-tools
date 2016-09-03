@@ -17,6 +17,7 @@
 #
 
 import argparse
+import gevent
 import logging
 import os
 import subprocess
@@ -46,6 +47,9 @@ def safe_call(call):
         LOGGER.critical(e)
         return 1
 
+def fix_gevent():
+    gevent.sleep(0.1)
+    return True
 
 # if is executing from a Cygwin console:
 if os.name is 'nt' and os.getenv('PWD'):
@@ -79,4 +83,5 @@ if __name__ == "__main__":
         ST = ui.console.SteamTools(cParams)
     else:
         ST = ui.main.SteamTools()
+        ui.GLib.idle_add(fix_gevent)
         ui.Gtk.main()
