@@ -39,6 +39,9 @@ class WindowSignals:
         self.window.main_window.hide()
         ui.Gtk.main_quit(*args)
 
+    def on_quit_activate(self, *args):
+        self.on_window_destroy(*args)
+
     def on_about_activate(self, button):
         self.window.about_dialog.run()
         self.window.about_dialog.hide()
