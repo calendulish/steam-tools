@@ -16,10 +16,11 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
+import gc
+import os
+
 import bs4
 import gevent
-import os
-from threading import Thread
 
 import stlib
 import ui
@@ -129,3 +130,20 @@ class Status:
         callback_function = ''.join(['_', class_name, '__', service_name, '_callback'])
         greenlet.link(eval(''.join(['self.', callback_function])))
         greenlet.start()
+
+    def wait_queue(self):
+        greenlets = []
+        for object_ in gc.get_objects():
+            if isinstance(object_, gevent.Greenlet):
+                greenlets.append(object_)
+
+        while True:
+            try:
+                if greenlets[-1].ready():
+                    greenlets.pop()
+                else:
+                    while ui.Gtk.events_pending():
+                        ui.Gtk.main_iteration()
+                    gevent.sleep(0.1)
+            except IndexError:
+                break

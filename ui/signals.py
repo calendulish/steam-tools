@@ -106,6 +106,7 @@ class WindowSignals:
 
         if ui.libsteam.is_steam_running():
             self.window.update_status_bar("Preparing. Please wait...")
+            self.window.spinner.start()
             ui.globals.CardFarming.is_running = True
 
             # FIXME: Very slow function for GUI mode
@@ -115,6 +116,8 @@ class WindowSignals:
                 ui.card_farming.get_card_prices()
 
             ui.globals.logger.warning('Ready to start.')
+            self.window.spinner.stop()
+
             start_time = time.time()
             ui.GLib.timeout_add_seconds(1, ui.timers.card_farming_time_timer, start_time)
 
@@ -154,6 +157,7 @@ class WindowSignals:
         self.window.stop.set_sensitive(False)
 
         self.window.update_status_bar("Preparing. Please wait...")
+        self.window.spinner.start()
         ui.globals.FakeApp.id = self.window.fake_app_game_id.get_text().strip()
 
         if not ui.globals.FakeApp.id:
@@ -176,6 +180,7 @@ class WindowSignals:
                                        "Please, start the Steam Client and try again.")
                 self.window.start.set_sensitive(True)
 
+        self.window.spinner.stop()
         start_time = time.time()
         ui.GLib.timeout_add_seconds(1, ui.timers.fake_app_timer, start_time)
 
