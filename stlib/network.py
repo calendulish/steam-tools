@@ -17,12 +17,15 @@
 #
 
 import logging
+import threading
 import time
 
 import bs4
+import gevent
 import requests
 
 import stlib
+import ui
 
 LOGGER = logging.getLogger(__name__)
 
@@ -34,27 +37,51 @@ STEAM_LOGIN_PAGES = [
 USER_AGENT = {'User-Agent': 'Unknown/0.0.0'}
 
 
+class Threaded(threading.Thread):
+    def __init__(self, function, *args, **kwargs):
+        threading.Thread.__init__(self)
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.return_ = None
+
+    def run(self):
+        self.return_ = self.function(*self.args, **self.kwargs)
+
+
+# It's Magic!
+def async_wait(function):
+    def async_call(*args, **kwargs):
+        thread = Threaded(function, *args, **kwargs)
+        thread.start()
+
+        while thread.is_alive():
+            ui.Gtk.main_iteration()
+            gevent.sleep(0.01)
+        else:
+            return thread.return_
+
+    return async_call
+
+@async_wait
 def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, verify='cacert.pem', stream=False):
     if headers:
         headers.update(USER_AGENT)
 
+    kwargs = {'data': data,
+              'headers': headers,
+              'cookies': cookies,
+              'timeout': timeout,
+              'verify': verify,
+              'stream': stream}
+
     for i in range(1, 4):
         try:
             if data:
-                response = requests.post(url,
-                                         data=data,
-                                         headers=headers,
-                                         cookies=cookies,
-                                         timeout=timeout,
-                                         verify=verify,
-                                         stream=stream)
+                response = requests.post(url, **kwargs)
             else:
-                response = requests.get(url,
-                                        cookies=cookies,
-                                        headers=headers,
-                                        timeout=timeout,
-                                        verify=verify,
-                                        stream=stream)
+                response = requests.get(url, **kwargs)
+
             response.raise_for_status()
         except requests.exceptions.SSLError:
             LOGGER.critical('INSECURE CONNECTION DETECTED!')
@@ -101,14 +128,14 @@ def try_get_response(service_name, url, data=None):
             return response
 
 
-def get_html(url, data=None, cookies=None):
-    response = get_response(url, data, cookies)
+def get_html(*args, **kwargs):
+    response = get_response(*args, **kwargs)
 
     return bs4.BeautifulSoup(response.content, 'html.parser')
 
 
-def try_get_html(service_name, url, data=None):
-    response = try_get_response(service_name, url, data)
+def try_get_html(*args, **kwargs):
+    response = try_get_response(*args, **kwargs)
 
     if response:
         return bs4.BeautifulSoup(response.content, 'html.parser')
