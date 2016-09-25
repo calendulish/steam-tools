@@ -19,6 +19,7 @@
 import datetime
 import time
 
+import stlib
 import ui
 
 
@@ -45,8 +46,18 @@ def card_farming_time_timer(start_time):
     else:
         return False
 
-def card_farming_timer(dry_run):
+def total_card_count():
     window = ui.globals.Window.main
+    generator = stlib.card_farming.get_total_card_count()
+    for card_count in generator:
+        window.card_farming_total_card_left.set_text('{} cards'.format(card_count))
+        ui.Gtk.main_iteration()
+
+    return False
+
+def card_farming_timer(dry_run, badges, badge_current, cards_info):
+    window = ui.globals.Window.main
+    badge = badges[badge_current]
 
     if ui.globals.CardFarming.is_running:
         # Update card drop
@@ -54,25 +65,24 @@ def card_farming_timer(dry_run):
         # otherwise, close, go to next badge, and start new game (see bellow)
         if ui.globals.FakeApp.id:
             window.update_status_bar('Checking if the game has more cards to drop.')
-            ui.card_farming.update_card_count(ui.globals.CardFarming.badge_current)
+            card_count = stlib.card_farming.get_card_count(badge, True)
 
-            if ui.globals.CardFarming.badge_set['cardCount'][ui.globals.CardFarming.badge_current] is 0:
+            if card_count is 0:
                 if not dry_run:
                     ui.libsteam.stop_wrapper()
                     ui.globals.FakeApp.is_running = False
 
-                ui.globals.CardFarming.badge_current += 1
+                badge_current += 1
             else:
                 return True
 
         # Start new game because the last check don't found more cards or a fake id
         if not dry_run:
             ui.globals.logger.info('Preparing. Please wait...')
-            ui.globals.FakeApp.id = ui.globals.CardFarming.badge_set['gameID'][ui.globals.CardFarming.badge_current]
+            ui.globals.FakeApp.id = stlib.card_farming.get_game_id(badge)
 
-            window.card_farming_current_game.set_text(ui.globals.FakeApp.id)
-            window.card_farming_card_left.set_text('{} cards'.format(
-                    ui.globals.CardFarming.badge_set['cardCount'][ui.globals.CardFarming.badge_current]))
+            window.card_farming_current_game.set_text(stlib.card_farming.get_game_name(badge))
+            window.card_farming_card_left.set_text('{} cards'.format(stlib.card_farming.get_card_count(badge)))
 
             ui.globals.CardFarming.game_start_time = time.time()
             ui.libsteam.run_wrapper(ui.globals.FakeApp.id)

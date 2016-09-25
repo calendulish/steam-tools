@@ -112,20 +112,35 @@ class WindowSignals:
             self.window.spinner.start()
             ui.globals.CardFarming.is_running = True
 
-            # FIXME: Very slow function for GUI mode
-            ui.card_farming.get_badges()
+            self.window.update_status_bar("Searching for badges...")
+            badge_pages = stlib.card_farming.get_badge_page_count()
+            badges = []
+            for page in range(1, badge_pages+1):
+                badges.extend(stlib.card_farming.get_badges(page))
+
+            self.window.update_status_bar("Ignoring completed badges...")
+            badges = stlib.card_farming.remove_completed_badges(badges)
+
+            self.window.update_status_bar("Getting cards info...")
+            cards_info = stlib.card_farming.get_cards_info()
 
             if self.config_parser.getboolean('Config', 'MostValuableFirst', fallback=True):
-                ui.card_farming.get_card_prices()
+                self.window.update_status_bar("Ordering cards by most valuable...")
+                badges = stlib.card_farming.order_by_most_valuable(cards_info, badges)
 
             ui.globals.logger.warning('Ready to start.')
+            self.window.update_status_bar('Ready.')
             self.window.spinner.stop()
 
             start_time = time.time()
             ui.GLib.timeout_add_seconds(1, ui.timers.card_farming_time_timer, start_time)
 
-            ui.timers.card_farming_timer(dry_run)
-            ui.GLib.timeout_add_seconds(40, ui.timers.card_farming_timer)
+            self.window.card_farming_total_card_left.set_text('Counting...')
+            ui.GLib.idle_add(ui.timers.total_card_count)
+
+            badge_current = 0
+            ui.timers.card_farming_timer(dry_run, badges, badge_current, cards_info)
+            ui.GLib.timeout_add_seconds(40, ui.timers.card_farming_timer, dry_run, badges, badge_current, cards_info)
 
             self.window.stop.set_sensitive(True)
         else:

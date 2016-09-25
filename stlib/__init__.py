@@ -6,9 +6,11 @@ gevent.monkey.patch_all()
 from stlib import (logger,
                    config,
                    network,
-                   browser)
+                   browser,
+                   card_farming)
 
 __all__ = ['logger',
            'config',
            'network',
-           'browser']
+           'browser',
+           'card_farming']

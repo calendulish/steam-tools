@@ -14,7 +14,6 @@ from ui import (console,
                 main,
                 signals,
                 timers,
-                card_farming,
                 globals)
 
 __all__ = ['console',
@@ -23,5 +22,4 @@ __all__ = ['console',
            'main',
            'signals',
            'timers',
-           'card_farming',
            'globals']
