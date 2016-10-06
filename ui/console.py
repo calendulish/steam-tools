@@ -21,6 +21,8 @@ import os
 import sys
 import time
 
+import gevent
+
 import stlib
 import ui
 
@@ -90,7 +92,15 @@ class SteamTools:
                 stlib.config.write()
 
     def __cardfarming(self):
-        ui.logins.check_steam_login()
+        greenlet = gevent.Greenlet(stlib.network.try_get_response,
+                                   'steam',
+                                   ui.globals.Logins.steam_check_page + '/?redirectURL=discussions')
+        greenlet.link(ui.logins.check_steam_login)
+        greenlet.start()
+        greenlet.join()
+
+        if not ui.globals.Logins.steam_user:
+            sys.exit(1)
 
         ui.globals.logger.info('Hello {}'.format(ui.globals.Logins.steam_user))
 
