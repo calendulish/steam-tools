@@ -56,7 +56,8 @@ def async_wait(function):
         thread.start()
 
         while thread.is_alive():
-            ui.Gtk.main_iteration()
+            if 'Gtk' in dir(ui):
+                ui.Gtk.main_iteration()
             gevent.sleep(0.01)
         else:
             return thread.return_
