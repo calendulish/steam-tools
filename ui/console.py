@@ -104,7 +104,7 @@ class SteamTools:
 
         ui.globals.logger.info('Hello {}'.format(stlib.steam_user))
 
-        if ui.libsteam.is_steam_running():
+        if stlib.libsteam.is_steam_running():
             stlib.logger.info('Preparing. Please wait...')
             badge_pages = stlib.card_farming.get_badge_page_count()
             badges = []
@@ -123,7 +123,7 @@ class SteamTools:
                 game_name = stlib.card_farming.get_game_name(badge)
                 game_id = stlib.card_farming.get_game_id(badge)
                 stlib.logger.info('Starting game %s (%s)', game_name, game_id)
-                ui.libsteam.run_wrapper(game_id)
+                stlib.libsteam.run_wrapper(game_id)
 
                 while True:
                     card_count = stlib.card_farming.get_card_count(badge, False)
@@ -131,9 +131,9 @@ class SteamTools:
                     stlib.logger.verbose('Waiting card drop loop')
 
                     for i in range(40):
-                        if ui.globals.FakeApp.process.poll():
+                        if stlib.wrapper_process.poll():
                             stlib.logging.console_fixer()
-                            stlib.logger.critical(ui.globals.FakeApp.process.stderr.read().decode('utf-8'))
+                            stlib.logger.critical(stlib.wrapper_process.stderr.read().decode('utf-8'))
                             sys.exit(1)
 
                         try:
@@ -149,7 +149,7 @@ class SteamTools:
                         stlib.logging.console_fixer('\r')
                         stlib.logger.warning('No more cards to drop.')
                         stlib.logger.info('Closing %s', game_name)
-                        ui.libsteam.stop_wrapper()
+                        stlib.libsteam.stop_wrapper()
                         break
         else:
             stlib.logger.error('Unable to locate a running instance of steam.')
@@ -166,18 +166,18 @@ class SteamTools:
             ui.globals.logger.critical("Please, check the command line.")
             sys.exit(1)
 
-        if ui.libsteam.is_steam_running():
+        if stlib.libsteam.is_steam_running():
             ui.globals.logger.info("Preparing. Please wait...")
-            ui.libsteam.run_wrapper(ui.globals.FakeApp.id)
+            stlib.libsteam.run_wrapper(ui.globals.FakeApp.id)
 
             time.sleep(3)
-            if ui.globals.FakeApp.process.poll():
+            if stlib.wrapper_process.poll():
                 ui.globals.logger.critical("This is not a valid gameID.")
                 sys.exit(1)
 
             try:
                 ui.globals.logger.info("Running {}".format(ui.globals.FakeApp.id))
-                ui.globals.FakeApp.process.wait()
+                stlib.wrapper_process.wait()
             except KeyboardInterrupt:
                 pass
         else:

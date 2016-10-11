@@ -33,5 +33,4 @@ class CardFarming:
 
 class FakeApp:
     id = None
-    process = None
     is_running = False

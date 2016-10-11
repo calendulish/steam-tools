@@ -9,7 +9,6 @@ if len(sys.argv) == 1:
 
 # noinspection PyPep8
 from ui import (console,
-                libsteam,
                 logins,
                 main,
                 signals,
@@ -17,7 +16,6 @@ from ui import (console,
                 globals)
 
 __all__ = ['console',
-           'libsteam',
            'logins',
            'main',
            'signals',

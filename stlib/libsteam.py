@@ -16,14 +16,12 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import atexit
 import ctypes
 import os
 import subprocess
 import sys
 
 import stlib
-import ui
 
 if os.name is 'posix':
     import site
@@ -57,7 +55,7 @@ def _find_libsteam():
 
 def _find_wrapper():
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-    paths = [current_directory, os.path.join(current_directory, 'ui')]
+    paths = [ os.path.join(current_directory, 'stlib') ]
 
     if os.name is 'posix':
         paths.append(os.path.join(site.getsitepackages()[1], 'stlib'))
@@ -77,26 +75,29 @@ def run_wrapper(app_id):
     if wrapper_path[-3:] != 'exe':
         wrapper_exec = ['python'] + wrapper_exec
 
-    ui.globals.FakeApp.process = subprocess.Popen(wrapper_exec, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stlib.wrapper_process = subprocess.Popen(wrapper_exec, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
 def stop_wrapper():
-    ui.globals.logger.verbose('Closing subprocess...')
+    stlib.logger.verbose('Closing wrapper subprocess...')
 
-    ui.globals.FakeApp.process.terminate()
+    stlib.wrapper_process.terminate()
 
     try:
-        ui.globals.logger.debug("Waiting to libsteam_wrapper terminate.")
-        ui.globals.FakeApp.process.communicate(timeout=20)
+        stlib.logger.verbose("Waiting to wrapper subprocess terminate.")
+        stlib.wrapper_process.communicate(timeout=20)
     except subprocess.TimeoutExpired:
-        ui.globals.logger.debug("Force Killing libsteam_wrapper.")
-        ui.globals.FakeApp.process.kill()
-        ui.globals.FakeApp.process.communicate()
+        stlib.logger.verbose("Force killing wrapper subprocess.")
+        stlib.wrapper_process.kill()
+        stlib.wrapper_process.communicate()
 
-    if ui.globals.FakeApp.process.returncode:
-        return 1
+    if stlib.wrapper_process.returncode:
+        return_ = 1
     else:
-        return 0
+        return_ = 0
+
+    stlib.wrapper_process = None
+    return return_
 
 
 def is_steam_running():
@@ -108,18 +109,7 @@ def is_steam_running():
 
 
 def is_wrapper_running():
-    if ui.globals.FakeApp.process.poll():
+    if stlib.wrapper_process.poll():
         return False
     else:
         return True
-
-
-def __safe_exit():
-    stlib.logging.console_fixer()
-    ui.globals.logger.warning('Exiting...')
-
-    if ui.globals.FakeApp.process:
-        return stop_wrapper()
-
-
-atexit.register(__safe_exit)

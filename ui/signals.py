@@ -107,7 +107,7 @@ class WindowSignals:
             self.window.start.set_sensitive(True)
             return None
 
-        if ui.libsteam.is_steam_running():
+        if stlib.libsteam.is_steam_running():
             self.window.update_status_bar("Preparing. Please wait...")
             self.window.spinner.start()
             ui.globals.CardFarming.is_running = True
@@ -152,7 +152,7 @@ class WindowSignals:
 
         self.window.update_status_bar("Waiting to card farming terminate.")
         ui.globals.CardFarming.is_running = False
-        ui.libsteam.stop_wrapper()
+        stlib.libsteam.stop_wrapper()
         ui.globals.FakeApp.is_running = False
         ui.globals.FakeApp.id = None
         self.window.fake_app_current_game.set_text('')
@@ -181,8 +181,8 @@ class WindowSignals:
                                    "You must specify an AppID!")
             self.window.start.set_sensitive(True)
         else:
-            if ui.libsteam.is_steam_running():
-                ui.libsteam.run_wrapper(ui.globals.FakeApp.id)
+            if stlib.libsteam.is_steam_running():
+                stlib.libsteam.run_wrapper(ui.globals.FakeApp.id)
                 ui.globals.FakeApp.is_running = True
                 self.window.stop.set_sensitive(True)
             else:
@@ -211,13 +211,13 @@ class WindowSignals:
             return None
 
         self.window.update_status_bar("Waiting to fakeapp terminate.")
-        ui.libsteam.stop_wrapper()
+        stlib.libsteam.stop_wrapper()
 
-        if ui.globals.FakeApp.process.returncode is None:
-            error = ui.globals.FakeApp.process.stderr.read()
+        if stlib.wrapper_process.returncode is None:
+            error = stlib.wrapper_process.stderr.read()
             self.window.new_dialog(ui.Gtk.MessageType.ERROR,
                                    'Fake Steam App',
-                                   'An Error occured ({}).'.format(ui.globals.FakeApp.process.returncode),
+                                   'An Error occured ({}).'.format(stlib.wrapper_process.returncode),
                                    error.decode(locale.getpreferredencoding()))
 
         ui.globals.FakeApp.is_running = False

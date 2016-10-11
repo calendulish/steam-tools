@@ -66,7 +66,7 @@ def card_farming_timer(dry_run, badges, badge_current, cards_info):
 
             if card_count is 0:
                 if not dry_run:
-                    ui.libsteam.stop_wrapper()
+                    stlib.libsteam.stop_wrapper()
                     ui.globals.FakeApp.is_running = False
 
                 badge_current += 1
@@ -82,7 +82,7 @@ def card_farming_timer(dry_run, badges, badge_current, cards_info):
             ui.main_window.card_farming_card_left.set_text('{} cards'.format(stlib.card_farming.get_card_count(badge)))
 
             ui.globals.CardFarming.game_start_time = time.time()
-            ui.libsteam.run_wrapper(ui.globals.FakeApp.id)
+            stlib.libsteam.run_wrapper(ui.globals.FakeApp.id)
             ui.globals.FakeApp.is_running = True
             ui.globals.logger.info('Running {}'.format(ui.globals.FakeApp.id))
             ui.GLib.timeout_add_seconds(1, fake_app_timer, ui.globals.CardFarming.game_start_time)
@@ -96,7 +96,7 @@ def fake_app_timer(start_time):
     elapsed_time = datetime.timedelta(seconds=elapsed_seconds)
 
     if ui.globals.FakeApp.is_running:
-        if not ui.libsteam.is_wrapper_running():
+        if not stlib.libsteam.is_wrapper_running():
             ui.main_window.update_status_bar("This is not a valid gameID.")
             ui.main_window.new_dialog(ui.Gtk.MessageType.ERROR,
                               'Fake Steam App',
