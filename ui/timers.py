@@ -64,7 +64,6 @@ def card_farming_timer(dry_run, badges, badge_current, cards_info):
         # If the current game have more cards, return and wait the new loop
         # otherwise, close, go to next badge, and start new game (see bellow)
         if ui.globals.FakeApp.id:
-            window.update_status_bar('Checking if the game has more cards to drop.')
             card_count = stlib.card_farming.get_card_count(badge, True)
 
             if card_count is 0:

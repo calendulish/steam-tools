@@ -115,7 +115,7 @@ def is_wrapper_running():
 
 
 def __safe_exit():
-    stlib.logger.console_fixer()
+    stlib.logging.console_fixer()
     ui.globals.logger.warning('Exiting...')
 
     if ui.globals.FakeApp.process:

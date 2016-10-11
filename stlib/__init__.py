@@ -1,9 +1,10 @@
 #  Keep the import order, please
 
 import gevent.monkey
+
 gevent.monkey.patch_all()
 
-from stlib import (logger,
+from stlib import (logging,
                    config,
                    network,
                    browser,
@@ -14,3 +15,5 @@ __all__ = ['logger',
            'network',
            'browser',
            'card_farming']
+
+logger = logging.get_logger('VERBOSE')

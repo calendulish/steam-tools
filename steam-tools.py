@@ -17,23 +17,22 @@
 #
 
 import argparse
-import gevent
 import logging
 import os
 import subprocess
 import sys
 
+import gevent
+
 import stlib
 import ui
-
-LOGGER = stlib.logger.get_logger('VERBOSE')
 
 if os.name is 'posix':
     if os.getenv('DISPLAY'):
         import ui.main
     else:
-        LOGGER.warning('The DISPLAY is not set!')
-        LOGGER.warning('Use --cli <module> for the command line interface.')
+        stlib.logger.warning('The DISPLAY is not set!')
+        stlib.logger.warning('Use --cli <module> for the command line interface.')
         sys.exit(1)
 
 
@@ -43,13 +42,15 @@ def safe_call(call):
     except subprocess.CalledProcessError as e:
         return e.returncode
     except FileNotFoundError as e:
-        LOGGER.critical("I cannot find winpty. Please, check your installation.")
-        LOGGER.critical(e)
+        stlib.logger.critical("I cannot find winpty. Please, check your installation.")
+        stlib.logger.critical(e)
         return 1
+
 
 def fix_gevent():
     gevent.sleep(0.1)
     return True
+
 
 # if is executing from a Cygwin console:
 if os.name is 'nt' and os.getenv('PWD'):
