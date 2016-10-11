@@ -104,70 +104,59 @@ class SteamTools:
 
         ui.globals.logger.info('Hello {}'.format(stlib.steam_user))
 
-        ui.card_farming.get_badges()
+        if ui.libsteam.is_steam_running():
+            stlib.logger.info('Preparing. Please wait...')
+            badge_pages = stlib.card_farming.get_badge_page_count()
+            badges = []
+            for page in range(1, badge_pages+1):
+                badges.extend(stlib.card_farming.get_badges(page))
 
-        if self.config_parser.getboolean('Config', 'MostValuableFirst', fallback=True):
-            ui.card_farming.get_card_prices()
+            badges = stlib.card_farming.remove_completed_badges(badges)
+            cards_info = stlib.card_farming.get_cards_info()
 
-        ui.globals.logger.warning('Ready to start.')
-        game_count = len(ui.globals.CardFarming.badge_set['gameID'])
+            if self.config_parser.getboolean('Config', 'MostValuableFirst', fallback=True):
+                badges = stlib.card_farming.order_by_most_valuable(cards_info, badges)
 
-        for index in range(game_count):
-            if ui.globals.CardFarming.badge_set['cardCount'][index] < 1:
-                ui.globals.logger.verbose('%s have no cards to drop. Ignoring.',
-                                          ui.globals.CardFarming.badge_set['gameName'][index])
-                continue
+            ui.globals.logger.warning('Ready to start.')
 
-            stlib.logger.console_fixer()
-            ui.globals.logger.info('Starting game %s (%s)',
-                                   ui.globals.CardFarming.badge_set['gameName'][index],
-                                   ui.globals.CardFarming.badge_set['gameID'][index])
-            dry_run = self.config_parser.getboolean('Debug', 'DryRun', fallback=False)
+            for badge in badges:
+                game_name = stlib.card_farming.get_game_name(badge)
+                game_id = stlib.card_farming.get_game_id(badge)
+                stlib.logger.info('Starting game %s (%s)', game_name, game_id)
+                ui.libsteam.run_wrapper(game_id)
 
-            if not dry_run:
-                if not ui.libsteam.is_steam_running():
-                    ui.globals.logger.critical('Unable to locate a running instance of steam.')
-                    ui.globals.logger.critical('Please, start Steam and try again.')
-                    sys.exit(1)
+                while True:
+                    card_count = stlib.card_farming.get_card_count(badge, False)
+                    stlib.logging.console_msg('{:2d} cards drop remaining. Waiting...'.format(card_count), end='\r')
+                    stlib.logger.verbose('Waiting card drop loop')
 
-                ui.globals.logger.info('Preparing. Please wait...')
-                ui.libsteam.run_wrapper(ui.globals.CardFarming.badge_set['gameID'][index])
-                ui.globals.logger.info('Running {}'.format(ui.globals.CardFarming.badge_set['gameID'][index]))
+                    for i in range(40):
+                        if ui.globals.FakeApp.process.poll():
+                            stlib.logging.console_fixer()
+                            stlib.logger.critical(ui.globals.FakeApp.process.stderr.read().decode('utf-8'))
+                            sys.exit(1)
 
-            while True:
-                card_count = ui.globals.CardFarming.badge_set['cardCount'][index]
-                stlib.logger.console_msg('{:2d} cards drop remaining. Waiting...'.format(card_count), end='\r')
-                ui.globals.logger.verbose('Waiting card drop loop')
-                ui.globals.logger.trace("Current: %s", [ui.globals.CardFarming.badge_set[i][index]
-                                                        for i, v in ui.globals.CardFarming.badge_set.items()])
+                        try:
+                            time.sleep(1)
+                        except KeyboardInterrupt:
+                            sys.exit(0)
 
-                for i in range(40):
-                    if not dry_run and ui.globals.FakeApp.process.poll():
-                        stlib.logger.console_fixer()
-                        ui.globals.logger.critical(ui.globals.FakeApp.process.stderr.read().decode('utf-8'))
-                        sys.exit(1)
+                    stlib.logging.console_fixer('\r')
+                    stlib.logging.console_msg('Checking if game have more cards drops...', end='\r')
+                    card_count = stlib.card_farming.get_card_count(badge, True)
 
-                    try:
-                        time.sleep(1)
-                    except KeyboardInterrupt:
-                        sys.exit(0)
+                    if card_count is 0:
+                        stlib.logging.console_fixer('\r')
+                        stlib.logger.warning('No more cards to drop.')
+                        stlib.logger.info('Closing %s', game_name)
+                        ui.libsteam.stop_wrapper()
+                        break
+        else:
+            stlib.logger.error('Unable to locate a running instance of steam.')
+            stlib.logger.error('Please, start the Steam Client and try again.')
+            sys.exit(1)
 
-                stlib.logger.console_fixer('\r')
-                stlib.logger.console_msg('Checking if game have more cards drops...', end='\r')
-                ui.card_farming.update_card_count(index)
-                stlib.logger.console_fixer('\r')
-
-                if ui.globals.CardFarming.badge_set['cardCount'][index] < 1:
-                    stlib.logger.console_fixer('\r')
-                    ui.globals.logger.warning('No more cards to drop.')
-                    break
-
-            ui.globals.logger.info('Closing %s', ui.globals.CardFarming.badge_set['gameName'][index])
-
-            if not dry_run:
-                ui.libsteam.stop_wrapper()
-
-        ui.globals.logger.warning('There\'s nothing else to do. Leaving.')
+        stlib.logger.warning('There\'s nothing else to do. Leaving.')
 
     def __fakeapp(self):
         try:
