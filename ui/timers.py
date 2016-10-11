@@ -45,8 +45,8 @@ def card_farming_time_timer(start_time):
         return False
 
 
-def total_card_count():
-    generator = stlib.card_farming.get_total_card_count()
+def total_card_count(badges):
+    generator = stlib.card_farming.get_total_card_count(badges)
     for card_count in generator:
         ui.main_window.card_farming_total_card_left.set_text('{} cards'.format(card_count))
         ui.Gtk.main_iteration()

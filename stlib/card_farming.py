@@ -126,16 +126,11 @@ def get_badge_cards_count(cards_info, badge):
     return cards_info['card_count'][cards_info['game_name'].index(game_name)]
 
 
-def get_total_card_count():
-    stlib.logger.info('Getting total card count')
-    badges_page_count = get_badge_page_count()
-
+def get_total_card_count(badges):
     card_count = 0
-    for page in range(1, badges_page_count + 1):
-        badges = get_badges(page)
-        for badge in badges:
-            card_count += get_card_count(badge)
-            yield card_count
+    for badge in badges:
+        card_count += get_card_count(badge)
+        yield card_count
 
 
 def order_by_most_valuable(cards_info, badges):

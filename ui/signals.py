@@ -131,7 +131,7 @@ class WindowSignals:
             ui.GLib.timeout_add_seconds(1, ui.timers.card_farming_time_timer, start_time)
 
             self.window.card_farming_total_card_left.set_text('Counting...')
-            ui.GLib.idle_add(ui.timers.total_card_count)
+            ui.GLib.idle_add(ui.timers.total_card_count, badges)
 
             badge_current = 0
             ui.timers.card_farming_timer(dry_run, badges, badge_current, cards_info)
