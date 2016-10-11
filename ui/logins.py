@@ -67,7 +67,7 @@ def check_steamcompanion_login(greenlet):
 
 class Status:
     def __init__(self):
-        self.window = ui.globals.Window.main
+        self.window = ui.main_window
         self.steam_connected = False
         self.steamgifts_connected = False
         self.steamcompanion_connected = False

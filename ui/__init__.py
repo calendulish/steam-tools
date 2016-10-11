@@ -23,3 +23,5 @@ __all__ = ['console',
            'signals',
            'timers',
            'globals']
+
+main_window = None

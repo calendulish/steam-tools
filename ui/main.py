@@ -27,7 +27,7 @@ import ui
 
 class SteamTools:
     def __init__(self):
-        ui.globals.Window.main = self
+        ui.main_window = self
         self.signals = ui.signals.WindowSignals()
         self.config_parser = stlib.config.read()
         self.login_status = ui.logins.Status()

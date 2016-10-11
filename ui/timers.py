@@ -24,39 +24,37 @@ import ui
 
 
 def status_bar_text_pushed_timer(context):
-    window = ui.globals.Window.main
-    window.status_bar.pop(context)
+    ui.main_window.status_bar.pop(context)
     return False
 
 
 def card_farming_time_timer(start_time):
-    window = ui.globals.Window.main
     elapsed_seconds = int(time.time() - start_time)
     elapsed_time = datetime.timedelta(seconds=elapsed_seconds)
 
     if ui.globals.CardFarming.is_running:
-        window.card_farming_total_time.set_text(str(elapsed_time))
+        ui.main_window.card_farming_total_time.set_text(str(elapsed_time))
 
         if ui.globals.CardFarming.game_start_time:
             elapsed_seconds = int(time.time() - ui.globals.CardFarming.game_start_time)
             elapsed_time = datetime.timedelta(seconds=elapsed_seconds)
-            window.card_farming_current_game_time.set_text(str(elapsed_time))
+            ui.main_window.card_farming_current_game_time.set_text(str(elapsed_time))
 
         return True
     else:
         return False
 
+
 def total_card_count():
-    window = ui.globals.Window.main
     generator = stlib.card_farming.get_total_card_count()
     for card_count in generator:
-        window.card_farming_total_card_left.set_text('{} cards'.format(card_count))
+        ui.main_window.card_farming_total_card_left.set_text('{} cards'.format(card_count))
         ui.Gtk.main_iteration()
 
     return False
 
+
 def card_farming_timer(dry_run, badges, badge_current, cards_info):
-    window = ui.globals.Window.main
     badge = badges[badge_current]
 
     if ui.globals.CardFarming.is_running:
@@ -80,8 +78,8 @@ def card_farming_timer(dry_run, badges, badge_current, cards_info):
             ui.globals.logger.info('Preparing. Please wait...')
             ui.globals.FakeApp.id = stlib.card_farming.get_game_id(badge)
 
-            window.card_farming_current_game.set_text(stlib.card_farming.get_game_name(badge))
-            window.card_farming_card_left.set_text('{} cards'.format(stlib.card_farming.get_card_count(badge)))
+            ui.main_window.card_farming_current_game.set_text(stlib.card_farming.get_game_name(badge))
+            ui.main_window.card_farming_card_left.set_text('{} cards'.format(stlib.card_farming.get_card_count(badge)))
 
             ui.globals.CardFarming.game_start_time = time.time()
             ui.libsteam.run_wrapper(ui.globals.FakeApp.id)
@@ -94,28 +92,27 @@ def card_farming_timer(dry_run, badges, badge_current, cards_info):
 
 
 def fake_app_timer(start_time):
-    window = ui.globals.Window.main
     elapsed_seconds = round(time.time() - start_time)
     elapsed_time = datetime.timedelta(seconds=elapsed_seconds)
 
     if ui.globals.FakeApp.is_running:
         if not ui.libsteam.is_wrapper_running():
-            window.update_status_bar("This is not a valid gameID.")
-            window.new_dialog(ui.Gtk.MessageType.ERROR,
+            ui.main_window.update_status_bar("This is not a valid gameID.")
+            ui.main_window.new_dialog(ui.Gtk.MessageType.ERROR,
                               'Fake Steam App',
                               'This is not a valid gameID.',
                               "Please, check if you write correctly and try again.")
 
             ui.globals.FakeApp.is_running = False
-            window.start.set_sensitive(True)
-            window.stop.set_sensitive(False)
-            window.fake_app_current_game.set_text('')
-            window.fake_app_current_time.set_text('')
+            ui.main_window.start.set_sensitive(True)
+            ui.main_window.stop.set_sensitive(False)
+            ui.main_window.fake_app_current_game.set_text('')
+            ui.main_window.fake_app_current_time.set_text('')
 
             return False
         else:
-            window.fake_app_current_game.set_text(ui.globals.FakeApp.id)
-            window.fake_app_current_time.set_text(str(elapsed_time))
+            ui.main_window.fake_app_current_game.set_text(ui.globals.FakeApp.id)
+            ui.main_window.fake_app_current_time.set_text(str(elapsed_time))
 
             return True
     else:

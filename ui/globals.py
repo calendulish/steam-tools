@@ -22,7 +22,6 @@ logger = logging.getLogger('SteamTools')
 
 
 class Window:
-    main = None
     profile = 0
 
 class CardFarming:

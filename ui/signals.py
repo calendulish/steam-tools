@@ -32,7 +32,7 @@ import stlib
 
 class WindowSignals:
     def __init__(self):
-        self.window = ui.globals.Window.main
+        self.window = ui.main_window
         self.config_parser = stlib.config.read()
 
     def on_window_destroy(self, *args):
