@@ -25,6 +25,9 @@ import shutil
 import sys
 import tempfile
 
+# NEVER import full stlib module here!!! (cyclic)
+from stlib import config as stconfig
+
 
 class ColoredFormatter(logging.Formatter):
     def format(self, log):
@@ -59,7 +62,8 @@ def console_msg(*objs, sep='', end='\n', out=sys.stdout):
     print(*objs, sep=sep, end=end, file=encoder(out.buffer), flush=True)
 
 
-def get_logger(log_file_level):
+def get_logger():
+    config_parser = stconfig.read()
     data_dir = tempfile.gettempdir()
 
     log_file_name = os.path.splitext(os.path.basename(sys.argv[0]))[0] + '.log'
@@ -70,6 +74,9 @@ def get_logger(log_file_level):
     logging.TRACE = 5
     logging.addLevelName(logging.VERBOSE, 'VERBOSE')
     logging.addLevelName(logging.TRACE, 'TRACE')
+
+    console_level = config_parser.get('Debug', 'consoleLevel', fallback='info')
+    log_file_level = config_parser.get('Debug', 'logFileLevel', fallback='verbose')
 
     # --- Internal logger control --- #
     logger = logging.getLogger('SteamTools')
@@ -91,7 +98,7 @@ def get_logger(log_file_level):
     # --- Console Handler --- #
     console = logging.StreamHandler(encoder(sys.stdout.buffer))
     console.setFormatter(ColoredFormatter())
-    console.setLevel(logging.INFO)
+    console.setLevel(eval('logging.' + console_level.upper()))
     logger.addHandler(console)
     # --- ~ --- ~ --- ~ --- ~ #
 

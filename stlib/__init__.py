@@ -16,7 +16,7 @@ __all__ = ['logger',
            'browser',
            'card_farming']
 
-logger = logging.get_logger('VERBOSE')
+logger = logging.get_logger()
 
 steam_login_page = 'https://steamcommunity.com/login/checkstoredlogin'
 steam_check_page = '{}/?redirectURL=discussions'.format(steam_login_page)
