@@ -51,14 +51,14 @@ def get_badges(page):
 
 
 def get_game_name(badge):
-    stlib.logger.info('Getting game name')
+    stlib.logger.verbose('Getting game name')
     title = badge.find('div', class_='badge_title')
 
     return title.text.split('\t\t\t\t\t\t\t\t\t', 2)[1]
 
 
 def get_game_id(badge):
-    stlib.logger.info('Getting game id')
+    stlib.logger.verbose('Getting game id')
 
     try:
         game_href = badge.find('a')['href']
@@ -81,13 +81,13 @@ def get_card_count(badge, update_from_web=False):
     game_id = get_game_id(badge)
 
     if update_from_web:
-        stlib.logger.info('Updating number of cards of %s(%s)', game_name, game_id)
+        stlib.logger.verbose('Updating number of cards of %s(%s)', game_name, game_id)
         profile = stlib.steam_profile()
         html = stlib.network.try_get_html('steam', '{}/gamecards/{}'.format(profile, game_id))
         stats = html.find('div', class_='badge_title_stats_drops')
         progress = stats.find('span', class_='progress_info_bold')
     else:
-        stlib.logger.info('Getting number of cards of %s(%s)', game_name, game_id)
+        stlib.logger.verbose('Getting number of cards of %s(%s)', game_name, game_id)
         progress = badge.find('span', class_='progress_info_bold')
 
     if not progress or 'No' in progress.text:
@@ -111,7 +111,7 @@ def get_cards_info():
 
 def get_badge_price(cards_info, badge):
     game_name = get_game_name(badge)
-    stlib.logger.info('Getting badge price for %s', game_name)
+    stlib.logger.verbose('Getting badge price for %s', game_name)
 
     try:
         price_index = cards_info['game_name'].index(game_name)
