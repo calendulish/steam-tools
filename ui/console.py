@@ -41,23 +41,23 @@ class SteamTools:
         if module_function in dir(self):
             eval(''.join(['self.', module_function, '()']))
         else:
-            ui.globals.logger.critical("Please, check the command line.")
-            ui.globals.logger.critical("The module %s don't exist", self.module)
+            stlib.logger.critical("Please, check the command line.")
+            stlib.logger.critical("The module %s don't exist", self.module)
 
     def select_profile(self):
         if not self.config_parser.has_option('Config', 'chromeProfile'):
             profiles = stlib.browser.get_chrome_profile()
 
             if not len(profiles):
-                ui.globals.logger.error('I cannot find your chrome/Chromium profile')
-                ui.globals.logger.error('Some functions will be disabled.')
+                stlib.logger.error('I cannot find your chrome/Chromium profile')
+                stlib.logger.error('Some functions will be disabled.')
             elif len(profiles) == 1:
                 profile_name = os.path.join(stlib.browser.get_chrome_dir(), profiles[0])
                 self.config_parser.set('Config', 'chromeProfile', profile_name)
                 stlib.config.write()
             else:
                 selected_profile = 0
-                ui.globals.logger.warning("Who are you?")
+                stlib.logger.warning("Who are you?")
                 for i in range(len(profiles)):
                     with open(os.path.join(stlib.browser.get_chrome_dir(), profiles[i], 'Preferences')) as prefs_file:
                         prefs = json.load(prefs_file)
@@ -68,7 +68,7 @@ class SteamTools:
                         account_name = prefs['profile']['name']
 
                     profile_name = profiles[i]
-                    ui.globals.logger.warning('  - [%d] %s (%s)',
+                    stlib.logger.warning('  - [%d] %s (%s)',
                                               i + 1,
                                               account_name,
                                               profile_name)
@@ -80,12 +80,12 @@ class SteamTools:
                         if selected_profile >= len(profiles) or selected_profile < 0:
                             raise ValueError
                     except ValueError:
-                        ui.globals.logger.error('Please, choose an valid option.')
+                        stlib.logger.error('Please, choose an valid option.')
                         continue
 
                     print(selected_profile)
                     print(profiles[selected_profile])
-                    ui.globals.logger.warning("Okay, I'll remember that next time.")
+                    stlib.logger.warning("Okay, I'll remember that next time.")
                     break
 
                 self.config_parser.set('Config', 'chromeProfile', profiles[selected_profile])
@@ -102,7 +102,7 @@ class SteamTools:
         if not stlib.steam_user:
             sys.exit(1)
 
-        ui.globals.logger.info('Hello {}'.format(stlib.steam_user))
+        stlib.logger.info('Hello {}'.format(stlib.steam_user))
 
         if stlib.libsteam.is_steam_running():
             stlib.logger.info('Preparing. Please wait...')
@@ -117,7 +117,7 @@ class SteamTools:
             if self.config_parser.getboolean('Config', 'MostValuableFirst', fallback=True):
                 badges = stlib.card_farming.order_by_most_valuable(cards_info, badges)
 
-            ui.globals.logger.warning('Ready to start.')
+            stlib.logger.warning('Ready to start.')
 
             for badge in badges:
                 game_name = stlib.card_farming.get_game_name(badge)
@@ -160,29 +160,29 @@ class SteamTools:
 
     def __fakeapp(self):
         try:
-            ui.globals.FakeApp.id = self.parameters.cli[1]
+            ui.fake_app_id = self.parameters.cli[1]
         except IndexError:
-            ui.globals.logger.critical("Unable to locate the gameID.")
-            ui.globals.logger.critical("Please, check the command line.")
+            stlib.logger.critical("Unable to locate the gameID.")
+            stlib.logger.critical("Please, check the command line.")
             sys.exit(1)
 
         if stlib.libsteam.is_steam_running():
-            ui.globals.logger.info("Preparing. Please wait...")
-            stlib.libsteam.run_wrapper(ui.globals.FakeApp.id)
+            stlib.logger.info("Preparing. Please wait...")
+            stlib.libsteam.run_wrapper(ui.fake_app_id)
 
             time.sleep(3)
             if stlib.wrapper_process.poll():
-                ui.globals.logger.critical("This is not a valid gameID.")
+                stlib.logger.critical("This is not a valid gameID.")
                 sys.exit(1)
 
             try:
-                ui.globals.logger.info("Running {}".format(ui.globals.FakeApp.id))
+                stlib.logger.info("Running {}".format(ui.fake_app_id))
                 stlib.wrapper_process.wait()
             except KeyboardInterrupt:
                 pass
         else:
-            ui.globals.logger.critical("Unable to locate a running instance of steam.")
-            ui.globals.logger.critical("Please, start Steam and try again.")
+            stlib.logger.critical("Unable to locate a running instance of steam.")
+            stlib.logger.critical("Please, start Steam and try again.")
             sys.exit(1)
 
         sys.exit(0)

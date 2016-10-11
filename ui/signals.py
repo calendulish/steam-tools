@@ -74,14 +74,14 @@ class WindowSignals:
 
     def on_tabs_switch_page(self, tab, box, current_page):
         if current_page == 0:
-            if ui.globals.CardFarming.is_running:
+            if ui.card_farming_is_running:
                 self.window.start.set_sensitive(False)
                 self.window.stop.set_sensitive(True)
             else:
                 self.window.start.set_sensitive(True)
                 self.window.stop.set_sensitive(False)
         elif current_page == 1:
-            if ui.globals.FakeApp.is_running:
+            if ui.card_farming_is_running:
                 self.window.start.set_sensitive(False)
                 self.window.stop.set_sensitive(True)
             else:
@@ -99,7 +99,7 @@ class WindowSignals:
         self.window.stop.set_sensitive(False)
         dry_run = self.config_parser.getboolean('Debug', 'DryRun', fallback=False)
 
-        if ui.globals.FakeApp.is_running:
+        if ui.card_farming_is_running:
             self.window.new_dialog(ui.Gtk.MessageType.ERROR,
                                    'Card Farming',
                                    'Please, stop the Fake App',
@@ -110,7 +110,7 @@ class WindowSignals:
         if stlib.libsteam.is_steam_running():
             self.window.update_status_bar("Preparing. Please wait...")
             self.window.spinner.start()
-            ui.globals.CardFarming.is_running = True
+            ui.card_farming_is_running = True
 
             badge_pages = stlib.card_farming.get_badge_page_count()
             badges = []
@@ -123,7 +123,7 @@ class WindowSignals:
             if self.config_parser.getboolean('Config', 'MostValuableFirst', fallback=True):
                 badges = stlib.card_farming.order_by_most_valuable(cards_info, badges)
 
-            ui.globals.logger.warning('Ready to start.')
+            stlib.logger.warning('Ready to start.')
             self.window.update_status_bar('Ready.')
             self.window.spinner.stop()
 
@@ -151,10 +151,10 @@ class WindowSignals:
         self.window.stop.set_sensitive(False)
 
         self.window.update_status_bar("Waiting to card farming terminate.")
-        ui.globals.CardFarming.is_running = False
+        ui.card_farming_is_running = False
         stlib.libsteam.stop_wrapper()
-        ui.globals.FakeApp.is_running = False
-        ui.globals.FakeApp.id = None
+        ui.fake_app_is_running = False
+        ui.fake_app_id = None
         self.window.fake_app_current_game.set_text('')
         self.window.fake_app_current_time.set_text('')
         self.window.card_farming_current_game.set_text('')
@@ -171,9 +171,9 @@ class WindowSignals:
 
         self.window.update_status_bar("Preparing. Please wait...")
         self.window.spinner.start()
-        ui.globals.FakeApp.id = self.window.fake_app_game_id.get_text().strip()
+        ui.fake_app_id = self.window.fake_app_game_id.get_text().strip()
 
-        if not ui.globals.FakeApp.id:
+        if not ui.fake_app_id:
             self.window.update_status_bar("No AppID found!")
             self.window.new_dialog(ui.Gtk.MessageType.ERROR,
                                    'Fake Steam App',
@@ -182,8 +182,8 @@ class WindowSignals:
             self.window.start.set_sensitive(True)
         else:
             if stlib.libsteam.is_steam_running():
-                stlib.libsteam.run_wrapper(ui.globals.FakeApp.id)
-                ui.globals.FakeApp.is_running = True
+                stlib.libsteam.run_wrapper(ui.fake_app_id)
+                ui.fake_app_is_running = True
                 self.window.stop.set_sensitive(True)
             else:
                 self.window.update_status_bar("Unable to locate a running instance of steam.")
@@ -201,7 +201,7 @@ class WindowSignals:
         self.window.stop.set_sensitive(False)
         self.window.start.set_sensitive(False)
 
-        if ui.globals.CardFarming.is_running:
+        if ui.card_farming_is_running:
             self.window.new_dialog(ui.Gtk.MessageType.ERROR,
                                    'Fake Steam App',
                                    'This function is not available now',
@@ -220,8 +220,8 @@ class WindowSignals:
                                    'An Error occured ({}).'.format(stlib.wrapper_process.returncode),
                                    error.decode(locale.getpreferredencoding()))
 
-        ui.globals.FakeApp.is_running = False
-        ui.globals.FakeApp.id = None
+        ui.fake_app_is_running = False
+        ui.fake_app_id = None
         self.window.fake_app_current_game.set_text('')
         self.window.fake_app_current_time.set_text('')
 
@@ -235,4 +235,4 @@ class WindowSignals:
     @staticmethod
     def on_select_profile_button_toggled(radio_button, profile_id):
         if radio_button.get_active():
-            ui.globals.Window.profile = profile_id
+            ui.browser_profile = profile_id

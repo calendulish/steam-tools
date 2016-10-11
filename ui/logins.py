@@ -33,7 +33,7 @@ def check_steam_login(greenlet):
         stlib.steam_user = supernav.find('a', class_='username').text.strip()
     except(AttributeError, IndexError):
         stlib.steam_user = None
-        ui.globals.logger.error('Steam login status: Cookies not found' +
+        stlib.logger.error('Steam login status: Cookies not found' +
                                 '\nPlease, check if you are logged in on' +
                                 '\nsteampowered.com or steamcommunity.com')
 
@@ -45,7 +45,7 @@ def check_steamgifts_login(greenlet):
         stlib.SG_user = form.find('input', {'name': 'username'}).get('value')
     except(AttributeError, IndexError):
         stlib.SG_user = None
-        ui.globals.logger.error('SteamGifts login status: Cookies not found' +
+        stlib.logger.error('SteamGifts login status: Cookies not found' +
                                 '\nPlease, check if you are logged in on' +
                                 '\nwww.steamgifts.com')
 
@@ -61,7 +61,7 @@ def check_steamcompanion_login(greenlet):
         stlib.SC_user = user
     except(AttributeError, IndexError):
         stlib.SC_user = None
-        ui.globals.logger.error('SteamCompanion login status: Cookies not found' +
+        stlib.logger.error('SteamCompanion login status: Cookies not found' +
                                 '\nPlease, check if you are logged in on' +
                                 '\nsteamcompanion.com')
 
