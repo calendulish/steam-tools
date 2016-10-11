@@ -30,9 +30,9 @@ def check_steam_login(greenlet):
     try:
         html = bs4.BeautifulSoup(greenlet.value.content, 'html.parser')
         supernav = html.find('div', class_='supernav_container')
-        ui.globals.Logins.steam_user = supernav.find('a', class_='username').text.strip()
+        stlib.steam_user = supernav.find('a', class_='username').text.strip()
     except(AttributeError, IndexError):
-        ui.globals.Logins.steam_user = None
+        stlib.steam_user = None
         ui.globals.logger.error('Steam login status: Cookies not found' +
                                 '\nPlease, check if you are logged in on' +
                                 '\nsteampowered.com or steamcommunity.com')
@@ -42,9 +42,9 @@ def check_steamgifts_login(greenlet):
     try:
         html = bs4.BeautifulSoup(greenlet.value.content, 'html.parser')
         form = html.findAll('form')[1]
-        ui.globals.Logins.steamgifts_user = form.find('input', {'name': 'username'}).get('value')
+        stlib.SG_user = form.find('input', {'name': 'username'}).get('value')
     except(AttributeError, IndexError):
-        ui.globals.Logins.steamgifts_user = None
+        stlib.SG_user = None
         ui.globals.logger.error('SteamGifts login status: Cookies not found' +
                                 '\nPlease, check if you are logged in on' +
                                 '\nwww.steamgifts.com')
@@ -58,9 +58,9 @@ def check_steamcompanion_login(greenlet):
         if not user:
             raise AttributeError
 
-        ui.globals.Logins.steamcompanion_user = user
+        stlib.SC_user = user
     except(AttributeError, IndexError):
-        ui.globals.Logins.steamcompanion_user = None
+        stlib.SC_user = None
         ui.globals.logger.error('SteamCompanion login status: Cookies not found' +
                                 '\nPlease, check if you are logged in on' +
                                 '\nsteamcompanion.com')
@@ -75,11 +75,11 @@ class Status:
     def __steam_callback(self, greenlet):
         check_steam_login(greenlet)
 
-        if ui.globals.Logins.steam_user:
+        if stlib.steam_user:
             self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path,
                                                                       self.window.steam_icon_available))
             self.window.steam_login_status.set_tooltip_text("Steam Login status:\n" +
-                                                            "Connected as {}".format(ui.globals.Logins.steam_user))
+                                                            "Connected as {}".format(stlib.steam_user))
             self.steam_connected = True
         else:
             self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path,
@@ -92,11 +92,11 @@ class Status:
     def __steamgifts_callback(self, greenlet):
         check_steamgifts_login(greenlet)
 
-        if ui.globals.Logins.steamgifts_user:
+        if stlib.SG_user:
             self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
                                                                    self.window.steamgifts_icon_available))
             self.window.SG_login_status.set_tooltip_text("SteamGifts Login status:\n" +
-                                                         "Connected as {}".format(ui.globals.Logins.steamgifts_user))
+                                                         "Connected as {}".format(stlib.SG_user))
             self.steamgifts_connected = True
         else:
             self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
@@ -109,11 +109,11 @@ class Status:
     def __steamcompanion_callback(self, greenlet):
         check_steamcompanion_login(greenlet)
 
-        if ui.globals.Logins.steamcompanion_user:
+        if stlib.SC_user:
             self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,
                                                                    self.window.steamcompanion_icon_available))
             self.window.SC_login_status.set_tooltip_text("SteamCompanion Login status:\n" +
-                                                         "Connected as {}".format(ui.globals.Logins.steamcompanion_user)
+                                                         "Connected as {}".format(stlib.SC_user)
                                                          )
             self.steamcompanion_connected = True
         else:

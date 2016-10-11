@@ -94,15 +94,15 @@ class SteamTools:
     def __cardfarming(self):
         greenlet = gevent.Greenlet(stlib.network.try_get_response,
                                    'steam',
-                                   ui.globals.Logins.steam_check_page + '/?redirectURL=discussions')
+                                   stlib.steam_check_page)
         greenlet.link(ui.logins.check_steam_login)
         greenlet.start()
         greenlet.join()
 
-        if not ui.globals.Logins.steam_user:
+        if not stlib.steam_user:
             sys.exit(1)
 
-        ui.globals.logger.info('Hello {}'.format(ui.globals.Logins.steam_user))
+        ui.globals.logger.info('Hello {}'.format(stlib.steam_user))
 
         ui.card_farming.get_badges()
 

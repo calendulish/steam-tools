@@ -67,9 +67,9 @@ class SteamTools:
         self.select_profile()
 
         self.spinner.start()
-        self.login_status.queue_connect("steam", ui.globals.Logins.steam_check_page + '/?redirectURL=discussions')
-        self.login_status.queue_connect("steamgifts", ui.globals.Logins.steamgifts_check_page)
-        self.login_status.queue_connect("steamcompanion", ui.globals.Logins.steamcompanion_check_page)
+        self.login_status.queue_connect("steam", stlib.steam_check_page)
+        self.login_status.queue_connect("steamgifts", stlib.SG_check_page)
+        self.login_status.queue_connect("steamcompanion", stlib.SC_check_page)
         self.login_status.wait_queue()
         self.spinner.stop()
 

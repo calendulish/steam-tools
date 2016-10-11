@@ -25,16 +25,6 @@ class Window:
     main = None
     profile = 0
 
-
-class Logins:
-    steam_check_page = 'https://steamcommunity.com/login/checkstoredlogin'
-    steamgifts_check_page = 'https://www.steamgifts.com/account/profile/sync'
-    steamcompanion_check_page ='https://steamcompanion.com/settings'
-    steam_user = None
-    steamgifts_user = None
-    steamcompanion_user = None
-
-
 class CardFarming:
     badge_set = {key: [] for key in ['gameID', 'gameName', 'cardCount', 'cardValue']}
     badge_current = 0

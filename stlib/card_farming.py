@@ -17,13 +17,6 @@
 #
 
 import stlib
-import ui
-
-
-def get_steam_profile():
-    stlib.logger.info('Getting your steam profile')
-    return '{}/?redirectURL=id/{}'.format(ui.globals.Logins.steam_check_page,
-                                          ui.globals.Logins.steam_user)
 
 
 def remove_completed_badges(badges):
@@ -38,7 +31,7 @@ def remove_completed_badges(badges):
 
 def get_badge_page_count():
     stlib.logger.info('Counting badge pages')
-    profile = get_steam_profile()
+    profile = stlib.steam_profile()
     html = stlib.network.try_get_html('steam', '{}/badges/'.format(profile))
 
     try:
@@ -51,7 +44,7 @@ def get_badge_page_count():
 
 def get_badges(page):
     stlib.logger.info('Getting badges from page %d', page)
-    profile = get_steam_profile()
+    profile = stlib.steam_profile()
     html = stlib.network.try_get_html('steam', '{}/badges/?p={}'.format(profile, page))
 
     return html.findAll('div', class_='badge_title_row')
@@ -89,7 +82,7 @@ def get_card_count(badge, update_from_web=False):
 
     if update_from_web:
         stlib.logger.info('Updating number of cards of %s(%s)', game_name, game_id)
-        profile = get_steam_profile()
+        profile = stlib.steam_profile()
         html = stlib.network.try_get_html('steam', '{}/gamecards/{}'.format(profile, game_id))
         stats = html.find('div', class_='badge_title_stats_drops')
         progress = stats.find('span', class_='progress_info_bold')
