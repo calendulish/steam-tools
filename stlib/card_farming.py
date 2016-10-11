@@ -61,7 +61,20 @@ def get_game_name(badge):
 
 
 def get_game_id(badge):
-    return str(badge.find('a')['href'].split('/', 3)[3])
+    try:
+        game_href = badge.find('a')['href']
+    except TypeError:
+        # FIXME: It's a foil badge. The game id is above the badge_title_row...
+        return str(000000)
+
+    try:
+        game_id = game_href.split('/', 3)[3]
+    except IndexError:
+        # Possibly a game without cards
+        # TODO: This can speed up the remove_completed_badges?
+        game_id = game_href.split('_', 6)[4]
+
+    return str(game_id)
 
 
 def get_card_count(badge, update_from_web=False):
