@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.20.0 -->
 <interface>
-  <requires lib="gtk+" version="3.0"/>
+  <requires lib="gtk+" version="3.20"/>
   <object class="GtkListStore" id="liststore1"/>
   <object class="GtkWindow" id="main_window">
     <property name="width_request">640</property>
@@ -198,15 +198,15 @@
                   <object class="GtkBox" id="card_farming_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_left">5</property>
-                    <property name="margin_right">5</property>
-                    <property name="margin_top">5</property>
-                    <property name="margin_bottom">5</property>
+                    <property name="margin_left">20</property>
+                    <property name="margin_right">20</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel" id="label4">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="margin_top">20</property>
+                        <property name="margin_bottom">10</property>
                         <property name="label" translatable="yes">Steam Card Farming</property>
                         <attributes>
                           <attribute name="underline" value="True"/>
@@ -222,12 +222,19 @@
                       <object class="GtkFrame" id="frame2">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label_xalign">0</property>
+                        <property name="margin_bottom">10</property>
+                        <property name="label_xalign">0.02</property>
                         <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkBox" id="box1">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="margin_left">10</property>
+                            <property name="margin_right">10</property>
+                            <property name="margin_top">5</property>
+                            <property name="margin_bottom">5</property>
+                            <property name="spacing">5</property>
+                            <property name="homogeneous">True</property>
                             <child>
                               <object class="GtkBox" id="box4">
                                 <property name="visible">True</property>
@@ -242,6 +249,7 @@
                                   <object class="GtkLabel" id="label7">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
                                     <property name="label" translatable="yes">Current game: </property>
                                   </object>
                                   <packing>
@@ -254,6 +262,7 @@
                                   <object class="GtkLabel" id="label8">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
                                     <property name="label" translatable="yes">Card(s) left: </property>
                                   </object>
                                   <packing>
@@ -266,6 +275,7 @@
                                   <object class="GtkLabel" id="label9">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
                                     <property name="label" translatable="yes">Total card(s) left: </property>
                                   </object>
                                   <packing>
@@ -278,6 +288,7 @@
                                   <object class="GtkLabel" id="label10">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
                                     <property name="label" translatable="yes">Current game time: </property>
                                   </object>
                                   <packing>
@@ -290,6 +301,7 @@
                                   <object class="GtkLabel" id="label11">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
                                     <property name="label" translatable="yes">Total time running: </property>
                                   </object>
                                   <packing>
@@ -323,7 +335,7 @@
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">True</property>
+                                    <property name="fill">False</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
@@ -335,7 +347,7 @@
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">True</property>
+                                    <property name="fill">False</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
@@ -347,7 +359,7 @@
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">True</property>
+                                    <property name="fill">False</property>
                                     <property name="position">2</property>
                                   </packing>
                                 </child>
@@ -359,7 +371,7 @@
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">True</property>
+                                    <property name="fill">False</property>
                                     <property name="position">3</property>
                                   </packing>
                                 </child>
@@ -371,7 +383,7 @@
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">True</property>
+                                    <property name="fill">False</property>
                                     <property name="position">4</property>
                                   </packing>
                                 </child>
@@ -393,8 +405,8 @@
                         </child>
                       </object>
                       <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -402,17 +414,19 @@
                       <object class="GtkFrame" id="frame1">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label_xalign">0</property>
+                        <property name="margin_top">20</property>
+                        <property name="label_xalign">0.02</property>
                         <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkBox" id="box2">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
+                            <property name="margin_left">10</property>
+                            <property name="margin_right">10</property>
                             <property name="margin_top">5</property>
                             <property name="margin_bottom">5</property>
                             <property name="spacing">5</property>
+                            <property name="homogeneous">True</property>
                             <child>
                               <object class="GtkBox" id="box6">
                                 <property name="visible">True</property>
@@ -423,7 +437,8 @@
                                   <object class="GtkLabel" id="label3">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Catch most valuable cards first</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes">Most valuable cards first:</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -435,6 +450,7 @@
                                   <object class="GtkLabel" id="label22">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
                                     <property name="label" translatable="yes">Chrome/Chromium profile: </property>
                                   </object>
                                   <packing>
@@ -444,10 +460,11 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="label5">
+                                  <object class="GtkLabel" id="label6">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Log file level</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes">Enable dry run (fake run):</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -456,16 +473,10 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="label6">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Enable dry run (fake run)</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">3</property>
-                                  </packing>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
                                 </child>
                               </object>
                               <packing>
@@ -482,10 +493,10 @@
                                 <property name="spacing">3</property>
                                 <property name="homogeneous">True</property>
                                 <child>
-                                  <object class="GtkSwitch" id="card_farming_most_valuable_first">
+                                  <object class="GtkSwitch" id="most_valuable_cards_first">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <signal name="activate" handler="on_MostValuableFirst_activate" swapped="no"/>
+                                    <signal name="activate" handler="on_most_valuable_cards_first_activate" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -494,32 +505,24 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="card_farming_chrome_profile">
+                                  <object class="GtkEntry" id="browser_profile">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="sensitive">False</property>
+                                    <property name="can_focus">False</property>
                                     <property name="invisible_char">●</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">True</property>
+                                    <property name="fill">False</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkComboBoxText" id="card_farming_log_level">
+                                  <object class="GtkSwitch" id="card_farming_dry_run">
                                     <property name="visible">True</property>
+                                    <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
-                                    <property name="active">4</property>
-                                    <items>
-                                      <item translatable="yes">Critical</item>
-                                      <item translatable="yes">Error</item>
-                                      <item translatable="yes">Info</item>
-                                      <item translatable="yes">Warning</item>
-                                      <item translatable="yes">Verbose</item>
-                                      <item translatable="yes">Debug</item>
-                                      <item translatable="yes">Trace</item>
-                                    </items>
-                                    <signal name="changed" handler="on_card_farming_log_level_changed" swapped="no"/>
+                                    <signal name="activate" handler="on_DryRun_activate" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -528,17 +531,10 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSwitch" id="card_farming_dry_run">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can_focus">True</property>
-                                    <signal name="activate" handler="on_DryRun_activate" swapped="no"/>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">3</property>
-                                  </packing>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
                                 </child>
                               </object>
                               <packing>
@@ -558,8 +554,8 @@
                         </child>
                       </object>
                       <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
@@ -1807,7 +1803,7 @@ Steam Client and some related websites.</property>
     <property name="website_label">dev@lara.click</property>
     <property name="authors">Lara Maia
 Fernando Manfredi</property>
-    <property name="logo">icons/steam-tools.png</property>
+    <property name="logo">steam.png</property>
     <property name="license_type">gpl-3-0</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="aboutdialog-vbox1">
