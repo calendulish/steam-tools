@@ -81,7 +81,7 @@ class WindowSignals:
                 self.window.start.set_sensitive(True)
                 self.window.stop.set_sensitive(False)
         elif current_page == 1:
-            if ui.card_farming_is_running:
+            if ui.fake_app_is_running:
                 self.window.start.set_sensitive(False)
                 self.window.stop.set_sensitive(True)
             else:
