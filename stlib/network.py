@@ -95,7 +95,7 @@ def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, v
                requests.exceptions.RequestException,
                requests.exceptions.Timeout):
             LOGGER.error('Unable to connect. Trying again... ({}/3)'.format(i))
-            time.sleep(3)
+            gevent.sleep(3)
         else:
             return response
 

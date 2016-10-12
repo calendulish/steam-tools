@@ -37,6 +37,7 @@ class WindowSignals:
 
     def on_window_destroy(self, *args):
         self.window.main_window.hide()
+        ui.main_window = None
         ui.Gtk.main_quit(*args)
 
     def on_quit_activate(self, *args):

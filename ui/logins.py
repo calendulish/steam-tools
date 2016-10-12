@@ -18,6 +18,7 @@
 
 import gc
 import os
+import sys
 
 import bs4
 import gevent
@@ -138,12 +139,16 @@ class Status:
                 greenlets.append(object_)
 
         while True:
+            if not ui.main_window:
+                sys.exit(0)
+
             try:
                 if greenlets[-1].ready():
                     greenlets.pop()
                 else:
                     while ui.Gtk.events_pending():
                         ui.Gtk.main_iteration()
+
                     gevent.sleep(0.1)
             except IndexError:
                 break
