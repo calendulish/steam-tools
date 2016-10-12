@@ -73,6 +73,11 @@ class Status:
         self.steamgifts_connected = False
         self.steamcompanion_connected = False
 
+    def __toggle_start_active(self, pages, state):
+        for page in pages:
+            if self.window.tabs.get_current_page() == page:
+                self.window.start.set_sensitive(state)
+
     def __steam_callback(self, greenlet):
         check_steam_login(greenlet)
 
@@ -89,6 +94,8 @@ class Status:
                                                             "\nPlease, check if you are logged in on" +
                                                             "\nsteampowered.com or steamcommunity.com")
             self.steam_connected = False
+
+        self.__toggle_start_active([0, 1], self.steam_connected)
 
     def __steamgifts_callback(self, greenlet):
         check_steamgifts_login(greenlet)
@@ -107,6 +114,8 @@ class Status:
                                                          "\nwww.steamgifts.com")
             self.steamgifts_connected = False
 
+        self.__toggle_start_active([2, 3], self.steamgifts_connected)
+
     def __steamcompanion_callback(self, greenlet):
         check_steamcompanion_login(greenlet)
 
@@ -124,6 +133,8 @@ class Status:
                                                          "\nPlease, check if you are logged in on" +
                                                          "\nsteamcompanion.com")
             self.steamcompanion_connected = False
+
+        self.__toggle_start_active([4], self.steamcompanion_connected)
 
     def queue_connect(self, service_name, url):
         greenlet = gevent.Greenlet(stlib.network.try_get_response, service_name, url)

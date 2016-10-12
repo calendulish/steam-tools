@@ -58,10 +58,6 @@ class SteamTools:
         self.steamcompanion_icon_busy = 'steamcompanion_yellow.png'
         self.steamcompanion_icon_unavailable = 'steamcompanion_red.png'
 
-        # The tab will not check the signals for the first program start
-        # FIXME: Enable the start button manually for now, but we need to check the logins...
-        self.start.set_sensitive(True)
-
         self.main_window.show_all()
 
         self.select_profile()

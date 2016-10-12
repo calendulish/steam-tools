@@ -75,6 +75,11 @@ class WindowSignals:
 
     def on_tabs_switch_page(self, tab, box, current_page):
         if current_page == 0:
+            if not stlib.steam_user:
+                self.window.start.set_sensitive(False)
+                self.window.stop.set_sensitive(False)
+                return None
+
             if ui.card_farming_is_running:
                 self.window.start.set_sensitive(False)
                 self.window.stop.set_sensitive(True)
@@ -82,6 +87,11 @@ class WindowSignals:
                 self.window.start.set_sensitive(True)
                 self.window.stop.set_sensitive(False)
         elif current_page == 1:
+            if not stlib.steam_user:
+                self.window.start.set_sensitive(False)
+                self.window.stop.set_sensitive(False)
+                return None
+
             if ui.fake_app_is_running:
                 self.window.start.set_sensitive(False)
                 self.window.stop.set_sensitive(True)
@@ -89,11 +99,20 @@ class WindowSignals:
                 self.window.start.set_sensitive(True)
                 self.window.stop.set_sensitive(False)
         elif current_page == 2:
-            pass
+            if not stlib.SG_user:
+                self.window.start.set_sensitive(False)
+                self.window.stop.set_sensitive(False)
+                return None
         elif current_page == 3:
-            pass
+            if not stlib.SG_user:
+                self.window.start.set_sensitive(False)
+                self.window.stop.set_sensitive(False)
+                return None
         elif current_page == 4:
-            pass
+            if not stlib.SC_user:
+                self.window.start.set_sensitive(False)
+                self.window.stop.set_sensitive(False)
+                return None
 
     def on_card_farming_start(self):
         self.window.start.set_sensitive(False)
