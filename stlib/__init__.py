@@ -13,7 +13,7 @@ from stlib import (logging,
                    libsteam,
                    card_farming)
 
-__all__ = ['logger',
+__all__ = ['logging',
            'config',
            'network',
            'browser',
