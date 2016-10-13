@@ -73,7 +73,7 @@ class SteamTools:
         stlib.config.read()
 
         if not self.config_parser.has_option('Config', 'browserProfile'):
-            profiles = stlib.browser.get_chrome_profile()
+            profiles = stlib.browser.get_profiles()
 
             if not len(profiles):
                 self.update_status_bar('I cannot find your chrome/Chromium profile')
@@ -82,26 +82,17 @@ class SteamTools:
                                 'I cannot find your Chrome/Chromium profile',
                                 'Some functions will be disabled.')
             elif len(profiles) == 1:
-                profile_name = os.path.join(stlib.browser.get_chrome_dir(), profiles[0])
-                self.config_parser.set('Config', 'browserProfile', profile_name)
+                self.config_parser.set('Config', 'browserProfile', profiles[0])
                 stlib.config.write()
             else:
                 self.select_profile_dialog.add_button('Ok', 1)
 
                 temp_radiobutton = None
                 for i in range(len(profiles)):
-                    with open(os.path.join(stlib.browser.get_chrome_dir(), profiles[i], 'Preferences')) as prefs_file:
-                        prefs = json.load(prefs_file)
-
-                    try:
-                        account_name = prefs['account_info'][0]['full_name']
-                    except KeyError:
-                        account_name = prefs['profile']['name']
-
-                    profile_name = profiles[i]
+                    account_name = stlib.browser.get_account_name(profile_name=profiles[i])
                     temp_radiobutton = ui.Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
                                                                                      '{} ({})'.format(account_name,
-                                                                                                      profile_name))
+                                                                                                      profiles[i]))
 
                     temp_radiobutton.connect('toggled', self.signals.on_select_profile_button_toggled, i)
                     self.radiobutton_box.pack_start(temp_radiobutton, False, False, 0)

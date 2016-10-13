@@ -45,33 +45,24 @@ class SteamTools:
             stlib.logger.critical("The module %s don't exist", self.module)
 
     def select_profile(self):
-        if not self.config_parser.has_option('Config', 'chromeProfile'):
-            profiles = stlib.browser.get_chrome_profile()
+        if not self.config_parser.has_option('Config', 'browserProfile'):
+            profiles = stlib.browser.get_profiles()
 
             if not len(profiles):
                 stlib.logger.error('I cannot find your chrome/Chromium profile')
                 stlib.logger.error('Some functions will be disabled.')
             elif len(profiles) == 1:
-                profile_name = os.path.join(stlib.browser.get_chrome_dir(), profiles[0])
-                self.config_parser.set('Config', 'browserProfile', profile_name)
+                self.config_parser.set('Config', 'browserProfile', profiles[0])
                 stlib.config.write()
             else:
                 selected_profile = 0
                 stlib.logger.warning("Who are you?")
                 for i in range(len(profiles)):
-                    with open(os.path.join(stlib.browser.get_chrome_dir(), profiles[i], 'Preferences')) as prefs_file:
-                        prefs = json.load(prefs_file)
-
-                    try:
-                        account_name = prefs['account_info'][0]['full_name']
-                    except KeyError:
-                        account_name = prefs['profile']['name']
-
-                    profile_name = profiles[i]
+                    account_name = stlib.browser.get_account_name(profile_name=profiles[i])
                     stlib.logger.warning('  - [%d] %s (%s)',
                                               i + 1,
                                               account_name,
-                                              profile_name)
+                                              profiles[i])
 
                 while True:
                     try:
@@ -83,8 +74,6 @@ class SteamTools:
                         stlib.logger.error('Please, choose an valid option.')
                         continue
 
-                    print(selected_profile)
-                    print(profiles[selected_profile])
                     stlib.logger.warning("Okay, I'll remember that next time.")
                     break
 
