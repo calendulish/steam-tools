@@ -72,7 +72,7 @@ class SteamTools:
     def select_profile(self):
         stlib.config.read()
 
-        if not self.config_parser.has_option('Config', 'chromeProfile'):
+        if not self.config_parser.has_option('Config', 'browserProfile'):
             profiles = stlib.browser.get_chrome_profile()
 
             if not len(profiles):
@@ -83,7 +83,7 @@ class SteamTools:
                                 'Some functions will be disabled.')
             elif len(profiles) == 1:
                 profile_name = os.path.join(stlib.browser.get_chrome_dir(), profiles[0])
-                self.config_parser.set('Config', 'chromeProfile', profile_name)
+                self.config_parser.set('Config', 'browserProfile', profile_name)
                 stlib.config.write()
             else:
                 self.select_profile_dialog.add_button('Ok', 1)
@@ -110,7 +110,7 @@ class SteamTools:
                 self.select_profile_dialog.run()
                 self.select_profile_dialog.destroy()
 
-                self.config_parser.set('Config', 'chromeProfile', profiles[ui.browser_profile])
+                self.config_parser.set('Config', 'browserProfile', profiles[ui.browser_profile])
                 stlib.config.write()
 
     def update_status_bar(self, message):

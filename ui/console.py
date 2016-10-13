@@ -53,7 +53,7 @@ class SteamTools:
                 stlib.logger.error('Some functions will be disabled.')
             elif len(profiles) == 1:
                 profile_name = os.path.join(stlib.browser.get_chrome_dir(), profiles[0])
-                self.config_parser.set('Config', 'chromeProfile', profile_name)
+                self.config_parser.set('Config', 'browserProfile', profile_name)
                 stlib.config.write()
             else:
                 selected_profile = 0
@@ -88,7 +88,7 @@ class SteamTools:
                     stlib.logger.warning("Okay, I'll remember that next time.")
                     break
 
-                self.config_parser.set('Config', 'chromeProfile', profiles[selected_profile])
+                self.config_parser.set('Config', 'browserProfile', profiles[selected_profile])
                 stlib.config.write()
 
     def __cardfarming(self):
@@ -114,7 +114,7 @@ class SteamTools:
             badges = stlib.card_farming.remove_completed_badges(badges)
             cards_info = stlib.card_farming.get_cards_info()
 
-            if self.config_parser.getboolean('Config', 'MostValuableFirst', fallback=True):
+            if self.config_parser.getboolean('CardFarming', 'mostValuableCardsFirst', fallback=True):
                 badges = stlib.card_farming.order_by_most_valuable(cards_info, badges)
 
             stlib.logger.warning('Ready to start.')

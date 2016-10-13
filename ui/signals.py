@@ -117,7 +117,7 @@ class WindowSignals:
     def on_card_farming_start(self):
         self.window.start.set_sensitive(False)
         self.window.stop.set_sensitive(False)
-        dry_run = self.config_parser.getboolean('Debug', 'DryRun', fallback=False)
+        dry_run = self.config_parser.getboolean('Debug', 'dryRun', fallback=False)
 
         if ui.card_farming_is_running:
             self.window.new_dialog(ui.Gtk.MessageType.ERROR,
@@ -140,7 +140,7 @@ class WindowSignals:
             badges = stlib.card_farming.remove_completed_badges(badges)
             cards_info = stlib.card_farming.get_cards_info()
 
-            if self.config_parser.getboolean('Config', 'MostValuableFirst', fallback=True):
+            if self.config_parser.getboolean('CardFarming', 'mostValuableCardsFirst', fallback=True):
                 badges = stlib.card_farming.order_by_most_valuable(cards_info, badges)
 
             stlib.logger.warning('Ready to start.')

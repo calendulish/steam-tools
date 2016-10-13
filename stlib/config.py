@@ -21,36 +21,37 @@ import logging
 import os
 import sys
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 if os.name == 'nt':
-    DATA_DIR = os.getenv('LOCALAPPDATA')
+    data_dir = os.getenv('LOCALAPPDATA')
 else:
-    DATA_DIR = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
+    data_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
 
-CONFIG_FILE_NAME = os.path.splitext(os.path.basename(sys.argv[0]))[0] + '.config'
-CONFIG_FILE_PATH = os.path.join(DATA_DIR, 'steam-tools', CONFIG_FILE_NAME)
+config_file_name = os.path.splitext(os.path.basename(sys.argv[0]))[0] + '.config'
+config_file_path = os.path.join(data_dir, 'steam-tools', config_file_name)
 
-CONFIG_PARSER = configparser.RawConfigParser()
-CONFIG_PARSER.optionxform = str
+config_parser = configparser.RawConfigParser()
+config_parser.optionxform = str
 
-os.makedirs(os.path.dirname(CONFIG_FILE_PATH), exist_ok=True)
+os.makedirs(os.path.dirname(config_file_path), exist_ok=True)
 
-if not os.path.isfile(CONFIG_FILE_PATH):
-    LOGGER.warn("No config file found.")
-    LOGGER.warn("Creating a new at %s", CONFIG_FILE_PATH)
+if not os.path.isfile(config_file_path):
+    logger.warn("No config file found.")
+    logger.warn("Creating a new at %s", config_file_path)
 
-    CONFIG_PARSER.add_section('Config')
+    config_parser.add_section('Config')
+    config_parser.add_section('CardFarming')
 
-    with open(CONFIG_FILE_PATH, 'w') as FP:
-        CONFIG_PARSER.write(FP)
+    with open(config_file_path, 'w') as FP:
+        config_parser.write(FP)
 
 
 def read():
-    CONFIG_PARSER.read(CONFIG_FILE_PATH)
-    return CONFIG_PARSER
+    config_parser.read(config_file_path)
+    return config_parser
 
 
 def write():
-    with open(CONFIG_FILE_PATH, 'w') as config_file:
-        CONFIG_PARSER.write(config_file)
+    with open(config_file_path, 'w') as config_file:
+        config_parser.write(config_file)

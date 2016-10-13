@@ -65,7 +65,7 @@ def get_cookies(url):
     cookies = {}
     temp_dir = tempfile.mkdtemp()
     config_parser = stlib.config.read()
-    profile = config_parser.get('Config', 'chromeProfile')
+    profile = config_parser.get('Config', 'browserProfile')
     cookies_path = os.path.join(get_chrome_dir(), profile, 'Cookies')
     temp_cookies_path = os.path.join(temp_dir, os.path.basename(cookies_path))
     shutil.copy(cookies_path, temp_cookies_path)
