@@ -123,9 +123,12 @@ def get_profiles():
     return profiles
 
 
-def get_profile_path():
-    config_parser = stlib.config.read()
-    profile_path = config_parser.get('Config', 'browser_profile')
+def get_profile_path(profile_name=None):
+    if profile_name:
+        profile_path = os.path.join(get_chrome_dir(), profile_name)
+    else:
+        config_parser = stlib.config.read()
+        profile_path = config_parser.get('Config', 'browser_profile')
 
     return profile_path
 
@@ -141,7 +144,7 @@ def get_profile_name(profile_path=None):
 
 def get_account_name(profile_path=None, profile_name=None):
     if not profile_path:
-        profile_path = get_profile_path()
+        profile_path = get_profile_path(profile_name)
 
     if not profile_name:
         profile_name = os.path.basename(profile_path)
