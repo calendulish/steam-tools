@@ -496,7 +496,7 @@
                                   <object class="GtkSwitch" id="most_valuable_cards_first">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <signal name="activate" handler="on_most_valuable_cards_first_activate" swapped="no"/>
+                                    <signal name="state-set" handler="on_most_valuable_cards_first_changed" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>

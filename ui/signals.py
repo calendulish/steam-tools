@@ -114,6 +114,10 @@ class WindowSignals:
                 self.window.stop.set_sensitive(False)
                 return None
 
+    def on_most_valuable_cards_first_changed(self, switch, state):
+        self.config_parser.set('CardFarming', 'mostValuableCardsFirst', state)
+        stlib.config.write()
+
     def on_card_farming_start(self):
         self.window.start.set_sensitive(False)
         self.window.stop.set_sensitive(False)

@@ -43,6 +43,7 @@ class SteamTools:
 
         self.fake_app_current_game.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
         self.fake_app_current_time.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
+        self.browser_profile.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
 
         self.icons_path = 'ui/icons'
 
@@ -58,9 +59,16 @@ class SteamTools:
         self.steamcompanion_icon_busy = 'steamcompanion_yellow.png'
         self.steamcompanion_icon_unavailable = 'steamcompanion_red.png'
 
+        MVCF_config = self.config_parser.getboolean('CardFarming', 'mostValuableCardsFirst', fallback=True)
+        self.most_valuable_cards_first.set_active(MVCF_config)
+        del MVCF_config
+
         self.main_window.show_all()
 
         self.select_profile()
+
+        self.browser_profile.set_text('{} ({})'.format(stlib.browser.get_account_name(),
+                                                       stlib.browser.get_profile_name()))
 
         self.spinner.start()
         self.login_status.queue_connect("steam", stlib.steam_check_page)
