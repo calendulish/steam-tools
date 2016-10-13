@@ -55,7 +55,7 @@ class SteamTools:
                 self.config_parser.set('Config', 'browserProfile', profiles[0])
                 stlib.config.write()
             else:
-                selected_profile = 0
+                selected_profile_id = 0
                 stlib.logger.warning("Who are you?")
                 for i in range(len(profiles)):
                     account_name = stlib.browser.get_account_name(profile_name=profiles[i])
@@ -67,8 +67,8 @@ class SteamTools:
                 while True:
                     try:
                         user_input = input("Please, input an number [1-{}]:".format(len(profiles)))
-                        selected_profile = int(user_input) - 1
-                        if selected_profile >= len(profiles) or selected_profile < 0:
+                        selected_profile_id = int(user_input) - 1
+                        if selected_profile_id >= len(profiles) or selected_profile_id < 0:
                             raise ValueError
                     except ValueError:
                         stlib.logger.error('Please, choose an valid option.')
@@ -77,7 +77,7 @@ class SteamTools:
                     stlib.logger.warning("Okay, I'll remember that next time.")
                     break
 
-                self.config_parser.set('Config', 'browserProfile', profiles[selected_profile])
+                self.config_parser.set('Config', 'browserProfile', profiles[selected_profile_id])
                 stlib.config.write()
 
     def __cardfarming(self):

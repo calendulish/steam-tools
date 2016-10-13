@@ -255,4 +255,4 @@ class WindowSignals:
     @staticmethod
     def on_select_profile_button_toggled(radio_button, profile_id):
         if radio_button.get_active():
-            ui.browser_profile = profile_id
+            ui.selected_profile_id = profile_id

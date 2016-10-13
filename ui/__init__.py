@@ -21,7 +21,7 @@ __all__ = ['console',
            'timers']
 
 main_window = None
-browser_profile = 0
+selected_profile_id = 0
 
 card_farming_is_running = False
 card_farming_game_start_time = None

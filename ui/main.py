@@ -101,7 +101,7 @@ class SteamTools:
                 self.select_profile_dialog.run()
                 self.select_profile_dialog.destroy()
 
-                self.config_parser.set('Config', 'browserProfile', profiles[ui.browser_profile])
+                self.config_parser.set('Config', 'browserProfile', profiles[ui.selected_profile_id])
                 stlib.config.write()
 
     def update_status_bar(self, message):
