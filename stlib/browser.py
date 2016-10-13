@@ -16,6 +16,7 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
+import json
 import os
 import shutil
 import sqlite3
@@ -120,6 +121,41 @@ def get_chrome_profile():
                     profiles.append(profile_name)
 
     return profiles
+
+
+def get_profile_path():
+    config_parser = stlib.config.read()
+    profile_path = config_parser.get('Config', 'browser_profile')
+
+    return profile_path
+
+
+def get_profile_name(profile_path=None):
+    if not profile_path:
+        profile_path = get_profile_path()
+
+    profile_name = os.path.basename(profile_path)
+
+    return profile_name
+
+
+def get_account_name(profile_path=None, profile_name=None):
+    if not profile_path:
+        profile_path = get_profile_path()
+
+    if not profile_name:
+        profile_name = os.path.basename(profile_path)
+
+    preferences_path = os.path.join(get_chrome_dir(), profile_name, 'Preferences')
+    with open(preferences_path) as preferences_file:
+        preferences = json.load(preferences_file)
+
+    try:
+        account_name = preferences['account_info'][0]['full_name']
+    except KeyError:
+        account_name = preferences['profile']['name']
+
+    return account_name
 
 
 def get_domain_name(url):
