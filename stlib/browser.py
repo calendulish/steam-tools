@@ -108,7 +108,7 @@ def get_chrome_dir():
     return chrome_dir
 
 
-def get_chrome_profile():
+def get_profiles():
     chrome_dir = get_chrome_dir()
 
     profiles = []
