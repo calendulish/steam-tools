@@ -128,7 +128,7 @@ def get_profile_path(profile_name=None):
         profile_path = os.path.join(get_chrome_dir(), profile_name)
     else:
         config_parser = stlib.config.read()
-        profile_path = config_parser.get('Config', 'browser_profile')
+        profile_path = config_parser.get('Config', 'browserProfile')
 
     return profile_path
 
