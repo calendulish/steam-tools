@@ -36,7 +36,7 @@ def get_badge_page_count():
 
     try:
         page_count = int(html.findAll('a', class_='pagelink')[-1].text)
-    except:
+    except IndexError:
         page_count = 1
 
     return page_count
@@ -142,7 +142,7 @@ def order_by_most_valuable(cards_info, badges):
                           reverse=True)
     ordered_badges = []
 
-    for price in prices:
+    for _ in prices:
         ordered_badges = [badges[index] for index in badges_order]
 
     return ordered_badges

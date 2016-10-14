@@ -16,9 +16,7 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import logging
 import threading
-import time
 
 import bs4
 import gevent
@@ -62,8 +60,11 @@ def async_wait(function):
 
     return async_call
 
+
 @async_wait
 def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, verify='cacert.pem', stream=False):
+    response = None
+
     if headers:
         headers.update(USER_AGENT)
 
@@ -85,16 +86,14 @@ def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, v
         except requests.exceptions.SSLError:
             stlib.logger.critical('INSECURE CONNECTION DETECTED!')
             stlib.logger.critical('Invalid SSL Certificates.')
-            return None
         except requests.exceptions.HTTPError:
             stlib.logger.warning('Response with HTTP error. Continuing.')
-            return response
         except(requests.exceptions.ConnectionError,
                requests.exceptions.RequestException,
                requests.exceptions.Timeout):
             stlib.logger.error('Unable to connect. Trying again... ({}/3)'.format(i))
             gevent.sleep(3)
-        else:
+        finally:
             return response
 
 
@@ -104,6 +103,7 @@ def try_get_response(service_name, url, data=None):
 
     while True:
         try:
+            # noinspection PyProtectedMember
             cookies = config_parser._sections[service_name + 'Cookies']
 
             if not cookies:

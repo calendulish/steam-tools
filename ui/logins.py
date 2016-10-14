@@ -35,8 +35,8 @@ def check_steam_login(greenlet):
     except(AttributeError, IndexError):
         stlib.steam_user = None
         stlib.logger.error('Steam login status: Cookies not found' +
-                                '\nPlease, check if you are logged in on' +
-                                '\nsteampowered.com or steamcommunity.com')
+                           '\nPlease, check if you are logged in on' +
+                           '\nsteampowered.com or steamcommunity.com')
 
 
 def check_steamgifts_login(greenlet):
@@ -47,8 +47,8 @@ def check_steamgifts_login(greenlet):
     except(AttributeError, IndexError):
         stlib.SG_user = None
         stlib.logger.error('SteamGifts login status: Cookies not found' +
-                                '\nPlease, check if you are logged in on' +
-                                '\nwww.steamgifts.com')
+                           '\nPlease, check if you are logged in on' +
+                           '\nwww.steamgifts.com')
 
 
 def check_steamcompanion_login(greenlet):
@@ -63,8 +63,8 @@ def check_steamcompanion_login(greenlet):
     except(AttributeError, IndexError):
         stlib.SC_user = None
         stlib.logger.error('SteamCompanion login status: Cookies not found' +
-                                '\nPlease, check if you are logged in on' +
-                                '\nsteamcompanion.com')
+                           '\nPlease, check if you are logged in on' +
+                           '\nsteamcompanion.com')
 
 
 def connect(service_name, url):

@@ -30,6 +30,7 @@ import ui
 import stlib
 
 
+# noinspection PyUnusedLocal
 class WindowSignals:
     def __init__(self):
         self.window = ui.main_window
@@ -160,8 +161,8 @@ class WindowSignals:
             ui.GLib.idle_add(ui.timers.total_card_count, badges)
 
             badge_current = 0
-            ui.timers.card_farming_timer(dry_run, badges, badge_current, cards_info)
-            ui.GLib.timeout_add_seconds(40, ui.timers.card_farming_timer, dry_run, badges, badge_current, cards_info)
+            ui.timers.card_farming_timer(dry_run, badges, badge_current)
+            ui.GLib.timeout_add_seconds(40, ui.timers.card_farming_timer, dry_run, badges, badge_current)
 
             self.window.stop.set_sensitive(True)
         else:

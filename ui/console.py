@@ -21,8 +21,6 @@ import random
 import sys
 import time
 
-import gevent
-
 import stlib
 import ui
 
@@ -60,9 +58,9 @@ class SteamTools:
                 for i in range(len(profiles)):
                     account_name = stlib.browser.get_account_name(profile_name=profiles[i])
                     stlib.logger.warning('  - [%d] %s (%s)',
-                                              i + 1,
-                                              account_name,
-                                              profiles[i])
+                                         i + 1,
+                                         account_name,
+                                         profiles[i])
 
                 while True:
                     try:
@@ -93,7 +91,7 @@ class SteamTools:
             stlib.logger.info('Preparing. Please wait...')
             badge_pages = stlib.card_farming.get_badge_page_count()
             badges = []
-            for page in range(1, badge_pages+1):
+            for page in range(1, badge_pages + 1):
                 badges.extend(stlib.card_farming.get_badges(page))
 
             badges = stlib.card_farming.remove_completed_badges(badges)

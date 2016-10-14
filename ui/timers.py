@@ -54,7 +54,7 @@ def total_card_count(badges):
     return False
 
 
-def card_farming_timer(dry_run, badges, badge_current, cards_info):
+def card_farming_timer(dry_run, badges, badge_current):
     badge = badges[badge_current]
 
     if ui.card_farming_is_running:
@@ -99,9 +99,9 @@ def fake_app_timer(start_time):
         if not stlib.libsteam.is_wrapper_running():
             ui.main_window.update_status_bar("This is not a valid gameID.")
             ui.main_window.new_dialog(ui.Gtk.MessageType.ERROR,
-                              'Fake Steam App',
-                              'This is not a valid gameID.',
-                              "Please, check if you write correctly and try again.")
+                                      'Fake Steam App',
+                                      'This is not a valid gameID.',
+                                      "Please, check if you write correctly and try again.")
 
             ui.fake_app_is_running = False
             ui.main_window.start.set_sensitive(True)

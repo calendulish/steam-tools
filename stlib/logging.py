@@ -62,6 +62,7 @@ def console_msg(*objs, sep='', end='\n', out=sys.stdout):
     print(*objs, sep=sep, end=end, file=encoder(out.buffer), flush=True)
 
 
+# noinspection PyProtectedMember
 def get_logger():
     config_parser = stconfig.read()
     data_dir = tempfile.gettempdir()

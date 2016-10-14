@@ -55,7 +55,7 @@ def _find_libsteam():
 
 def _find_wrapper():
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-    paths = [ os.path.join(current_directory, 'stlib') ]
+    paths = [os.path.join(current_directory, 'stlib')]
 
     if os.name is 'posix':
         paths.append(os.path.join(site.getsitepackages()[1], 'stlib'))
