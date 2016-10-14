@@ -88,6 +88,9 @@ def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, v
             LOGGER.critical('INSECURE CONNECTION DETECTED!')
             LOGGER.critical('Invalid SSL Certificates.')
             return None
+        except requests.exceptions.HTTPError:
+            LOGGER.warning('Response with HTTP error. Continuing.')
+            return response
         except(requests.exceptions.ConnectionError,
                requests.exceptions.RequestException,
                requests.exceptions.Timeout):
