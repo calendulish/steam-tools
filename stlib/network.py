@@ -27,8 +27,6 @@ import requests
 import stlib
 import ui
 
-LOGGER = logging.getLogger(__name__)
-
 STEAM_LOGIN_PAGES = [
     'https://steamcommunity.com/login/home/',
     'https://store.steampowered.com//login/',
@@ -85,16 +83,16 @@ def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, v
 
             response.raise_for_status()
         except requests.exceptions.SSLError:
-            LOGGER.critical('INSECURE CONNECTION DETECTED!')
-            LOGGER.critical('Invalid SSL Certificates.')
+            stlib.logger.critical('INSECURE CONNECTION DETECTED!')
+            stlib.logger.critical('Invalid SSL Certificates.')
             return None
         except requests.exceptions.HTTPError:
-            LOGGER.warning('Response with HTTP error. Continuing.')
+            stlib.logger.warning('Response with HTTP error. Continuing.')
             return response
         except(requests.exceptions.ConnectionError,
                requests.exceptions.RequestException,
                requests.exceptions.Timeout):
-            LOGGER.error('Unable to connect. Trying again... ({}/3)'.format(i))
+            stlib.logger.error('Unable to connect. Trying again... ({}/3)'.format(i))
             gevent.sleep(3)
         else:
             return response
@@ -118,15 +116,15 @@ def try_get_response(service_name, url, data=None):
                     raise requests.exceptions.TooManyRedirects
         except(requests.exceptions.TooManyRedirects, KeyError):
             if not auto_recovery:
-                LOGGER.error('Unable to find cookies for {}'.format(service_name))
-                LOGGER.error('Trying to auto recovery')
+                stlib.logger.error('Unable to find cookies for {}'.format(service_name))
+                stlib.logger.error('Trying to auto recovery')
                 auto_recovery = True
                 cookies = stlib.browser.get_cookies(url)
 
                 config_parser[service_name + 'Cookies'] = cookies
                 stlib.config.write()
             else:
-                LOGGER.error('Unable to get cookies for {}'.format(service_name))
+                stlib.logger.error('Unable to get cookies for {}'.format(service_name))
                 return None
         else:
             return response
