@@ -59,6 +59,9 @@ def console_fixer(end='\n'):
 
 
 def console_msg(*objs, sep='', end='\n', out=sys.stdout):
+    if end == '\r':
+        console_fixer(end)
+
     print(*objs, sep=sep, end=end, file=encoder(out.buffer), flush=True)
 
 

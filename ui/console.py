@@ -124,7 +124,6 @@ class SteamTools:
                         except KeyboardInterrupt:
                             sys.exit(0)
 
-                    stlib.logging.console_fixer('\r')
                     stlib.logging.console_msg('Checking if game have more cards drops...', end='\r')
                     card_count = stlib.card_farming.get_card_count(badge, True)
 
