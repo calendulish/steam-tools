@@ -126,7 +126,7 @@ class WindowSignals:
         self.window.stop.set_sensitive(False)
         dry_run = self.config_parser.getboolean('Debug', 'dryRun', fallback=False)
 
-        if ui.card_farming_is_running:
+        if ui.fake_app_is_running:
             self.window.new_dialog(ui.Gtk.MessageType.ERROR,
                                    'Card Farming',
                                    'Please, stop the Fake App',
