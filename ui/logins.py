@@ -75,12 +75,10 @@ def connect(service_name, url):
 
     return greenlet
 
+
 class Status:
     def __init__(self):
         self.window = ui.main_window
-        self.steam_connected = False
-        self.steamgifts_connected = False
-        self.steamcompanion_connected = False
 
     def __toggle_start_active(self, pages, state):
         for page in pages:
@@ -95,16 +93,16 @@ class Status:
                                                                       self.window.steam_icon_available))
             self.window.steam_login_status.set_tooltip_text("Steam Login status:\n" +
                                                             "Connected as {}".format(stlib.steam_user))
-            self.steam_connected = True
+            steam_connected = True
         else:
             self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path,
                                                                       self.window.steam_icon_unavailable))
             self.window.steam_login_status.set_tooltip_text("Steam Login status: Cookies not found" +
                                                             "\nPlease, check if you are logged in on" +
                                                             "\nsteampowered.com or steamcommunity.com")
-            self.steam_connected = False
+            steam_connected = False
 
-        self.__toggle_start_active([0, 1], self.steam_connected)
+        self.__toggle_start_active([0, 1], steam_connected)
 
     def __steamgifts_callback(self, greenlet):
         check_steamgifts_login(greenlet)
@@ -114,16 +112,16 @@ class Status:
                                                                    self.window.steamgifts_icon_available))
             self.window.SG_login_status.set_tooltip_text("SteamGifts Login status:\n" +
                                                          "Connected as {}".format(stlib.SG_user))
-            self.steamgifts_connected = True
+            steamgifts_connected = True
         else:
             self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
                                                                    self.window.steamgifts_icon_unavailable))
             self.window.SG_login_status.set_tooltip_text("SteamGifts Login status: Cookies not found" +
                                                          "\nPlease, check if you are logged in on" +
                                                          "\nwww.steamgifts.com")
-            self.steamgifts_connected = False
+            steamgifts_connected = False
 
-        self.__toggle_start_active([2, 3], self.steamgifts_connected)
+        self.__toggle_start_active([2, 3], steamgifts_connected)
 
     def __steamcompanion_callback(self, greenlet):
         check_steamcompanion_login(greenlet)
@@ -134,16 +132,16 @@ class Status:
             self.window.SC_login_status.set_tooltip_text("SteamCompanion Login status:\n" +
                                                          "Connected as {}".format(stlib.SC_user)
                                                          )
-            self.steamcompanion_connected = True
+            steamcompanion_connected = True
         else:
             self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,
                                                                    self.window.steamcompanion_icon_unavailable))
             self.window.SC_login_status.set_tooltip_text("SteamCompanion Login status: Cookies not found" +
                                                          "\nPlease, check if you are logged in on" +
                                                          "\nsteamcompanion.com")
-            self.steamcompanion_connected = False
+            steamcompanion_connected = False
 
-        self.__toggle_start_active([4], self.steamcompanion_connected)
+        self.__toggle_start_active([4], steamcompanion_connected)
 
     def queue_connect(self, service_name, url):
         greenlet = gevent.Greenlet(stlib.network.try_get_response, service_name, url)
