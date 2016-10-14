@@ -152,7 +152,8 @@ class Status:
 
         return None
 
-    def wait_queue(self):
+    @staticmethod
+    def wait_queue():
         greenlets = []
         for object_ in gc.get_objects():
             if isinstance(object_, gevent.Greenlet):
