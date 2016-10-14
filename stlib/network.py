@@ -60,10 +60,7 @@ def async_wait(function):
                 ui.Gtk.main_iteration()
             gevent.sleep(0.01)
         else:
-            if thread.return_:
-                return thread.return_
-            else:
-                raise requests.exceptions.ConnectionError
+            return thread.return_
 
     return async_call
 
@@ -128,8 +125,6 @@ def try_get_response(service_name, url, data=None):
             else:
                 LOGGER.error('Unable to get cookies for {}'.format(service_name))
                 return None
-        except requests.exceptions.ConnectionError:
-            return None
         else:
             return response
 
