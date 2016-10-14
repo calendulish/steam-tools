@@ -81,11 +81,7 @@ class SteamTools:
                 stlib.config.write()
 
     def __cardfarming(self):
-        greenlet = gevent.Greenlet(stlib.network.try_get_response,
-                                   'steam',
-                                   stlib.steam_check_page)
-        greenlet.link(ui.logins.check_steam_login)
-        greenlet.start()
+        greenlet = ui.logins.connect('steam', stlib.steam_check_page)
         greenlet.join()
 
         if not stlib.steam_user:
@@ -177,11 +173,7 @@ class SteamTools:
         sys.exit(0)
 
     def __steamgifts_bump(self):
-        greenlet = gevent.Greenlet(stlib.network.try_get_response,
-                                   'steamgifts',
-                                   stlib.SG_check_page)
-        greenlet.link(ui.logins.check_steamgifts_login)
-        greenlet.start()
+        greenlet = ui.logins.connect('steamgifts', stlib.SG_check_page)
         greenlet.join()
 
         if not stlib.SG_user:

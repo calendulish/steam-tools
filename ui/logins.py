@@ -66,6 +66,15 @@ def check_steamcompanion_login(greenlet):
                                 '\nPlease, check if you are logged in on' +
                                 '\nsteamcompanion.com')
 
+
+def connect(service_name, url):
+    greenlet = gevent.Greenlet(stlib.network.try_get_response, service_name, url)
+    greenlet.link(eval(''.join(['ui.logins.check_', service_name, '_login'])))
+    greenlet.start()
+    greenlet.join()
+
+    return greenlet
+
 class Status:
     def __init__(self):
         self.window = ui.main_window
@@ -142,6 +151,8 @@ class Status:
         callback_function = ''.join(['_', class_name, '__', service_name, '_callback'])
         greenlet.link(eval(''.join(['self.', callback_function])))
         greenlet.start()
+
+        return None
 
     def wait_queue(self):
         greenlets = []
