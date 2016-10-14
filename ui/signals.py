@@ -109,10 +109,12 @@ class WindowSignals:
                 self.window.stop.set_sensitive(False)
                 return None
         elif current_page == 4:
-            if not stlib.SC_user:
-                self.window.start.set_sensitive(False)
-                self.window.stop.set_sensitive(False)
-                return None
+            ui.GLib.idle_add(self.window.tabs.set_current_page, 0)
+            self.window.new_dialog(ui.Gtk.MessageType.INFO,
+                                   'SteamCompanion is down.',
+                                   'SteamCompanion is closed until further notice.',
+                                   'Primarily because the harddrive crashed. '
+                                   'Read more at <a href="http://steamcompanion.com/">Steam Companion</a>.')
 
     def on_most_valuable_cards_first_changed(self, switch, state):
         self.config_parser.set('CardFarming', 'mostValuableCardsFirst', state)

@@ -73,7 +73,7 @@ class SteamTools:
         self.spinner.start()
         self.login_status.queue_connect("steam", stlib.steam_check_page)
         self.login_status.queue_connect("steamgifts", stlib.SG_check_page)
-        self.login_status.queue_connect("steamcompanion", stlib.SC_check_page)
+        #self.login_status.queue_connect("steamcompanion", stlib.SC_check_page)
         self.login_status.wait_queue()
         self.spinner.stop()
 
