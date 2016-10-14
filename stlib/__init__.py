@@ -11,14 +11,16 @@ from stlib import (logging,
                    network,
                    browser,
                    libsteam,
-                   card_farming)
+                   card_farming,
+                   steamgifts_bump)
 
 __all__ = ['logging',
            'config',
            'network',
            'browser',
            'libsteam',
-           'card_farming']
+           'card_farming',
+           'steamgifts_bump']
 
 logger = logging.get_logger()
 wrapper_process = None
@@ -43,3 +45,4 @@ SG_user = None
 SC_user = None
 
 steam_profile = lambda: '{}/?redirectURL=id/{}'.format(steam_login_page, steam_user)
+

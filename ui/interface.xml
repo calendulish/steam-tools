@@ -800,6 +800,7 @@
                                       <object class="GtkEntry" id="fake_app_game_id">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="has_focus">True</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>

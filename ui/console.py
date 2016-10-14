@@ -16,8 +16,8 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import json
-import os
+import configparser
+import random
 import sys
 import time
 
@@ -175,3 +175,56 @@ class SteamTools:
             sys.exit(1)
 
         sys.exit(0)
+
+    def __steamgifts_bump(self):
+        greenlet = gevent.Greenlet(stlib.network.try_get_response,
+                                   'steamgifts',
+                                   stlib.SG_check_page)
+        greenlet.link(ui.logins.check_steamgifts_login)
+        greenlet.start()
+        greenlet.join()
+
+        if not stlib.SG_user:
+            sys.exit(1)
+
+        stlib.logger.info('Hello {}'.format(stlib.SG_user))
+
+        try:
+            TID_config = self.config_parser.get('SteamGiftsBump', 'tradeID')
+            trade_ids = [line.strip() for line in TID_config.split(',')]
+            del TID_config
+        except configparser.NoOptionError:
+            trade_ids = ['EXAMPLEID1', 'EXAMPLEID2']
+            self.config_parser.set('SteamGiftsBump', 'tradeID', ', '.join(trade_ids))
+            stlib.config.write()
+            stlib.logger.error('No trade ID found in the config file. Using EXAMPLEID\'s')
+            stlib.logger.error('Please, edit the auto-generated config file after this run')
+            stlib.logger.error(stlib.config.config_file_path)
+
+        while True:
+            MIN_wait_time = self.config_parser.getint('SteamGiftsBump', 'minWaitTime', fallback=3700)
+            MAX_wait_time = self.config_parser.getint('SteamGiftsBump', 'maxWaitTime', fallback=4100)
+            current_datetime = time.strftime('%B, %d, %Y - %H:%M:%S')
+
+            stlib.logging.console_fixer('\r')
+            stlib.logger.info('Bumping now! %s', current_datetime)
+
+            for trade_id in trade_ids:
+                response = stlib.network.try_get_response('steamgifts',
+                                                          'https://www.steamgifts.com/trade/{}/'.format(trade_id))
+
+                if response.status_code == 404:
+                    stlib.logger.warning('The trade ID %s is not valid. Ignoring.', trade_id)
+                    continue
+
+                return_ = stlib.steamgifts_bump.bump(response)
+
+                if type(return_) == int:
+                    MIN_wait_time = return_ * 60
+                    MAX_wait_time = MIN_wait_time + 400
+
+            random_time = random.randint(MIN_wait_time, MAX_wait_time)
+
+            for past_time in range(random_time):
+                stlib.logging.console_msg("Waiting: {:4d} seconds".format(random_time - past_time), end='\r')
+                time.sleep(1)
