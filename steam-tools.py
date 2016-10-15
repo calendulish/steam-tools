@@ -22,15 +22,11 @@ import os
 import subprocess
 import sys
 
-import gevent
-
 import stlib
 import ui
 
 if os.name is 'posix':
-    if os.getenv('DISPLAY'):
-        import ui.main
-    else:
+    if not os.getenv('DISPLAY'):
         stlib.logger.warning('The DISPLAY is not set!')
         stlib.logger.warning('Use --cli <module> for the command line interface.')
         sys.exit(1)

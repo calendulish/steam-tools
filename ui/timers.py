@@ -19,6 +19,12 @@
 import datetime
 import time
 
+import gi
+
+gi.require_version('Gtk', '3.0')
+
+from gi.repository import Gtk, GLib
+
 import stlib
 import ui
 
@@ -49,7 +55,7 @@ def total_card_count(badges):
     generator = stlib.card_farming.get_total_card_count(badges)
     for card_count in generator:
         ui.main_window.card_farming_total_card_left.set_text('{} cards'.format(card_count))
-        ui.Gtk.main_iteration()
+        Gtk.main_iteration()
 
     return False
 
@@ -85,7 +91,7 @@ def card_farming_timer(dry_run, badges, badge_current):
             stlib.libsteam.run_wrapper(ui.fake_app_id)
             ui.fake_app_is_running = True
             stlib.logger.info('Running {}'.format(ui.fake_app_id))
-            ui.GLib.timeout_add_seconds(1, fake_app_timer, ui.card_farming_game_start_time)
+            GLib.timeout_add_seconds(1, fake_app_timer, ui.card_farming_game_start_time)
         return True
     else:
         return False
@@ -98,7 +104,7 @@ def fake_app_timer(start_time):
     if ui.fake_app_is_running:
         if not stlib.libsteam.is_wrapper_running():
             ui.application.update_status_bar("This is not a valid gameID.")
-            message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+            message = ui.main.MessageDialog(Gtk.MessageType.ERROR,
                                             'Fake Steam App',
                                             'This is not a valid gameID.',
                                             "Please, check if you write correctly and try again.")

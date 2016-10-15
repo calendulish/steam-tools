@@ -19,40 +19,46 @@
 import os
 import random
 
+import gi
+
+gi.require_version('Gtk', '3.0')
+
+from gi.repository import Gtk, GLib, Gdk, Gio
+
 import stlib
 import ui
 
 
-class SteamToolsWindow(ui.Gtk.ApplicationWindow):
+class SteamToolsWindow(Gtk.ApplicationWindow):
     def __init__(self, parent):
         super().__init__(title='Steam Tools', application=parent)
         ui.main_window = self
         self.set_default_size(640, 480)
         self.set_resizable(False)
-        self.set_position(ui.Gtk.WindowPosition.CENTER)
+        self.set_position(Gtk.WindowPosition.CENTER)
         self.set_show_menubar(True)
 
-        builder = ui.Gtk.Builder()
+        builder = Gtk.Builder()
         builder.add_from_file('ui/interface.xml')
         builder.connect_signals(ui.signals)
 
         for _object in builder.get_objects():
-            if issubclass(type(_object), ui.Gtk.Buildable):
-                name = ui.Gtk.Buildable.get_name(_object)
+            if issubclass(type(_object), Gtk.Buildable):
+                name = Gtk.Buildable.get_name(_object)
                 setattr(self, name, _object)
 
         del self.main_window
         self.main_box.reparent(self)
 
-        self.fake_app_current_game.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
-        self.fake_app_current_time.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
-        self.browser_profile.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
+        self.fake_app_current_game.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('black'))
+        self.fake_app_current_time.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('black'))
+        self.browser_profile.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('black'))
 
 
-class SteamTools(ui.Gtk.Application):
+class SteamTools(Gtk.Application):
     def __init__(self):
         super().__init__(application_id='click.lara.SteamTools')
-        ui.GLib.set_application_name('Steam Tools')
+        GLib.set_application_name('Steam Tools')
         self.config_parser = stlib.config.read()
         ui.application = self
         self.window = None
@@ -97,9 +103,9 @@ class SteamTools(ui.Gtk.Application):
         self.window.spinner.stop()
 
     def do_startup(self):
-        ui.Gtk.Application.do_startup(self)
+        Gtk.Application.do_startup(self)
 
-        builder = ui.Gtk.Builder()
+        builder = Gtk.Builder()
         builder.add_from_file('ui/menu.xml')
         menu_bar = builder.get_object('menu_bar')
         self.set_menubar(menu_bar)
@@ -110,7 +116,7 @@ class SteamTools(ui.Gtk.Application):
                       'about']
 
         for item in menu_items:
-            action = ui.Gio.SimpleAction.new(item, None)
+            action = Gio.SimpleAction.new(item, None)
             action_handler = ['ui.signals.on_', item, '_activate']
             action.connect('activate', eval(''.join(action_handler)))
             self.add_action(action)
@@ -175,7 +181,7 @@ class SteamTools(ui.Gtk.Application):
 
             if not len(profiles):
                 self.update_status_bar('I cannot find your chrome/Chromium profile')
-                message = MessageDialog(ui.Gtk.MesageType.ERROR,
+                message = MessageDialog(Gtk.MesageType.ERROR,
                                         'Network Error',
                                         'I cannot find your Chrome/Chromium profile',
                                         'Some functions will be disabled.')
@@ -187,9 +193,9 @@ class SteamTools(ui.Gtk.Application):
                 temp_radiobutton = None
                 for i in range(len(profiles)):
                     account_name = stlib.browser.get_account_name(profile_name=profiles[i])
-                    temp_radiobutton = ui.Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
-                                                                                     '{} ({})'.format(account_name,
-                                                                                                      profiles[i]))
+                    temp_radiobutton = Gtk.RadioButton.new_with_label_from_widget(temp_radiobutton,
+                                                                                  '{} ({})'.format(account_name,
+                                                                                                   profiles[i]))
 
                     temp_radiobutton.connect('toggled', ui.signals.on_select_profile_button_toggled, i)
                     dialog.radio_button_box.pack_start(temp_radiobutton, False, False, 5)
@@ -213,16 +219,16 @@ class SteamTools(ui.Gtk.Application):
                 self.window.start.set_sensitive(state)
 
 
-class MessageDialog(ui.Gtk.MessageDialog):
+class MessageDialog(Gtk.MessageDialog):
     def __init__(self, message_type, title, markup, secondary_markup=None):
-        super().__init__(buttons=ui.Gtk.ButtonsType.OK, type=message_type)
+        super().__init__(buttons=Gtk.ButtonsType.OK, type=message_type)
         self.set_title(title)
         self.set_transient_for(ui.main_window)
         self.set_modal(True)
         self.set_destroy_with_parent(True)
         self.set_resizable(False)
         self.set_deletable(False)
-        self.set_position(ui.Gtk.WindowPosition.CENTER_ON_PARENT)
+        self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
         self.set_markup("<span size='large'>{}</span>".format(markup))
         self.format_secondary_markup(secondary_markup)
         self.connect('response', self.on_response)
@@ -231,7 +237,7 @@ class MessageDialog(ui.Gtk.MessageDialog):
         self.destroy()
 
 
-class SelectProfileDialog(ui.Gtk.Dialog):
+class SelectProfileDialog(Gtk.Dialog):
     def __init__(self):
         super().__init__()
         self.set_default_size(-1, 200)
@@ -240,39 +246,39 @@ class SelectProfileDialog(ui.Gtk.Dialog):
         self.set_modal(True)
         self.set_destroy_with_parent(True)
         self.set_resizable(False)
-        self.set_position(ui.Gtk.WindowPosition.CENTER_ON_PARENT)
+        self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
         self.set_deletable(False)
         self.set_skip_taskbar_hint(True)
         self.set_skip_pager_hint(True)
-        self.add_button(button_text='_OK', response_id=ui.Gtk.ResponseType.OK)
+        self.add_button(button_text='_OK', response_id=Gtk.ResponseType.OK)
         self.connect('response', self.on_response)
 
         self.content_area = self.get_content_area()
-        self.content_area.set_orientation(ui.Gtk.Orientation.VERTICAL)
+        self.content_area.set_orientation(Gtk.Orientation.VERTICAL)
         self.content_area.set_spacing(5)
         self.content_area.set_margin_left(10)
         self.content_area.set_margin_right(10)
         self.content_area.set_margin_top(10)
         self.content_area.set_margin_bottom(10)
 
-        label_who_are = ui.Gtk.Label('Who are you?')
+        label_who_are = Gtk.Label('Who are you?')
         self.content_area.pack_start(label_who_are, False, False, 0)
 
-        label_select_option = ui.Gtk.Label('Please, select an option bellow')
+        label_select_option = Gtk.Label('Please, select an option bellow')
         self.content_area.pack_start(label_select_option, False, False, 0)
 
-        frame = ui.Gtk.Frame(label='Chrome/Chromium Profiles:')
+        frame = Gtk.Frame(label='Chrome/Chromium Profiles:')
         frame.set_label_align(0.1, 0.5)
         frame.set_margin_top(10)
         frame.set_margin_bottom(5)
         self.content_area.pack_start(frame, False, False, 0)
 
-        self.radio_button_box = ui.Gtk.Box()
-        self.radio_button_box.set_orientation(ui.Gtk.Orientation.VERTICAL)
+        self.radio_button_box = Gtk.Box()
+        self.radio_button_box.set_orientation(Gtk.Orientation.VERTICAL)
         frame.add(self.radio_button_box)
 
     def on_response(self, dialog, response):
-        if response == ui.Gtk.ResponseType.OK:
+        if response == Gtk.ResponseType.OK:
             stlib.logger.info('Browser profile selected')
             self.destroy()
         else:

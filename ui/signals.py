@@ -26,6 +26,12 @@
 import locale
 import time
 
+import gi
+
+gi.require_version('Gtk', '3.0')
+
+from gi.repository import Gtk, GLib
+
 import stlib
 import ui
 
@@ -119,8 +125,8 @@ def on_tabs_switch_page(tab, box, current_page):
             ui.main_window.stop.set_sensitive(False)
             return None
     elif current_page == 4:
-        ui.GLib.idle_add(ui.main_window.tabs.set_current_page, 0)
-        message = ui.main.MessageDialog(ui.Gtk.MessageType.INFO,
+        GLib.idle_add(ui.main_window.tabs.set_current_page, 0)
+        message = ui.main.MessageDialog(Gtk.MessageType.INFO,
                                         'SteamCompanion is down.',
                                         'SteamCompanion is closed until further notice.',
                                         'Primarily because the harddrive crashed. '
@@ -141,7 +147,7 @@ def on_card_farming_start():
     dry_run = config_parser.getboolean('Debug', 'dryRun', fallback=False)
 
     if ui.fake_app_is_running:
-        message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+        message = ui.main.MessageDialog(Gtk.MessageType.ERROR,
                                         'Card Farming',
                                         'Please, stop the Fake App',
                                         'Unable to start Card Farming if a fake app is already running.')
@@ -170,19 +176,19 @@ def on_card_farming_start():
         ui.main_window.spinner.stop()
 
         start_time = time.time()
-        ui.GLib.timeout_add_seconds(1, ui.timers.card_farming_time_timer, start_time)
+        GLib.timeout_add_seconds(1, ui.timers.card_farming_time_timer, start_time)
 
         ui.main_window.card_farming_total_card_left.set_text('Counting...')
-        ui.GLib.idle_add(ui.timers.total_card_count, badges)
+        GLib.idle_add(ui.timers.total_card_count, badges)
 
         badge_current = 0
         ui.timers.card_farming_timer(dry_run, badges, badge_current)
-        ui.GLib.timeout_add_seconds(40, ui.timers.card_farming_timer, dry_run, badges, badge_current)
+        GLib.timeout_add_seconds(40, ui.timers.card_farming_timer, dry_run, badges, badge_current)
 
         ui.main_window.stop.set_sensitive(True)
     else:
         ui.application.update_status_bar("Unable to locate a running instance of steam.")
-        message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+        message = ui.main.MessageDialog(Gtk.MessageType.ERROR,
                                         'Card Farming',
                                         'Unable to locate a running instance of steam.',
                                         "Please, start the Steam Client and try again.")
@@ -220,7 +226,7 @@ def on_fake_app_start():
 
     if not ui.fake_app_id:
         ui.application.update_status_bar("No AppID found!")
-        message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+        message = ui.main.MessageDialog(Gtk.MessageType.ERROR,
                                         'Fake Steam App',
                                         'No AppID found!',
                                         "You must specify an AppID!")
@@ -233,7 +239,7 @@ def on_fake_app_start():
             ui.main_window.stop.set_sensitive(True)
         else:
             ui.application.update_status_bar("Unable to locate a running instance of steam.")
-            message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+            message = ui.main.MessageDialog(Gtk.MessageType.ERROR,
                                             'Fake Steam App',
                                             'Unable to locate a running instance of steam.',
                                             "Please, start the Steam Client and try again.")
@@ -242,7 +248,7 @@ def on_fake_app_start():
 
     ui.main_window.spinner.stop()
     start_time = time.time()
-    ui.GLib.timeout_add_seconds(1, ui.timers.fake_app_timer, start_time)
+    GLib.timeout_add_seconds(1, ui.timers.fake_app_timer, start_time)
 
 
 def on_fake_app_stop():
@@ -250,7 +256,7 @@ def on_fake_app_stop():
     ui.main_window.start.set_sensitive(False)
 
     if ui.card_farming_is_running:
-        message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+        message = ui.main.MessageDialog(Gtk.MessageType.ERROR,
                                         'Fake Steam App',
                                         'This function is not available now',
                                         'Unable to stop Fake App because it was started by Card Farming module.\n' +
@@ -264,7 +270,7 @@ def on_fake_app_stop():
 
     if stlib.wrapper_process.returncode is None:
         error = stlib.wrapper_process.stderr.read()
-        message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+        message = ui.main.MessageDialog(Gtk.MessageType.ERROR,
                                         'Fake Steam App',
                                         'An Error occured ({}).'.format(stlib.wrapper_process.returncode),
                                         error.decode(locale.getpreferredencoding()))
@@ -280,7 +286,7 @@ def on_fake_app_stop():
 
 
 def on_status_bar_text_pushed(status_bar, context, text):
-    ui.GLib.timeout_add_seconds(10, ui.timers.status_bar_text_pushed_timer, context)
+    GLib.timeout_add_seconds(10, ui.timers.status_bar_text_pushed_timer, context)
 
 
 def on_select_profile_button_toggled(radio_button, profile_id):

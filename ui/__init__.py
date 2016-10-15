@@ -1,22 +1,17 @@
 import sys
 
+from ui import console
+
+__all__ = ['console']
+
 if len(sys.argv) == 1:
-    import gi
+    from ui import (main,
+                    signals,
+                    timers)
 
-    gi.require_version('Gtk', '3.0')
-    # noinspection PyUnresolvedReferences
-    from gi.repository import Gtk, Gdk, GLib, Gio
-
-# noinspection PyPep8
-from ui import (console,
-                main,
-                signals,
-                timers)
-
-__all__ = ['console',
-           'main',
-           'signals',
-           'timers']
+    __all__.extend(['main',
+                    'signals',
+                    'timers'])
 
 main_window = None
 application = None

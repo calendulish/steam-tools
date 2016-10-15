@@ -21,6 +21,11 @@ import sys
 
 import bs4
 import gevent
+import gi
+
+gi.require_version('Gtk', '3.0')
+
+from gi.repository import Gtk
 
 import stlib
 import ui
@@ -96,8 +101,8 @@ def wait_queue():
             if greenlets[-1].ready():
                 greenlets.pop()
             else:
-                while ui.Gtk.events_pending():
-                    ui.Gtk.main_iteration()
+                while Gtk.events_pending():
+                    Gtk.main_iteration()
 
                 gevent.sleep(0.1)
         except IndexError:
