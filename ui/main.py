@@ -98,6 +98,22 @@ class SteamTools(ui.Gtk.Application):
     def do_startup(self):
         ui.Gtk.Application.do_startup(self)
 
+        builder = ui.Gtk.Builder()
+        builder.add_from_file('ui/menu.xml')
+        menu_bar = builder.get_object('menu_bar')
+        self.set_menubar(menu_bar)
+
+        menu_items = ['quit',
+                      'browser_profile',
+                      'settings',
+                      'about']
+
+        for item in menu_items:
+            action = ui.Gio.SimpleAction.new(item, None)
+            action_handler = ['ui.signals.on_', item, '_activate']
+            action.connect('activate', eval(''.join(action_handler)))
+            self.add_action(action)
+
     def select_profile(self):
         stlib.config.read()
 

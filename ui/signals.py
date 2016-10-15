@@ -40,6 +40,16 @@ def on_quit_activate(action, parameters):
     on_window_destroy()
 
 
+def on_browser_profile_activate(action, parameters):
+    # TODO
+    pass
+
+
+def on_settings_activate(action, parameters):
+    # TODO
+    pass
+
+
 def on_about_activate(action, parameters):
     ui.main_window.about_dialog.run()
     ui.main_window.about_dialog.hide()
