@@ -79,7 +79,7 @@ class SteamTools:
                 stlib.config.write()
 
     def __cardfarming(self):
-        greenlet = ui.logins.connect('steam', stlib.steam_check_page)
+        greenlet = stlib.logins.queue_connect('steam', wait=True)
         greenlet.join()
 
         if not stlib.steam_user:
@@ -170,8 +170,7 @@ class SteamTools:
         sys.exit(0)
 
     def __steamgifts_bump(self):
-        greenlet = ui.logins.connect('steamgifts', stlib.SG_check_page)
-        greenlet.join()
+        stlib.logins.queue_connect('steamgifts', wait=True)
 
         if not stlib.SG_user:
             sys.exit(1)

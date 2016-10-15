@@ -16,6 +16,7 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
+import os
 import random
 
 import stlib
@@ -62,13 +63,13 @@ class SteamTools(ui.Gtk.Application):
         self.steam_icon_busy = 'steam_yellow.png'
         self.steam_icon_unavailable = 'steam_red.png'
 
-        self.steamgifts_icon_available = 'steamgifts_green.png'
-        self.steamgifts_icon_busy = 'steamgifts_yellow.png'
-        self.steamgifts_icon_unavailable = 'steamgifts_red.png'
+        self.SG_icon_available = 'steamgifts_green.png'
+        self.SG_icon_busy = 'steamgifts_yellow.png'
+        self.SG_icon_unavailable = 'steamgifts_red.png'
 
-        self.steamcompanion_icon_available = 'steamcompanion_green.png'
-        self.steamcompanion_icon_busy = 'steamcompanion_yellow.png'
-        self.steamcompanion_icon_unavailable = 'steamcompanion_red.png'
+        self.SC_icon_available = 'steamcompanion_green.png'
+        self.SC_icon_busy = 'steamcompanion_yellow.png'
+        self.SC_icon_unavailable = 'steamcompanion_red.png'
 
     def do_activate(self):
         if not self.window:
@@ -89,10 +90,10 @@ class SteamTools(ui.Gtk.Application):
                                                               stlib.browser.get_profile_name()))
 
         self.window.spinner.start()
-        ui.logins.queue_connect("steam", stlib.steam_check_page)
-        ui.logins.queue_connect("steamgifts", stlib.SG_check_page)
-        # ui.logins.queue_connect("steamcompanion", stlib.SC_check_page)
-        ui.logins.wait_queue()
+        stlib.logins.queue_connect('steam', self.do_steam_login)
+        stlib.logins.queue_connect('steamgifts', self.do_steamgifts_login)
+        # ui.logins.queue_connect('steamcompanion', self.do_steamcompanion_login)
+        stlib.logins.wait_queue()
         self.window.spinner.stop()
 
     def do_startup(self):
@@ -113,6 +114,57 @@ class SteamTools(ui.Gtk.Application):
             action_handler = ['ui.signals.on_', item, '_activate']
             action.connect('activate', eval(''.join(action_handler)))
             self.add_action(action)
+
+    def do_steam_login(self, greenlet):
+        stlib.logins.check_steam_login(greenlet)
+
+        if stlib.steam_user:
+            ui.main_window.steam_login_status.set_from_file(os.path.join(self.icons_path, self.steam_icon_available))
+            ui.main_window.steam_login_status.set_tooltip_text("Steam Login status:\n" +
+                                                               "Connected as {}".format(stlib.steam_user))
+            steam_connected = True
+        else:
+            ui.main_window.steam_login_status.set_from_file(os.path.join(self.icons_path, self.steam_icon_unavailable))
+            ui.main_window.steam_login_status.set_tooltip_text("Steam Login status: Cookies not found" +
+                                                               "\nPlease, check if you are logged in on" +
+                                                               "\nsteampowered.com or steamcommunity.com")
+            steam_connected = False
+
+        self._check_start_depends([0, 1], steam_connected)
+
+    def do_steamgifts_login(self, greenlet):
+        stlib.logins.check_steamgifts_login(greenlet)
+
+        if stlib.SG_user:
+            ui.main_window.SG_login_status.set_from_file(os.path.join(self.icons_path, self.SG_icon_available))
+            ui.main_window.SG_login_status.set_tooltip_text("SteamGifts Login status:\n" +
+                                                            "Connected as {}".format(stlib.SG_user))
+            SG_connected = True
+        else:
+            ui.main_window.SG_login_status.set_from_file(os.path.join(self.icons_path, self.SG_icon_unavailable))
+            ui.main_window.SG_login_status.set_tooltip_text("SteamGifts Login status: Cookies not found" +
+                                                            "\nPlease, check if you are logged in on" +
+                                                            "\nwww.steamgifts.com")
+            SG_connected = False
+
+        self._check_start_depends([2, 3], SG_connected)
+
+    def do_steamcompanion_login(self, greenlet):
+        stlib.logins.check_steamcompanion_login(greenlet)
+
+        if stlib.SC_user:
+            ui.main_window.SC_login_status.set_from_file(os.path.join(self.icons_path, self.SC_icon_available))
+            ui.main_window.SC_login_status.set_tooltip_text("SteamCompanion Login status:\n" +
+                                                            "Connected as {}".format(stlib.SC_user))
+            SC_connected = True
+        else:
+            ui.main_window.SC_login_status.set_from_file(os.path.join(self.icons_path, self.SC_icon_unavailable))
+            ui.main_window.SC_login_status.set_tooltip_text("SteamCompanion Login status: Cookies not found" +
+                                                            "\nPlease, check if you are logged in on" +
+                                                            "\nsteamcompanion.com")
+            SC_connected = False
+
+        self._check_start_depends([4], SC_connected)
 
     def select_profile(self):
         stlib.config.read()
@@ -154,6 +206,11 @@ class SteamTools(ui.Gtk.Application):
         self.window.status_bar.push(message_id, message)
 
         return message_id
+
+    def _check_start_depends(self, pages, state):
+        for page in pages:
+            if self.window.tabs.get_current_page() == page:
+                self.window.start.set_sensitive(state)
 
 
 class MessageDialog(ui.Gtk.MessageDialog):

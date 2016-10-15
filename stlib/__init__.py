@@ -12,6 +12,7 @@ from stlib import (logging,
                    network,
                    browser,
                    libsteam,
+                   logins,
                    card_farming,
                    steamgifts_bump)
 
@@ -20,6 +21,7 @@ __all__ = ['logging',
            'network',
            'browser',
            'libsteam',
+           'logins',
            'card_farming',
            'steamgifts_bump']
 
@@ -39,8 +41,8 @@ atexit.register(__safe_exit)
 
 steam_login_page = 'https://steamcommunity.com/login/checkstoredlogin'
 steam_check_page = '{}/?redirectURL=discussions'.format(steam_login_page)
-SG_check_page = 'https://www.steamgifts.com/account/profile/sync'
-SC_check_page = 'https://steamcompanion.com/settings'
+steamgifts_check_page = 'https://www.steamgifts.com/account/profile/sync'
+steamcompanion_check_page = 'https://steamcompanion.com/settings'
 
 steam_user = None
 SG_user = None

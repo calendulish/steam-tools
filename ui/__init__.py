@@ -9,13 +9,11 @@ if len(sys.argv) == 1:
 
 # noinspection PyPep8
 from ui import (console,
-                logins,
                 main,
                 signals,
                 timers)
 
 __all__ = ['console',
-           'logins',
            'main',
            'signals',
            'timers']
