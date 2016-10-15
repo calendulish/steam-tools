@@ -120,11 +120,12 @@ def on_tabs_switch_page(tab, box, current_page):
             return None
     elif current_page == 4:
         ui.GLib.idle_add(ui.main_window.tabs.set_current_page, 0)
-        ui.application.new_dialog(ui.Gtk.MessageType.INFO,
-                                  'SteamCompanion is down.',
-                                  'SteamCompanion is closed until further notice.',
-                                  'Primarily because the harddrive crashed. '
-                                  'Read more at <a href="http://steamcompanion.com/">Steam Companion</a>.')
+        message = ui.main.MessageDialog(ui.Gtk.MessageType.INFO,
+                                        'SteamCompanion is down.',
+                                        'SteamCompanion is closed until further notice.',
+                                        'Primarily because the harddrive crashed. '
+                                        'Read more at <a href="http://steamcompanion.com/">Steam Companion</a>.')
+        message.show()
 
 
 def on_most_valuable_cards_first_changed(switch, state):
@@ -140,10 +141,11 @@ def on_card_farming_start():
     dry_run = config_parser.getboolean('Debug', 'dryRun', fallback=False)
 
     if ui.fake_app_is_running:
-        ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
-                                  'Card Farming',
-                                  'Please, stop the Fake App',
-                                  'Unable to start Card Farming if a fake app is already running.')
+        message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+                                        'Card Farming',
+                                        'Please, stop the Fake App',
+                                        'Unable to start Card Farming if a fake app is already running.')
+        message.show()
         ui.main_window.start.set_sensitive(True)
         return None
 
@@ -180,10 +182,11 @@ def on_card_farming_start():
         ui.main_window.stop.set_sensitive(True)
     else:
         ui.application.update_status_bar("Unable to locate a running instance of steam.")
-        ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
-                                  'Card Farming',
-                                  'Unable to locate a running instance of steam.',
-                                  "Please, start the Steam Client and try again.")
+        message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+                                        'Card Farming',
+                                        'Unable to locate a running instance of steam.',
+                                        "Please, start the Steam Client and try again.")
+        message.show()
         ui.main_window.start.set_sensitive(True)
 
 
@@ -217,10 +220,11 @@ def on_fake_app_start():
 
     if not ui.fake_app_id:
         ui.application.update_status_bar("No AppID found!")
-        ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
-                                  'Fake Steam App',
-                                  'No AppID found!',
-                                  "You must specify an AppID!")
+        message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+                                        'Fake Steam App',
+                                        'No AppID found!',
+                                        "You must specify an AppID!")
+        message.show()
         ui.main_window.start.set_sensitive(True)
     else:
         if stlib.libsteam.is_steam_running():
@@ -229,10 +233,11 @@ def on_fake_app_start():
             ui.main_window.stop.set_sensitive(True)
         else:
             ui.application.update_status_bar("Unable to locate a running instance of steam.")
-            ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
-                                      'Fake Steam App',
-                                      'Unable to locate a running instance of steam.',
-                                      "Please, start the Steam Client and try again.")
+            message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+                                            'Fake Steam App',
+                                            'Unable to locate a running instance of steam.',
+                                            "Please, start the Steam Client and try again.")
+            message.show()
             ui.main_window.start.set_sensitive(True)
 
     ui.main_window.spinner.stop()
@@ -245,11 +250,12 @@ def on_fake_app_stop():
     ui.main_window.start.set_sensitive(False)
 
     if ui.card_farming_is_running:
-        ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
-                                  'Fake Steam App',
-                                  'This function is not available now',
-                                  'Unable to stop Fake App because it was started by Card Farming module.\n' +
-                                  'If you want to run a Fake App, stop the Card Farming module first.')
+        message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+                                        'Fake Steam App',
+                                        'This function is not available now',
+                                        'Unable to stop Fake App because it was started by Card Farming module.\n' +
+                                        'If you want to run a Fake App, stop the Card Farming module first.')
+        message.show()
         ui.main_window.stop.set_sensitive(True)
         return None
 
@@ -258,10 +264,11 @@ def on_fake_app_stop():
 
     if stlib.wrapper_process.returncode is None:
         error = stlib.wrapper_process.stderr.read()
-        ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
-                                  'Fake Steam App',
-                                  'An Error occured ({}).'.format(stlib.wrapper_process.returncode),
-                                  error.decode(locale.getpreferredencoding()))
+        message = ui.main.MessageDialog(ui.Gtk.MessageType.ERROR,
+                                        'Fake Steam App',
+                                        'An Error occured ({}).'.format(stlib.wrapper_process.returncode),
+                                        error.decode(locale.getpreferredencoding()))
+        message.show()
 
     ui.fake_app_is_running = False
     ui.fake_app_id = None

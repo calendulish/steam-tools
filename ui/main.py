@@ -123,10 +123,11 @@ class SteamTools(ui.Gtk.Application):
 
             if not len(profiles):
                 self.update_status_bar('I cannot find your chrome/Chromium profile')
-                self.new_dialog(ui.Gtk.MesageType.ERROR,
-                                'Network Error',
-                                'I cannot find your Chrome/Chromium profile',
-                                'Some functions will be disabled.')
+                message = MessageDialog(ui.Gtk.MesageType.ERROR,
+                                        'Network Error',
+                                        'I cannot find your Chrome/Chromium profile',
+                                        'Some functions will be disabled.')
+                message.show()
             elif len(profiles) == 1:
                 self.config_parser.set('Config', 'browserProfile', profiles[0])
                 stlib.config.write()
@@ -154,17 +155,23 @@ class SteamTools(ui.Gtk.Application):
 
         return message_id
 
-    def new_dialog(self, msg_type, title, markup, secondary_markup=None):
-        dialog = ui.Gtk.MessageDialog(transient_for=self.window,
-                                      flags=ui.Gtk.DialogFlags.MODAL,
-                                      destroy_with_parent=True,
-                                      type=msg_type,
-                                      buttons=ui.Gtk.ButtonsType.OK,
-                                      text=markup)
-        dialog.set_title(title)
-        dialog.format_secondary_markup(secondary_markup)
-        dialog.connect('response', lambda d, _: d.destroy())
-        dialog.show()
+
+class MessageDialog(ui.Gtk.MessageDialog):
+    def __init__(self, message_type, title, markup, secondary_markup=None):
+        super().__init__(buttons=ui.Gtk.ButtonsType.OK, type=message_type)
+        self.set_title(title)
+        self.set_transient_for(ui.main_window)
+        self.set_modal(True)
+        self.set_destroy_with_parent(True)
+        self.set_resizable(False)
+        self.set_deletable(False)
+        self.set_position(ui.Gtk.WindowPosition.CENTER_ON_PARENT)
+        self.set_markup("<span size='large'>{}</span>".format(markup))
+        self.format_secondary_markup(secondary_markup)
+        self.connect('response', self.on_response)
+
+    def on_response(self, dialog, response):
+        self.destroy()
 
 
 class SelectProfileDialog(ui.Gtk.Dialog):
