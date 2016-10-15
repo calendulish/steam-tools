@@ -5,7 +5,7 @@ if len(sys.argv) == 1:
 
     gi.require_version('Gtk', '3.0')
     # noinspection PyUnresolvedReferences
-    from gi.repository import Gtk, Gdk, GLib
+    from gi.repository import Gtk, Gdk, GLib, Gio
 
 # noinspection PyPep8
 from ui import (console,
@@ -21,6 +21,7 @@ __all__ = ['console',
            'timers']
 
 main_window = None
+application = None
 selected_profile_id = 0
 
 card_farming_is_running = False

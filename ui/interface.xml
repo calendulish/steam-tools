@@ -12,7 +12,7 @@
     <property name="icon">icons/steam-tools.ico</property>
     <signal name="destroy" handler="on_window_destroy" swapped="no"/>
     <child>
-      <object class="GtkBox" id="box">
+      <object class="GtkBox" id="main_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>

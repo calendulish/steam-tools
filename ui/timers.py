@@ -97,8 +97,8 @@ def fake_app_timer(start_time):
 
     if ui.fake_app_is_running:
         if not stlib.libsteam.is_wrapper_running():
-            ui.main_window.update_status_bar("This is not a valid gameID.")
-            ui.main_window.new_dialog(ui.Gtk.MessageType.ERROR,
+            ui.application.update_status_bar("This is not a valid gameID.")
+            ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
                                       'Fake Steam App',
                                       'This is not a valid gameID.',
                                       "Please, check if you write correctly and try again.")

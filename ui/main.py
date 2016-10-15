@@ -22,25 +22,39 @@ import stlib
 import ui
 
 
-class SteamTools:
-    def __init__(self):
+class SteamToolsWindow(ui.Gtk.ApplicationWindow):
+    def __init__(self, parent):
+        super().__init__(title='Steam Tools', application=parent)
         ui.main_window = self
-        self.signals = ui.signals.WindowSignals()
-        self.config_parser = stlib.config.read()
-        self.login_status = ui.logins.Status()
+        self.set_default_size(640, 480)
+        self.set_resizable(False)
+        self.set_position(ui.Gtk.WindowPosition.CENTER)
+        self.set_show_menubar(True)
 
         builder = ui.Gtk.Builder()
         builder.add_from_file('ui/interface.xml')
-        builder.connect_signals(self.signals)
+        builder.connect_signals(ui.signals)
 
         for _object in builder.get_objects():
             if issubclass(type(_object), ui.Gtk.Buildable):
                 name = ui.Gtk.Buildable.get_name(_object)
                 setattr(self, name, _object)
 
+        del self.main_window
+        self.main_box.reparent(self)
+
         self.fake_app_current_game.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
         self.fake_app_current_time.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
         self.browser_profile.modify_fg(ui.Gtk.StateFlags.NORMAL, ui.Gdk.color_parse('black'))
+
+
+class SteamTools(ui.Gtk.Application):
+    def __init__(self):
+        super().__init__(application_id='click.lara.SteamTools')
+        ui.GLib.set_application_name('Steam Tools')
+        self.config_parser = stlib.config.read()
+        ui.application = self
+        self.window = None
 
         self.icons_path = 'ui/icons'
 
@@ -56,23 +70,33 @@ class SteamTools:
         self.steamcompanion_icon_busy = 'steamcompanion_yellow.png'
         self.steamcompanion_icon_unavailable = 'steamcompanion_red.png'
 
+    def do_activate(self):
+        if not self.window:
+            self.window = SteamToolsWindow(self)
+        else:
+            stlib.logger.error('Already started.')
+            return None
+
         MVCF_config = self.config_parser.getboolean('CardFarming', 'mostValuableCardsFirst', fallback=True)
-        self.most_valuable_cards_first.set_active(MVCF_config)
+        self.window.most_valuable_cards_first.set_active(MVCF_config)
         del MVCF_config
 
-        self.main_window.show_all()
+        self.window.present()
 
         self.select_profile()
 
-        self.browser_profile.set_text('{} ({})'.format(stlib.browser.get_account_name(),
-                                                       stlib.browser.get_profile_name()))
+        self.window.browser_profile.set_text('{} ({})'.format(stlib.browser.get_account_name(),
+                                                              stlib.browser.get_profile_name()))
 
-        self.spinner.start()
-        self.login_status.queue_connect("steam", stlib.steam_check_page)
-        self.login_status.queue_connect("steamgifts", stlib.SG_check_page)
-        # self.login_status.queue_connect("steamcompanion", stlib.SC_check_page)
-        self.login_status.wait_queue()
-        self.spinner.stop()
+        self.window.spinner.start()
+        ui.logins.queue_connect("steam", stlib.steam_check_page)
+        ui.logins.queue_connect("steamgifts", stlib.SG_check_page)
+        # ui.logins.queue_connect("steamcompanion", stlib.SC_check_page)
+        ui.logins.wait_queue()
+        self.window.spinner.stop()
+
+    def do_startup(self):
+        ui.Gtk.Application.do_startup(self)
 
     def select_profile(self):
         stlib.config.read()
@@ -90,7 +114,7 @@ class SteamTools:
                 self.config_parser.set('Config', 'browserProfile', profiles[0])
                 stlib.config.write()
             else:
-                self.select_profile_dialog.add_button('Ok', 1)
+                self.window.select_profile_dialog.add_button('Ok', 1)
 
                 temp_radiobutton = None
                 for i in range(len(profiles)):
@@ -99,24 +123,24 @@ class SteamTools:
                                                                                      '{} ({})'.format(account_name,
                                                                                                       profiles[i]))
 
-                    temp_radiobutton.connect('toggled', self.signals.on_select_profile_button_toggled, i)
-                    self.radiobutton_box.pack_start(temp_radiobutton, False, False, 0)
+                    temp_radiobutton.connect('toggled', ui.signals.on_select_profile_button_toggled, i)
+                    self.window.radiobutton_box.pack_start(temp_radiobutton, False, False, 0)
 
-                self.select_profile_dialog.show_all()
-                self.select_profile_dialog.run()
-                self.select_profile_dialog.destroy()
+                self.window.select_profile_dialog.show_all()
+                self.window.select_profile_dialog.run()
+                self.window.select_profile_dialog.destroy()
 
                 self.config_parser.set('Config', 'browserProfile', profiles[ui.selected_profile_id])
                 stlib.config.write()
 
     def update_status_bar(self, message):
         message_id = random.randrange(500)
-        self.status_bar.push(message_id, message)
+        self.window.status_bar.push(message_id, message)
 
         return message_id
 
     def new_dialog(self, msg_type, title, markup, secondary_markup=None):
-        dialog = ui.Gtk.MessageDialog(transient_for=self.main_window,
+        dialog = ui.Gtk.MessageDialog(transient_for=self.window,
                                       flags=ui.Gtk.DialogFlags.MODAL,
                                       destroy_with_parent=True,
                                       type=msg_type,

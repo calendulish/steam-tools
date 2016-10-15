@@ -85,4 +85,4 @@ if __name__ == "__main__":
     else:
         ST = ui.main.SteamTools()
         ui.GLib.idle_add(fix_gevent)
-        ui.Gtk.main()
+        ST.run()

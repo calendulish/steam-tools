@@ -27,7 +27,7 @@ import stlib
 import ui
 
 
-def check_steam_login(greenlet):
+def _check_steam_login(greenlet):
     try:
         html = bs4.BeautifulSoup(greenlet.value.content, 'html.parser')
         supernav = html.find('div', class_='supernav_container')
@@ -39,7 +39,7 @@ def check_steam_login(greenlet):
                            '\nsteampowered.com or steamcommunity.com')
 
 
-def check_steamgifts_login(greenlet):
+def _check_steamgifts_login(greenlet):
     try:
         html = bs4.BeautifulSoup(greenlet.value.content, 'html.parser')
         form = html.findAll('form')[1]
@@ -51,7 +51,7 @@ def check_steamgifts_login(greenlet):
                            '\nwww.steamgifts.com')
 
 
-def check_steamcompanion_login(greenlet):
+def _check_steamcompanion_login(greenlet):
     try:
         html = bs4.BeautifulSoup(greenlet.value.content, 'html.parser')
         user = html.find('div', class_='profile').find('a').text.strip()
@@ -67,6 +67,72 @@ def check_steamcompanion_login(greenlet):
                            '\nsteamcompanion.com')
 
 
+def _toggle_start_active(pages, state):
+    for page in pages:
+        if ui.main_window.tabs.get_current_page() == page:
+            ui.main_window.start.set_sensitive(state)
+
+
+def _steam_callback(greenlet):
+    _check_steam_login(greenlet)
+
+    if stlib.steam_user:
+        ui.main_window.steam_login_status.set_from_file(os.path.join(ui.application.icons_path,
+                                                                     ui.application.steam_icon_available))
+        ui.main_window.steam_login_status.set_tooltip_text("Steam Login status:\n" +
+                                                           "Connected as {}".format(stlib.steam_user))
+        steam_connected = True
+    else:
+        ui.main_window.steam_login_status.set_from_file(os.path.join(ui.application.icons_path,
+                                                                     ui.application.steam_icon_unavailable))
+        ui.main_window.steam_login_status.set_tooltip_text("Steam Login status: Cookies not found" +
+                                                           "\nPlease, check if you are logged in on" +
+                                                           "\nsteampowered.com or steamcommunity.com")
+        steam_connected = False
+
+    _toggle_start_active([0, 1], steam_connected)
+
+
+def _steamgifts_callback(greenlet):
+    _check_steamgifts_login(greenlet)
+
+    if stlib.SG_user:
+        ui.main_window.SG_login_status.set_from_file(os.path.join(ui.application.icons_path,
+                                                                  ui.application.steamgifts_icon_available))
+        ui.main_window.SG_login_status.set_tooltip_text("SteamGifts Login status:\n" +
+                                                        "Connected as {}".format(stlib.SG_user))
+        steamgifts_connected = True
+    else:
+        ui.main_window.SG_login_status.set_from_file(os.path.join(ui.application.icons_path,
+                                                                  ui.application.steamgifts_icon_unavailable))
+        ui.main_window.SG_login_status.set_tooltip_text("SteamGifts Login status: Cookies not found" +
+                                                        "\nPlease, check if you are logged in on" +
+                                                        "\nwww.steamgifts.com")
+        steamgifts_connected = False
+
+    _toggle_start_active([2, 3], steamgifts_connected)
+
+
+def _steamcompanion_callback(greenlet):
+    _check_steamcompanion_login(greenlet)
+
+    if stlib.SC_user:
+        ui.main_window.SC_login_status.set_from_file(os.path.join(ui.application.icons_path,
+                                                                  ui.application.steamcompanion_icon_available))
+        ui.main_window.SC_login_status.set_tooltip_text("SteamCompanion Login status:\n" +
+                                                        "Connected as {}".format(stlib.SC_user))
+        steamcompanion_connected = True
+    else:
+        ui.main_window.SC_login_status.set_from_file(os.path.join(ui.application.icons_path,
+                                                                  ui.application.steamcompanion_icon_unavailable))
+        ui.main_window.SC_login_status.set_tooltip_text("SteamCompanion Login status: Cookies not found" +
+                                                        "\nPlease, check if you are logged in on" +
+                                                        "\nsteamcompanion.com")
+        steamcompanion_connected = False
+
+    _toggle_start_active([4], steamcompanion_connected)
+
+
 def connect(service_name, url):
     greenlet = gevent.Greenlet(stlib.network.try_get_response, service_name, url)
     greenlet.link(eval(''.join(['ui.logins.check_', service_name, '_login'])))
@@ -76,100 +142,32 @@ def connect(service_name, url):
     return greenlet
 
 
-class Status:
-    def __init__(self):
-        self.window = ui.main_window
+def queue_connect(service_name, url):
+    greenlet = gevent.Greenlet(stlib.network.try_get_response, service_name, url)
+    callback_function = ['_', service_name, '_callback']
+    greenlet.link(eval(''.join(callback_function)))
+    greenlet.start()
 
-    def __toggle_start_active(self, pages, state):
-        for page in pages:
-            if self.window.tabs.get_current_page() == page:
-                self.window.start.set_sensitive(state)
+    return None
 
-    def __steam_callback(self, greenlet):
-        check_steam_login(greenlet)
 
-        if stlib.steam_user:
-            self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path,
-                                                                      self.window.steam_icon_available))
-            self.window.steam_login_status.set_tooltip_text("Steam Login status:\n" +
-                                                            "Connected as {}".format(stlib.steam_user))
-            steam_connected = True
-        else:
-            self.window.steam_login_status.set_from_file(os.path.join(self.window.icons_path,
-                                                                      self.window.steam_icon_unavailable))
-            self.window.steam_login_status.set_tooltip_text("Steam Login status: Cookies not found" +
-                                                            "\nPlease, check if you are logged in on" +
-                                                            "\nsteampowered.com or steamcommunity.com")
-            steam_connected = False
+def wait_queue():
+    greenlets = []
+    for object_ in gc.get_objects():
+        if isinstance(object_, gevent.Greenlet):
+            greenlets.append(object_)
 
-        self.__toggle_start_active([0, 1], steam_connected)
+    while True:
+        if not ui.main_window:
+            sys.exit(0)
 
-    def __steamgifts_callback(self, greenlet):
-        check_steamgifts_login(greenlet)
+        try:
+            if greenlets[-1].ready():
+                greenlets.pop()
+            else:
+                while ui.Gtk.events_pending():
+                    ui.Gtk.main_iteration()
 
-        if stlib.SG_user:
-            self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
-                                                                   self.window.steamgifts_icon_available))
-            self.window.SG_login_status.set_tooltip_text("SteamGifts Login status:\n" +
-                                                         "Connected as {}".format(stlib.SG_user))
-            steamgifts_connected = True
-        else:
-            self.window.SG_login_status.set_from_file(os.path.join(self.window.icons_path,
-                                                                   self.window.steamgifts_icon_unavailable))
-            self.window.SG_login_status.set_tooltip_text("SteamGifts Login status: Cookies not found" +
-                                                         "\nPlease, check if you are logged in on" +
-                                                         "\nwww.steamgifts.com")
-            steamgifts_connected = False
-
-        self.__toggle_start_active([2, 3], steamgifts_connected)
-
-    def __steamcompanion_callback(self, greenlet):
-        check_steamcompanion_login(greenlet)
-
-        if stlib.SC_user:
-            self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,
-                                                                   self.window.steamcompanion_icon_available))
-            self.window.SC_login_status.set_tooltip_text("SteamCompanion Login status:\n" +
-                                                         "Connected as {}".format(stlib.SC_user)
-                                                         )
-            steamcompanion_connected = True
-        else:
-            self.window.SC_login_status.set_from_file(os.path.join(self.window.icons_path,
-                                                                   self.window.steamcompanion_icon_unavailable))
-            self.window.SC_login_status.set_tooltip_text("SteamCompanion Login status: Cookies not found" +
-                                                         "\nPlease, check if you are logged in on" +
-                                                         "\nsteamcompanion.com")
-            steamcompanion_connected = False
-
-        self.__toggle_start_active([4], steamcompanion_connected)
-
-    def queue_connect(self, service_name, url):
-        greenlet = gevent.Greenlet(stlib.network.try_get_response, service_name, url)
-        class_name = self.__class__.__name__
-        callback_function = ''.join(['_', class_name, '__', service_name, '_callback'])
-        greenlet.link(eval(''.join(['self.', callback_function])))
-        greenlet.start()
-
-        return None
-
-    @staticmethod
-    def wait_queue():
-        greenlets = []
-        for object_ in gc.get_objects():
-            if isinstance(object_, gevent.Greenlet):
-                greenlets.append(object_)
-
-        while True:
-            if not ui.main_window:
-                sys.exit(0)
-
-            try:
-                if greenlets[-1].ready():
-                    greenlets.pop()
-                else:
-                    while ui.Gtk.events_pending():
-                        ui.Gtk.main_iteration()
-
-                    gevent.sleep(0.1)
-            except IndexError:
-                break
+                gevent.sleep(0.1)
+        except IndexError:
+            break

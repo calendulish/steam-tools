@@ -26,240 +26,246 @@
 import locale
 import time
 
-import ui
 import stlib
+import ui
 
 
-# noinspection PyUnusedLocal
-class WindowSignals:
-    def __init__(self):
-        self.window = ui.main_window
-        self.config_parser = stlib.config.read()
+def on_window_destroy(*args):
+    ui.main_window.hide()
+    ui.main_window = None
+    ui.application.quit()
 
-    def on_window_destroy(self, *args):
-        self.window.main_window.hide()
-        ui.main_window = None
-        ui.Gtk.main_quit(*args)
 
-    def on_quit_activate(self, *args):
-        self.on_window_destroy(*args)
+def on_quit_activate(action, parameters):
+    on_window_destroy()
 
-    def on_about_activate(self, button):
-        self.window.about_dialog.run()
-        self.window.about_dialog.hide()
 
-    def on_start_clicked(self, button):
-        current_page = self.window.tabs.get_current_page()
-        if current_page == 0:
-            self.on_card_farming_start()
-        elif current_page == 1:
-            self.on_fake_app_start()
-        elif current_page == 2:
-            pass
-        elif current_page == 3:
-            pass
-        elif current_page == 4:
-            pass
+def on_about_activate(action, parameters):
+    ui.main_window.about_dialog.run()
+    ui.main_window.about_dialog.hide()
 
-    def on_stop_clicked(self, button):
-        current_page = self.window.tabs.get_current_page()
-        if current_page == 0:
-            self.on_card_farming_stop()
-        elif current_page == 1:
-            self.on_fake_app_stop()
-        elif current_page == 2:
-            pass
-        elif current_page == 3:
-            pass
-        elif current_page == 4:
-            pass
 
-    def on_tabs_switch_page(self, tab, box, current_page):
-        if current_page == 0:
-            if not stlib.steam_user:
-                self.window.start.set_sensitive(False)
-                self.window.stop.set_sensitive(False)
-                return None
+def on_start_clicked(button):
+    current_page = ui.main_window.tabs.get_current_page()
+    if current_page == 0:
+        on_card_farming_start()
+    elif current_page == 1:
+        on_fake_app_start()
+    elif current_page == 2:
+        pass
+    elif current_page == 3:
+        pass
+    elif current_page == 4:
+        pass
 
-            if ui.card_farming_is_running:
-                self.window.start.set_sensitive(False)
-                self.window.stop.set_sensitive(True)
-            else:
-                self.window.start.set_sensitive(True)
-                self.window.stop.set_sensitive(False)
-        elif current_page == 1:
-            if not stlib.steam_user:
-                self.window.start.set_sensitive(False)
-                self.window.stop.set_sensitive(False)
-                return None
 
-            if ui.fake_app_is_running:
-                self.window.start.set_sensitive(False)
-                self.window.stop.set_sensitive(True)
-            else:
-                self.window.start.set_sensitive(True)
-                self.window.stop.set_sensitive(False)
-        elif current_page == 2:
-            if not stlib.SG_user:
-                self.window.start.set_sensitive(False)
-                self.window.stop.set_sensitive(False)
-                return None
-        elif current_page == 3:
-            if not stlib.SG_user:
-                self.window.start.set_sensitive(False)
-                self.window.stop.set_sensitive(False)
-                return None
-        elif current_page == 4:
-            ui.GLib.idle_add(self.window.tabs.set_current_page, 0)
-            self.window.new_dialog(ui.Gtk.MessageType.INFO,
-                                   'SteamCompanion is down.',
-                                   'SteamCompanion is closed until further notice.',
-                                   'Primarily because the harddrive crashed. '
-                                   'Read more at <a href="http://steamcompanion.com/">Steam Companion</a>.')
+def on_stop_clicked(button):
+    current_page = ui.main_window.tabs.get_current_page()
+    if current_page == 0:
+        on_card_farming_stop()
+    elif current_page == 1:
+        on_fake_app_stop()
+    elif current_page == 2:
+        pass
+    elif current_page == 3:
+        pass
+    elif current_page == 4:
+        pass
 
-    def on_most_valuable_cards_first_changed(self, switch, state):
-        self.config_parser.set('CardFarming', 'mostValuableCardsFirst', state)
-        stlib.config.write()
 
-    def on_card_farming_start(self):
-        self.window.start.set_sensitive(False)
-        self.window.stop.set_sensitive(False)
-        dry_run = self.config_parser.getboolean('Debug', 'dryRun', fallback=False)
-
-        if ui.fake_app_is_running:
-            self.window.new_dialog(ui.Gtk.MessageType.ERROR,
-                                   'Card Farming',
-                                   'Please, stop the Fake App',
-                                   'Unable to start Card Farming if a fake app is already running.')
-            self.window.start.set_sensitive(True)
+def on_tabs_switch_page(tab, box, current_page):
+    if current_page == 0:
+        if not stlib.steam_user:
+            ui.main_window.start.set_sensitive(False)
+            ui.main_window.stop.set_sensitive(False)
             return None
-
-        if stlib.libsteam.is_steam_running():
-            self.window.update_status_bar("Preparing. Please wait...")
-            self.window.spinner.start()
-            ui.card_farming_is_running = True
-
-            badge_pages = stlib.card_farming.get_badge_page_count()
-            badges = []
-            for page in range(1, badge_pages+1):
-                badges.extend(stlib.card_farming.get_badges(page))
-
-            badges = stlib.card_farming.remove_completed_badges(badges)
-            cards_info = stlib.card_farming.get_cards_info()
-
-            if self.config_parser.getboolean('CardFarming', 'mostValuableCardsFirst', fallback=True):
-                badges = stlib.card_farming.order_by_most_valuable(cards_info, badges)
-
-            stlib.logger.warning('Ready to start.')
-            self.window.update_status_bar('Ready.')
-            self.window.spinner.stop()
-
-            start_time = time.time()
-            ui.GLib.timeout_add_seconds(1, ui.timers.card_farming_time_timer, start_time)
-
-            self.window.card_farming_total_card_left.set_text('Counting...')
-            ui.GLib.idle_add(ui.timers.total_card_count, badges)
-
-            badge_current = 0
-            ui.timers.card_farming_timer(dry_run, badges, badge_current)
-            ui.GLib.timeout_add_seconds(40, ui.timers.card_farming_timer, dry_run, badges, badge_current)
-
-            self.window.stop.set_sensitive(True)
-        else:
-            self.window.update_status_bar("Unable to locate a running instance of steam.")
-            self.window.new_dialog(ui.Gtk.MessageType.ERROR,
-                                   'Card Farming',
-                                   'Unable to locate a running instance of steam.',
-                                   "Please, start the Steam Client and try again.")
-            self.window.start.set_sensitive(True)
-
-    def on_card_farming_stop(self):
-        self.window.start.set_sensitive(False)
-        self.window.stop.set_sensitive(False)
-
-        self.window.update_status_bar("Waiting to card farming terminate.")
-        ui.card_farming_is_running = False
-        stlib.libsteam.stop_wrapper()
-        ui.fake_app_is_running = False
-        ui.fake_app_id = None
-        self.window.fake_app_current_game.set_text('')
-        self.window.fake_app_current_time.set_text('')
-        self.window.card_farming_current_game.set_text('')
-        self.window.card_farming_card_left.set_text('')
-        self.window.card_farming_current_game_time.set_text('')
-        self.window.card_farming_total_time.set_text('')
-
-        self.window.update_status_bar("Done!")
-        self.window.start.set_sensitive(True)
-
-    def on_fake_app_start(self):
-        self.window.start.set_sensitive(False)
-        self.window.stop.set_sensitive(False)
-
-        self.window.update_status_bar("Preparing. Please wait...")
-        self.window.spinner.start()
-        ui.fake_app_id = self.window.fake_app_game_id.get_text().strip()
-
-        if not ui.fake_app_id:
-            self.window.update_status_bar("No AppID found!")
-            self.window.new_dialog(ui.Gtk.MessageType.ERROR,
-                                   'Fake Steam App',
-                                   'No AppID found!',
-                                   "You must specify an AppID!")
-            self.window.start.set_sensitive(True)
-        else:
-            if stlib.libsteam.is_steam_running():
-                stlib.libsteam.run_wrapper(ui.fake_app_id)
-                ui.fake_app_is_running = True
-                self.window.stop.set_sensitive(True)
-            else:
-                self.window.update_status_bar("Unable to locate a running instance of steam.")
-                self.window.new_dialog(ui.Gtk.MessageType.ERROR,
-                                       'Fake Steam App',
-                                       'Unable to locate a running instance of steam.',
-                                       "Please, start the Steam Client and try again.")
-                self.window.start.set_sensitive(True)
-
-        self.window.spinner.stop()
-        start_time = time.time()
-        ui.GLib.timeout_add_seconds(1, ui.timers.fake_app_timer, start_time)
-
-    def on_fake_app_stop(self):
-        self.window.stop.set_sensitive(False)
-        self.window.start.set_sensitive(False)
 
         if ui.card_farming_is_running:
-            self.window.new_dialog(ui.Gtk.MessageType.ERROR,
-                                   'Fake Steam App',
-                                   'This function is not available now',
-                                   'Unable to stop Fake App because it was started by Card Farming module.\n' +
-                                   'If you want to run a Fake App, stop the Card Farming module first.')
-            self.window.stop.set_sensitive(True)
+            ui.main_window.start.set_sensitive(False)
+            ui.main_window.stop.set_sensitive(True)
+        else:
+            ui.main_window.start.set_sensitive(True)
+            ui.main_window.stop.set_sensitive(False)
+    elif current_page == 1:
+        if not stlib.steam_user:
+            ui.main_window.start.set_sensitive(False)
+            ui.main_window.stop.set_sensitive(False)
             return None
 
-        self.window.update_status_bar("Waiting to fakeapp terminate.")
-        stlib.libsteam.stop_wrapper()
+        if ui.fake_app_is_running:
+            ui.main_window.start.set_sensitive(False)
+            ui.main_window.stop.set_sensitive(True)
+        else:
+            ui.main_window.start.set_sensitive(True)
+            ui.main_window.stop.set_sensitive(False)
+    elif current_page == 2:
+        if not stlib.SG_user:
+            ui.main_window.start.set_sensitive(False)
+            ui.main_window.stop.set_sensitive(False)
+            return None
+    elif current_page == 3:
+        if not stlib.SG_user:
+            ui.main_window.start.set_sensitive(False)
+            ui.main_window.stop.set_sensitive(False)
+            return None
+    elif current_page == 4:
+        ui.GLib.idle_add(ui.main_window.tabs.set_current_page, 0)
+        ui.application.new_dialog(ui.Gtk.MessageType.INFO,
+                                  'SteamCompanion is down.',
+                                  'SteamCompanion is closed until further notice.',
+                                  'Primarily because the harddrive crashed. '
+                                  'Read more at <a href="http://steamcompanion.com/">Steam Companion</a>.')
 
-        if stlib.wrapper_process.returncode is None:
-            error = stlib.wrapper_process.stderr.read()
-            self.window.new_dialog(ui.Gtk.MessageType.ERROR,
-                                   'Fake Steam App',
-                                   'An Error occured ({}).'.format(stlib.wrapper_process.returncode),
-                                   error.decode(locale.getpreferredencoding()))
 
-        ui.fake_app_is_running = False
-        ui.fake_app_id = None
-        self.window.fake_app_current_game.set_text('')
-        self.window.fake_app_current_time.set_text('')
+def on_most_valuable_cards_first_changed(switch, state):
+    config_parser = stlib.config.read()
+    config_parser.set('CardFarming', 'mostValuableCardsFirst', state)
+    stlib.config.write()
 
-        self.window.update_status_bar("Done!")
-        self.window.start.set_sensitive(True)
 
-    @staticmethod
-    def on_status_bar_text_pushed(status_bar, context, text):
-        ui.GLib.timeout_add_seconds(10, ui.timers.status_bar_text_pushed_timer, context)
+def on_card_farming_start():
+    ui.main_window.start.set_sensitive(False)
+    ui.main_window.stop.set_sensitive(False)
+    config_parser = stlib.config.read()
+    dry_run = config_parser.getboolean('Debug', 'dryRun', fallback=False)
 
-    @staticmethod
-    def on_select_profile_button_toggled(radio_button, profile_id):
-        if radio_button.get_active():
-            ui.selected_profile_id = profile_id
+    if ui.fake_app_is_running:
+        ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
+                                  'Card Farming',
+                                  'Please, stop the Fake App',
+                                  'Unable to start Card Farming if a fake app is already running.')
+        ui.main_window.start.set_sensitive(True)
+        return None
+
+    if stlib.libsteam.is_steam_running():
+        ui.application.update_status_bar("Preparing. Please wait...")
+        ui.main_window.spinner.start()
+        ui.card_farming_is_running = True
+
+        badge_pages = stlib.card_farming.get_badge_page_count()
+        badges = []
+        for page in range(1, badge_pages + 1):
+            badges.extend(stlib.card_farming.get_badges(page))
+
+        badges = stlib.card_farming.remove_completed_badges(badges)
+        cards_info = stlib.card_farming.get_cards_info()
+
+        if config_parser.getboolean('CardFarming', 'mostValuableCardsFirst', fallback=True):
+            badges = stlib.card_farming.order_by_most_valuable(cards_info, badges)
+
+        stlib.logger.warning('Ready to start.')
+        ui.application.update_status_bar('Ready.')
+        ui.main_window.spinner.stop()
+
+        start_time = time.time()
+        ui.GLib.timeout_add_seconds(1, ui.timers.card_farming_time_timer, start_time)
+
+        ui.main_window.card_farming_total_card_left.set_text('Counting...')
+        ui.GLib.idle_add(ui.timers.total_card_count, badges)
+
+        badge_current = 0
+        ui.timers.card_farming_timer(dry_run, badges, badge_current)
+        ui.GLib.timeout_add_seconds(40, ui.timers.card_farming_timer, dry_run, badges, badge_current)
+
+        ui.main_window.stop.set_sensitive(True)
+    else:
+        ui.application.update_status_bar("Unable to locate a running instance of steam.")
+        ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
+                                  'Card Farming',
+                                  'Unable to locate a running instance of steam.',
+                                  "Please, start the Steam Client and try again.")
+        ui.main_window.start.set_sensitive(True)
+
+
+def on_card_farming_stop():
+    ui.main_window.start.set_sensitive(False)
+    ui.main_window.stop.set_sensitive(False)
+
+    ui.application.update_status_bar("Waiting to card farming terminate.")
+    ui.card_farming_is_running = False
+    stlib.libsteam.stop_wrapper()
+    ui.fake_app_is_running = False
+    ui.fake_app_id = None
+    ui.main_window.fake_app_current_game.set_text('')
+    ui.main_window.fake_app_current_time.set_text('')
+    ui.main_window.card_farming_current_game.set_text('')
+    ui.main_window.card_farming_card_left.set_text('')
+    ui.main_window.card_farming_current_game_time.set_text('')
+    ui.main_window.card_farming_total_time.set_text('')
+
+    ui.application.update_status_bar("Done!")
+    ui.main_window.start.set_sensitive(True)
+
+
+def on_fake_app_start():
+    ui.main_window.start.set_sensitive(False)
+    ui.main_window.stop.set_sensitive(False)
+
+    ui.application.update_status_bar("Preparing. Please wait...")
+    ui.main_window.spinner.start()
+    ui.fake_app_id = ui.main_window.fake_app_game_id.get_text().strip()
+
+    if not ui.fake_app_id:
+        ui.application.update_status_bar("No AppID found!")
+        ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
+                                  'Fake Steam App',
+                                  'No AppID found!',
+                                  "You must specify an AppID!")
+        ui.main_window.start.set_sensitive(True)
+    else:
+        if stlib.libsteam.is_steam_running():
+            stlib.libsteam.run_wrapper(ui.fake_app_id)
+            ui.fake_app_is_running = True
+            ui.main_window.stop.set_sensitive(True)
+        else:
+            ui.application.update_status_bar("Unable to locate a running instance of steam.")
+            ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
+                                      'Fake Steam App',
+                                      'Unable to locate a running instance of steam.',
+                                      "Please, start the Steam Client and try again.")
+            ui.main_window.start.set_sensitive(True)
+
+    ui.main_window.spinner.stop()
+    start_time = time.time()
+    ui.GLib.timeout_add_seconds(1, ui.timers.fake_app_timer, start_time)
+
+
+def on_fake_app_stop():
+    ui.main_window.stop.set_sensitive(False)
+    ui.main_window.start.set_sensitive(False)
+
+    if ui.card_farming_is_running:
+        ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
+                                  'Fake Steam App',
+                                  'This function is not available now',
+                                  'Unable to stop Fake App because it was started by Card Farming module.\n' +
+                                  'If you want to run a Fake App, stop the Card Farming module first.')
+        ui.main_window.stop.set_sensitive(True)
+        return None
+
+    ui.application.update_status_bar("Waiting to fakeapp terminate.")
+    stlib.libsteam.stop_wrapper()
+
+    if stlib.wrapper_process.returncode is None:
+        error = stlib.wrapper_process.stderr.read()
+        ui.application.new_dialog(ui.Gtk.MessageType.ERROR,
+                                  'Fake Steam App',
+                                  'An Error occured ({}).'.format(stlib.wrapper_process.returncode),
+                                  error.decode(locale.getpreferredencoding()))
+
+    ui.fake_app_is_running = False
+    ui.fake_app_id = None
+    ui.main_window.fake_app_current_game.set_text('')
+    ui.main_window.fake_app_current_time.set_text('')
+
+    ui.application.update_status_bar("Done!")
+    ui.main_window.start.set_sensitive(True)
+
+
+def on_status_bar_text_pushed(status_bar, context, text):
+    ui.GLib.timeout_add_seconds(10, ui.timers.status_bar_text_pushed_timer, context)
+
+
+def on_select_profile_button_toggled(radio_button, profile_id):
+    if radio_button.get_active():
+        ui.selected_profile_id = profile_id
