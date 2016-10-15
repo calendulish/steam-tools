@@ -79,8 +79,7 @@ class SteamTools:
                 stlib.config.write()
 
     def __cardfarming(self):
-        greenlet = stlib.logins.queue_connect('steam', wait=True)
-        greenlet.join()
+        stlib.logins.queue_connect('steam', wait=True)
 
         if not stlib.steam_user:
             sys.exit(1)
