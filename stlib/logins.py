@@ -21,14 +21,15 @@ import sys
 
 import bs4
 import gevent
-import gi
-
-gi.require_version('Gtk', '3.0')
-
-from gi.repository import Gtk
 
 import stlib
 import ui
+
+if stlib.gui_mode:
+    import gi
+
+    gi.require_version('Gtk', '3.0')
+    from gi.repository import Gtk
 
 
 def check_steam_login(greenlet):
@@ -101,8 +102,9 @@ def wait_queue():
             if greenlets[-1].ready():
                 greenlets.pop()
             else:
-                while Gtk.events_pending():
-                    Gtk.main_iteration()
+                if stlib.gui_mode:
+                    while Gtk.events_pending():
+                        Gtk.main_iteration()
 
                 gevent.sleep(0.1)
         except IndexError:

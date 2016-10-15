@@ -1,10 +1,16 @@
 #  Keep the import order, please
 
 import atexit
+import sys
 
 import gevent.monkey
 
 gevent.monkey.patch_all()
+
+if len(sys.argv) == 1:
+    gui_mode = True
+else:
+    gui_mode = False
 
 # noinspection PyPep8
 from stlib import (logging,

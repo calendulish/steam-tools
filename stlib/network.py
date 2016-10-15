@@ -24,6 +24,12 @@ import requests
 
 import stlib
 
+if stlib.gui_mode:
+    import gi
+
+    gi.require_version('Gtk', '3.0')
+    from gi.repository import Gtk
+
 STEAM_LOGIN_PAGES = [
     'https://steamcommunity.com/login/home/',
     'https://store.steampowered.com//login/',
@@ -51,6 +57,9 @@ def async_wait(function):
         thread.start()
 
         while thread.is_alive():
+            if stlib.gui_mode:
+                while (Gtk.events_pending()):
+                    Gtk.main_iteration()
             gevent.sleep(0.01)
         else:
             return thread.return_
