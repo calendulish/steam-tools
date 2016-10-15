@@ -116,6 +116,7 @@ class SteamTools(ui.Gtk.Application):
 
     def select_profile(self):
         stlib.config.read()
+        dialog = SelectProfileDialog()
 
         if not self.config_parser.has_option('Config', 'browserProfile'):
             profiles = stlib.browser.get_profiles()
@@ -130,8 +131,6 @@ class SteamTools(ui.Gtk.Application):
                 self.config_parser.set('Config', 'browserProfile', profiles[0])
                 stlib.config.write()
             else:
-                self.window.select_profile_dialog.add_button('Ok', 1)
-
                 temp_radiobutton = None
                 for i in range(len(profiles)):
                     account_name = stlib.browser.get_account_name(profile_name=profiles[i])
@@ -140,11 +139,11 @@ class SteamTools(ui.Gtk.Application):
                                                                                                       profiles[i]))
 
                     temp_radiobutton.connect('toggled', ui.signals.on_select_profile_button_toggled, i)
-                    self.window.radiobutton_box.pack_start(temp_radiobutton, False, False, 0)
+                    dialog.radio_button_box.pack_start(temp_radiobutton, False, False, 5)
 
-                self.window.select_profile_dialog.show_all()
-                self.window.select_profile_dialog.run()
-                self.window.select_profile_dialog.destroy()
+                dialog.show_all()
+                dialog.run()
+                dialog.destroy()
 
                 self.config_parser.set('Config', 'browserProfile', profiles[ui.selected_profile_id])
                 stlib.config.write()
@@ -166,3 +165,51 @@ class SteamTools(ui.Gtk.Application):
         dialog.format_secondary_markup(secondary_markup)
         dialog.connect('response', lambda d, _: d.destroy())
         dialog.show()
+
+
+class SelectProfileDialog(ui.Gtk.Dialog):
+    def __init__(self):
+        super().__init__()
+        self.set_default_size(-1, 200)
+        self.set_title('Select a profile')
+        self.set_transient_for(ui.main_window)
+        self.set_modal(True)
+        self.set_destroy_with_parent(True)
+        self.set_resizable(False)
+        self.set_position(ui.Gtk.WindowPosition.CENTER_ON_PARENT)
+        self.set_deletable(False)
+        self.set_skip_taskbar_hint(True)
+        self.set_skip_pager_hint(True)
+        self.add_button(button_text='_OK', response_id=ui.Gtk.ResponseType.OK)
+        self.connect('response', self.on_response)
+
+        self.content_area = self.get_content_area()
+        self.content_area.set_orientation(ui.Gtk.Orientation.VERTICAL)
+        self.content_area.set_spacing(5)
+        self.content_area.set_margin_left(10)
+        self.content_area.set_margin_right(10)
+        self.content_area.set_margin_top(10)
+        self.content_area.set_margin_bottom(10)
+
+        label_who_are = ui.Gtk.Label('Who are you?')
+        self.content_area.pack_start(label_who_are, False, False, 0)
+
+        label_select_option = ui.Gtk.Label('Please, select an option bellow')
+        self.content_area.pack_start(label_select_option, False, False, 0)
+
+        frame = ui.Gtk.Frame(label='Chrome/Chromium Profiles:')
+        frame.set_label_align(0.1, 0.5)
+        frame.set_margin_top(10)
+        frame.set_margin_bottom(5)
+        self.content_area.pack_start(frame, False, False, 0)
+
+        self.radio_button_box = ui.Gtk.Box()
+        self.radio_button_box.set_orientation(ui.Gtk.Orientation.VERTICAL)
+        frame.add(self.radio_button_box)
+
+    def on_response(self, dialog, response):
+        if response == ui.Gtk.ResponseType.OK:
+            stlib.logger.info('Browser profile selected')
+            self.destroy()
+        else:
+            return True
