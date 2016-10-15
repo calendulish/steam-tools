@@ -47,11 +47,6 @@ def safe_call(call):
         return 1
 
 
-def fix_gevent():
-    gevent.sleep(0.1)
-    return True
-
-
 # if is executing from a Cygwin console:
 if os.name is 'nt' and os.getenv('PWD'):
     # noinspection PyUnresolvedReferences
@@ -84,5 +79,4 @@ if __name__ == "__main__":
         ST = ui.console.SteamTools(cParams)
     else:
         ST = ui.main.SteamTools()
-        ui.GLib.idle_add(fix_gevent)
         ST.run()
