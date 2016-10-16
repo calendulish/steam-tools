@@ -234,7 +234,7 @@ class MessageDialog(Gtk.MessageDialog):
         self.connect('response', self.on_response)
 
     def on_response(self, dialog, response):
-        self.destroy()
+        dialog.destroy()
 
 
 class SelectProfileDialog(Gtk.Dialog):
@@ -280,6 +280,6 @@ class SelectProfileDialog(Gtk.Dialog):
     def on_response(self, dialog, response):
         if response == Gtk.ResponseType.OK:
             stlib.logger.info('Browser profile selected')
-            self.destroy()
+            dialog.destroy()
         else:
             return True
