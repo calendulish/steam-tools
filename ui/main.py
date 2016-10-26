@@ -83,6 +83,8 @@ class SteamToolsWindow(Gtk.ApplicationWindow):
 
         self.fake_app_current_game.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('black'))
         self.fake_app_current_time.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('black'))
+        self.warning_label.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('white'))
+        self.warning_label.modify_bg(Gtk.StateFlags.NORMAL, Gdk.color_parse('darkred'))
 
 
 class SteamTools(Gtk.Application):
