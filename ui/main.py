@@ -34,6 +34,7 @@ class SteamToolsWindow(Gtk.ApplicationWindow):
     def __init__(self, parent):
         super().__init__(title='Steam Tools', application=parent)
         ui.main_window = self
+        self.set_icon_from_file('ui/icons/steam-tools.ico')
         self.set_default_size(640, 480)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
