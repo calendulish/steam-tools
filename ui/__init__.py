@@ -2,6 +2,13 @@ import sys
 
 from ui import console
 
+__VERSION_MAJOR__ = '2'
+__VERSION_MINOR__ = '0'
+__VERSION_EXTRA__ = 'GIT'
+__VERSION__ = '{}.{} {}'.format(__VERSION_MAJOR__,
+                                __VERSION_MINOR__,
+                                __VERSION_EXTRA__)
+
 __all__ = ['console']
 
 if len(sys.argv) == 1:

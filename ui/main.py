@@ -27,6 +27,7 @@ from gi.repository import Gtk, GLib, Gdk, Gio
 
 import stlib
 import ui
+import ui.gtk_markup_substring
 
 
 class SteamToolsWindow(Gtk.ApplicationWindow):
@@ -45,14 +46,43 @@ class SteamToolsWindow(Gtk.ApplicationWindow):
         for _object in builder.get_objects():
             if issubclass(type(_object), Gtk.Buildable):
                 name = Gtk.Buildable.get_name(_object)
+                _object.set_name(name)
                 setattr(self, name, _object)
+
+        style_file = Gio.File.new_for_path('ui/interface.css')
+        self.style_provider = Gtk.CssProvider()
+        self.style_provider.load_from_file(style_file)
+
+        self.style_context = Gtk.StyleContext()
+        self.style_context.add_provider_for_screen(
+            Gdk.Screen.get_default(),
+            self.style_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
+        ui.gtk_markup_substring.set_from_css(
+                self.version_label,
+                styles=('text', 'version'),
+                params=('Steam Tools', ui.__VERSION__)
+        )
+
+        ui.gtk_markup_substring.set_from_css(
+                self.browser_label,
+                styles=('text', 'browser', 'text'),
+                params=('Using', 'Google Chrome', 'Profile')
+        )
+
+        ui.gtk_markup_substring.set_from_css(
+                self.browser_profile,
+                styles=('text', 'account', 'text', 'profile', 'text'),
+                params=('Cookies from', stlib.browser.get_account_name(), '(', stlib.browser.get_profile_name(), ')')
+        )
 
         del self.main_window
         self.main_box.reparent(self)
 
         self.fake_app_current_game.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('black'))
         self.fake_app_current_time.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('black'))
-        self.browser_profile.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse('black'))
 
 
 class SteamTools(Gtk.Application):
@@ -91,9 +121,6 @@ class SteamTools(Gtk.Application):
         self.window.present()
 
         self.select_profile()
-
-        self.window.browser_profile.set_text('{} ({})'.format(stlib.browser.get_account_name(),
-                                                              stlib.browser.get_profile_name()))
 
         self.window.spinner.start()
         stlib.logins.queue_connect('steam', self.do_steam_login)
