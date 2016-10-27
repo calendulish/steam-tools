@@ -122,7 +122,7 @@ def try_get_response(service_name, url, data=None):
 
             response = get_response(url, data, cookies)
 
-            if service_name is 'steam':
+            if response and service_name is 'steam':
                 if any(page in str(response.content) for page in STEAM_LOGIN_PAGES):
                     raise requests.exceptions.TooManyRedirects
 
