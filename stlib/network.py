@@ -125,6 +125,10 @@ def try_get_response(service_name, url, data=None):
             if service_name is 'steam':
                 if any(page in str(response.content) for page in STEAM_LOGIN_PAGES):
                     raise requests.exceptions.TooManyRedirects
+
+            if response and service_name is 'steamtrades':
+                if '?login&redirect=' in str(response.content):
+                    raise requests.exceptions.TooManyRedirects
         except(requests.exceptions.TooManyRedirects, KeyError):
             if not auto_recovery:
                 stlib.logger.error('Unable to find cookies for {}'.format(service_name))

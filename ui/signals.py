@@ -23,6 +23,7 @@
 # :  3 :   SC Join    :
 
 
+import configparser
 import locale
 import time
 
@@ -68,7 +69,7 @@ def on_start_clicked(button):
     elif current_page == 1:
         on_fake_app_start()
     elif current_page == 2:
-        pass
+        on_steamtrades_bump_start()
     elif current_page == 3:
         pass
     elif current_page == 4:
@@ -82,7 +83,7 @@ def on_stop_clicked(button):
     elif current_page == 1:
         on_fake_app_stop()
     elif current_page == 2:
-        pass
+        on_steamtrades_bump_stop()
     elif current_page == 3:
         pass
     elif current_page == 4:
@@ -115,10 +116,17 @@ def on_tabs_switch_page(tab, box, current_page):
             ui.main_window.start.set_sensitive(True)
             ui.main_window.stop.set_sensitive(False)
     elif current_page == 2:
-        if not stlib.SG_user:
+        if not stlib.ST_user:
             ui.main_window.start.set_sensitive(False)
             ui.main_window.stop.set_sensitive(False)
             return None
+
+        if ui.steamtrades_bump_is_running:
+            ui.main_window.start.set_sensitive(False)
+            ui.main_window.stop.set_sensitive(True)
+        else:
+            ui.main_window.start.set_sensitive(True)
+            ui.main_window.stop.set_sensitive(False)
     elif current_page == 3:
         if not stlib.SG_user:
             ui.main_window.start.set_sensitive(False)
@@ -283,6 +291,55 @@ def on_fake_app_stop():
 
     ui.application.update_status_bar("Done!")
     ui.main_window.start.set_sensitive(True)
+
+
+def on_steamtrades_bump_start():
+    config_parser = stlib.config.read()
+
+    ui.main_window.start.set_sensitive(False)
+    ui.main_window.stop.set_sensitive(False)
+
+    ui.application.update_status_bar('Preparing. Please wait...')
+    ui.main_window.spinner.start()
+    ui.steamtrades_bump_is_running = True
+
+    try:
+        TID_config = config_parser.get('SteamTrades', 'tradeID')
+        trade_ids = [line.strip() for line in TID_config.split(',')]
+        del TID_config
+    except configparser.NoOptionError:
+        trade_ids = ['EXAMPLEID1', 'EXAMPLEID2']
+        config_parser.set('SteamTrades', 'tradeID', ', '.join(trade_ids))
+        stlib.config.write()
+        stlib.logger.error('No trade ID found in the config file. Using EXAMPLEID\'s')
+        stlib.logger.error('Please, edit the auto-generated config file after this run')
+        stlib.logger.error(stlib.config.config_file_path)
+
+    MIN_wait_time = config_parser.getint('SteamTrades', 'minWaitTime', fallback=3700)
+    MAX_wait_time = config_parser.getint('SteamTrades', 'maxWaitTime', fallback=4100)
+
+    stlib.logger.warning('Ready to start.')
+    ui.application.update_status_bar('Ready.')
+    ui.main_window.spinner.stop()
+
+    GLib.timeout_add_seconds(
+            1,
+            ui.timers.steamtrades_bump_timer,
+            trade_ids,
+            MIN_wait_time,
+            MAX_wait_time
+    )
+
+    ui.main_window.stop.set_sensitive(True)
+
+
+def on_steamtrades_bump_stop():
+    ui.steamtrades_bump_is_running = False
+    ui.main_window.start.set_sensitive(True)
+    ui.main_window.stop.set_sensitive(False)
+    ui.main_window.SG_bump_progress_bar.set_fraction(0)
+    stlib.steamtrades_bump.current_trade = 0
+
 
 
 def on_status_bar_text_pushed(status_bar, context, text):

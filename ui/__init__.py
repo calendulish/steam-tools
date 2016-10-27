@@ -28,3 +28,5 @@ card_farming_is_running = False
 card_farming_game_start_time = None
 fake_app_is_running = False
 fake_app_id = None
+steamtrades_bump_is_running = False
+steamtrades_bump_waiting = False

@@ -22,6 +22,8 @@ import bs4
 
 import stlib
 
+current_trade = 0
+
 
 def get_trade_page(trade_id):
     response = stlib.network.try_get_response('steamtrades', '{}/{}/'.format(stlib.steamtrades_trade_page,
@@ -66,7 +68,7 @@ def bump(response):
                              minutes_left)
         return minutes_left
     else:
-        response = stlib.network.try_get_response('steamtrades', stlib.steamtrades_trade_page[:-1]+'s')
+        response = stlib.network.try_get_response('steamtrades', stlib.steamtrades_trade_page[:-1] + 's')
 
         if trade_id in response.content.decode('utf-8'):
             stlib.logger.info('%s (%s) Bumped!', trade_id, trade_title)

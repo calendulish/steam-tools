@@ -17,6 +17,7 @@
 #
 
 import datetime
+import random
 import time
 
 import gi
@@ -122,5 +123,58 @@ def fake_app_timer(start_time):
             ui.main_window.fake_app_current_time.set_text(str(elapsed_time))
 
             return True
+    else:
+        return False
+
+
+def progress_bar_pulse(start_time, maximum_time):
+    elapsed_seconds = int(time.time() - start_time)
+    time_left = datetime.timedelta(seconds=maximum_time - elapsed_seconds)
+
+    fraction = elapsed_seconds / (maximum_time/150)
+    ui.main_window.ST_bump_progress_bar.set_fraction(fraction)
+    ui.main_window.ST_bump_progress_bar.set_text(str(time_left))
+
+    if fraction >= 1.0:
+        ui.steamtrades_bump_waiting = False
+        return False
+    else:
+        return True
+
+
+def steamtrades_bump_timer(trade_ids, MIN_wait_time, MAX_wait_time):
+    if ui.steamtrades_bump_waiting:
+        return True
+
+    try:
+        trade_id = trade_ids[stlib.steamtrades_bump.current_trade]
+    except IndexError:
+        stlib.logger.warning('There\'s nothing else to do. Stopping.')
+        ui.signals.on_steamtrades_bump_stop()
+        return False
+
+    if ui.steamtrades_bump_is_running:
+        current_datetime = time.strftime('%B, %d, %Y - %H:%M:%S')
+        stlib.logger.info('Bumping now! %s', current_datetime)
+
+        response = stlib.steamtrades_bump.get_trade_page(trade_id)
+
+        if not response:
+            stlib.steamtrades_bump.current_trade += 1
+            return True
+
+        return_ = stlib.steamtrades_bump.bump(response)
+
+        if type(return_) == int:
+            MIN_wait_time = return_ * 60
+            MAX_wait_time = MIN_wait_time + 400
+
+        random_time = random.randint(MIN_wait_time, MAX_wait_time)
+
+        start_time = time.time()
+        GLib.timeout_add_seconds(1, progress_bar_pulse, start_time, random_time)
+        ui.steamtrades_bump_waiting = True
+
+        return True
     else:
         return False
