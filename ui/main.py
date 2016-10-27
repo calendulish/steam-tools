@@ -34,14 +34,14 @@ class SteamToolsWindow(Gtk.ApplicationWindow):
     def __init__(self, parent):
         super().__init__(title='Steam Tools', application=parent)
         ui.main_window = self
-        self.set_icon_from_file('ui/icons/steam-tools.ico')
+        self.set_icon_from_file(os.path.join('ui', 'icons', 'steam-tools.ico'))
         self.set_default_size(640, 480)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_show_menubar(True)
 
         builder = Gtk.Builder()
-        builder.add_from_file('ui/interface.xml')
+        builder.add_from_file(os.path.join('ui', 'interface.xml'))
         builder.connect_signals(ui.signals)
 
         for _object in builder.get_objects():
@@ -50,7 +50,7 @@ class SteamToolsWindow(Gtk.ApplicationWindow):
                 _object.set_name(name)
                 setattr(self, name, _object)
 
-        style_file = Gio.File.new_for_path('ui/interface.css')
+        style_file = Gio.File.new_for_path(os.path.join('ui', 'interface.css'))
         self.style_provider = Gtk.CssProvider()
         self.style_provider.load_from_file(style_file)
 
@@ -96,7 +96,7 @@ class SteamTools(Gtk.Application):
         ui.application = self
         self.window = None
 
-        self.icons_path = 'ui/icons'
+        self.icons_path = os.path.join('ui', 'icons')
 
         self.steam_icon_available = 'steam_green.png'
         self.steam_icon_busy = 'steam_yellow.png'
@@ -136,7 +136,7 @@ class SteamTools(Gtk.Application):
         Gtk.Application.do_startup(self)
 
         builder = Gtk.Builder()
-        builder.add_from_file('ui/menu.xml')
+        builder.add_from_file(os.path.join('ui', 'menu.xml'))
         menu_bar = builder.get_object('menu_bar')
         self.set_menubar(menu_bar)
 

@@ -94,10 +94,10 @@ def get_cookies(url):
 def get_chrome_dir():
     if os.name == 'nt':
         data_dir = os.getenv('LOCALAPPDATA')
-        chrome_dir = os.path.join(data_dir, 'Google/Chrome/User Data')
+        chrome_dir = os.path.join(data_dir, 'Google', 'Chrome', 'User Data')
         # Fallback to Chromium
         if not os.path.isdir(chrome_dir):
-            chrome_dir = os.path.join(data_dir, 'Chromium/User Data')
+            chrome_dir = os.path.join(data_dir, 'Chromium', 'User Data')
     else:
         data_dir = os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
         chrome_dir = os.path.join(data_dir, 'google-chrome')
