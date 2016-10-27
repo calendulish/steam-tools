@@ -116,25 +116,8 @@ class SteamTools(Gtk.Application):
         self.window.present()
 
         self.select_profile()
-
-        ui.gtk_markup_substring.set_from_css(
-                self.window.browser_label,
-                styles=('text', 'browser', 'text'),
-                params=('Using', 'Google Chrome', 'Profile')
-        )
-
-        ui.gtk_markup_substring.set_from_css(
-                self.window.browser_profile,
-                styles=('text', 'account', 'text', 'profile', 'text'),
-                params=('Cookies from', stlib.browser.get_account_name(), '(', stlib.browser.get_profile_name(), ')')
-        )
-
-        self.window.spinner.start()
-        stlib.logins.queue_connect('steam', self.do_steam_login)
-        stlib.logins.queue_connect('steamgifts', self.do_steamgifts_login)
-        stlib.logins.queue_connect('steamtrades', self.do_steamtrades_login)
-        stlib.logins.wait_queue()
-        self.window.spinner.stop()
+        self.update_info_labels()
+        self.do_login_check()
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
@@ -154,6 +137,14 @@ class SteamTools(Gtk.Application):
             action_handler = ['ui.signals.on_', item, '_activate']
             action.connect('activate', eval(''.join(action_handler)))
             self.add_action(action)
+
+    def do_login_check(self):
+        self.window.spinner.start()
+        stlib.logins.queue_connect('steam', self.do_steam_login)
+        stlib.logins.queue_connect('steamgifts', self.do_steamgifts_login)
+        stlib.logins.queue_connect('steamtrades', self.do_steamtrades_login)
+        stlib.logins.wait_queue()
+        self.window.spinner.stop()
 
     def do_steam_login(self, greenlet):
         stlib.logins.check_steam_login(greenlet)
@@ -263,6 +254,19 @@ class SteamTools(Gtk.Application):
         self.window.status_bar.push(message_id, message)
 
         return message_id
+
+    def update_info_labels(self):
+        ui.gtk_markup_substring.set_from_css(
+                self.window.browser_label,
+                styles=('text', 'browser', 'text'),
+                params=('Using', 'Google Chrome', 'Profile')
+        )
+
+        ui.gtk_markup_substring.set_from_css(
+                self.window.browser_profile,
+                styles=('text', 'account', 'text', 'profile', 'text'),
+                params=('Cookies from', stlib.browser.get_account_name(), '(', stlib.browser.get_profile_name(), ')')
+        )
 
     def _check_start_depends(self, pages, state):
         for page in pages:
