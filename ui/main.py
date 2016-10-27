@@ -67,18 +67,6 @@ class SteamToolsWindow(Gtk.ApplicationWindow):
                 params=('Steam Tools', ui.__VERSION__)
         )
 
-        ui.gtk_markup_substring.set_from_css(
-                self.browser_label,
-                styles=('text', 'browser', 'text'),
-                params=('Using', 'Google Chrome', 'Profile')
-        )
-
-        ui.gtk_markup_substring.set_from_css(
-                self.browser_profile,
-                styles=('text', 'account', 'text', 'profile', 'text'),
-                params=('Cookies from', stlib.browser.get_account_name(), '(', stlib.browser.get_profile_name(), ')')
-        )
-
         del self.main_window
         self.main_box.reparent(self)
 
@@ -128,6 +116,18 @@ class SteamTools(Gtk.Application):
         self.window.present()
 
         self.select_profile()
+
+        ui.gtk_markup_substring.set_from_css(
+                self.window.browser_label,
+                styles=('text', 'browser', 'text'),
+                params=('Using', 'Google Chrome', 'Profile')
+        )
+
+        ui.gtk_markup_substring.set_from_css(
+                self.window.browser_profile,
+                styles=('text', 'account', 'text', 'profile', 'text'),
+                params=('Cookies from', stlib.browser.get_account_name(), '(', stlib.browser.get_profile_name(), ')')
+        )
 
         self.window.spinner.start()
         stlib.logins.queue_connect('steam', self.do_steam_login)
