@@ -94,6 +94,8 @@ def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, v
             stlib.logger.critical('Invalid SSL Certificates.')
         except requests.exceptions.HTTPError:
             stlib.logger.warning('Response with HTTP error. Continuing.')
+        except requests.exceptions.TooManyRedirects:
+            stlib.logger.warning('Response with too many redirects. Continuing.')
         except(requests.exceptions.ConnectionError,
                requests.exceptions.RequestException,
                requests.exceptions.Timeout):
