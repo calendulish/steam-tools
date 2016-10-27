@@ -23,6 +23,17 @@ import bs4
 import stlib
 
 
+def get_trade_page(trade_id):
+    response = stlib.network.try_get_response('steamgifts', '{}/{}/'.format(stlib.steamgifts_trade_page,
+                                                                            trade_id))
+
+    if not response:
+        stlib.logger.warning('The trade ID %s is not valid.', trade_id)
+        return None
+
+    return response
+
+
 def get_trade_id(response):
     trade_id = response.url.split('/')[4]
     return trade_id

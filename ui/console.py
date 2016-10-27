@@ -197,11 +197,9 @@ class SteamTools:
             stlib.logger.info('Bumping now! %s', current_datetime)
 
             for trade_id in trade_ids:
-                response = stlib.network.try_get_response('steamgifts',
-                                                          'https://www.steamgifts.com/trade/{}/'.format(trade_id))
+                response = stlib.steamgifts_bump.get_trade_page(trade_id)
 
-                if response.status_code == 404:
-                    stlib.logger.warning('The trade ID %s is not valid. Ignoring.', trade_id)
+                if not response:
                     continue
 
                 return_ = stlib.steamgifts_bump.bump(response)
