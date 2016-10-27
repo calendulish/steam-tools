@@ -55,8 +55,20 @@ def on_quit_activate(action, parameters):
 
 
 def on_browser_profile_activate(action, parameters):
-    # TODO
-    pass
+    ui.application.select_profile(force=True)
+    ui.application.update_info_labels()
+
+    config_parser = stlib.config.read()
+
+    for section in config_parser.sections():
+        if 'Cookies' in section:
+            config_parser.remove_section(section)
+
+    stlib.config.write()
+
+    # FIXME
+    ui.main_window.warning_label.set_text('You must restart Steam tools to use new profile')
+    ui.main_window.warning_label.show()
 
 
 def on_settings_activate(action, parameters):

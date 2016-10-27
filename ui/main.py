@@ -214,11 +214,12 @@ class SteamTools(Gtk.Application):
 
         self._check_start_depends([4], SC_connected)
 
-    def select_profile(self):
+    def select_profile(self, force=False):
         stlib.config.read()
         dialog = SelectProfileDialog()
+        ui.selected_profile_id = 0
 
-        if not self.config_parser.has_option('Config', 'browserProfile'):
+        if force or not self.config_parser.has_option('Config', 'browserProfile'):
             profiles = stlib.browser.get_profiles()
 
             if not len(profiles):
