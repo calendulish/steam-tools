@@ -36,6 +36,13 @@ from gi.repository import Gtk, GLib
 import stlib
 import ui
 
+switch_stats = {
+    0: [lambda: stlib.steam_user, lambda: ui.card_farming_is_running],
+    1: [lambda: stlib.steam_user, lambda: ui.fake_app_is_running],
+    2: [lambda: stlib.ST_user, lambda: ui.steamtrades_bump_is_running],
+    3: [lambda: None, lambda: None],
+}
+
 
 def on_window_destroy(*args):
     ui.main_window.hide()
@@ -91,48 +98,7 @@ def on_stop_clicked(button):
 
 
 def on_tabs_switch_page(tab, box, current_page):
-    if current_page == 0:
-        if not stlib.steam_user:
-            ui.main_window.start.set_sensitive(False)
-            ui.main_window.stop.set_sensitive(False)
-            return None
-
-        if ui.card_farming_is_running:
-            ui.main_window.start.set_sensitive(False)
-            ui.main_window.stop.set_sensitive(True)
-        else:
-            ui.main_window.start.set_sensitive(True)
-            ui.main_window.stop.set_sensitive(False)
-    elif current_page == 1:
-        if not stlib.steam_user:
-            ui.main_window.start.set_sensitive(False)
-            ui.main_window.stop.set_sensitive(False)
-            return None
-
-        if ui.fake_app_is_running:
-            ui.main_window.start.set_sensitive(False)
-            ui.main_window.stop.set_sensitive(True)
-        else:
-            ui.main_window.start.set_sensitive(True)
-            ui.main_window.stop.set_sensitive(False)
-    elif current_page == 2:
-        if not stlib.ST_user:
-            ui.main_window.start.set_sensitive(False)
-            ui.main_window.stop.set_sensitive(False)
-            return None
-
-        if ui.steamtrades_bump_is_running:
-            ui.main_window.start.set_sensitive(False)
-            ui.main_window.stop.set_sensitive(True)
-        else:
-            ui.main_window.start.set_sensitive(True)
-            ui.main_window.stop.set_sensitive(False)
-    elif current_page == 3:
-        if not stlib.SG_user:
-            ui.main_window.start.set_sensitive(False)
-            ui.main_window.stop.set_sensitive(False)
-            return None
-    elif current_page == 4:
+    if current_page == 4:
         GLib.idle_add(ui.main_window.tabs.set_current_page, 0)
         message = ui.main.MessageDialog(Gtk.MessageType.INFO,
                                         'SteamCompanion is down.',
@@ -140,6 +106,18 @@ def on_tabs_switch_page(tab, box, current_page):
                                         'Primarily because the harddrive crashed. '
                                         'Read more at <a href="http://steamcompanion.com/">Steam Companion</a>.')
         message.show()
+
+        return None
+
+    if switch_stats[current_page][1]():
+        ui.main_window.start.set_sensitive(False)
+        ui.main_window.stop.set_sensitive(True)
+    elif not switch_stats[current_page][0]():
+        ui.main_window.start.set_sensitive(False)
+        ui.main_window.stop.set_sensitive(False)
+    else:
+        ui.main_window.start.set_sensitive(True)
+        ui.main_window.stop.set_sensitive(False)
 
 
 def on_most_valuable_cards_first_changed(switch, state):
@@ -339,7 +317,6 @@ def on_steamtrades_bump_stop():
     ui.main_window.stop.set_sensitive(False)
     ui.main_window.SG_bump_progress_bar.set_fraction(0)
     stlib.steamtrades_bump.current_trade = 0
-
 
 
 def on_status_bar_text_pushed(status_bar, context, text):
