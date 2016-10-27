@@ -60,8 +60,8 @@ def total_card_count(badges):
     return False
 
 
-def card_farming_timer(dry_run, badges, badge_current):
-    badge = badges[badge_current]
+def card_farming_timer(dry_run, badges):
+    badge = badges[stlib.card_farming.current_badge]
 
     if ui.card_farming_is_running:
         # Update card drop
@@ -75,7 +75,7 @@ def card_farming_timer(dry_run, badges, badge_current):
                     stlib.libsteam.stop_wrapper()
                     ui.card_farming_is_running = False
 
-                badge_current += 1
+                stlib.card_farming.current_badge += 1
             else:
                 return True
 

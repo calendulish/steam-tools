@@ -181,9 +181,8 @@ def on_card_farming_start():
         ui.main_window.card_farming_total_card_left.set_text('Counting...')
         GLib.idle_add(ui.timers.total_card_count, badges)
 
-        badge_current = 0
-        ui.timers.card_farming_timer(dry_run, badges, badge_current)
-        GLib.timeout_add_seconds(40, ui.timers.card_farming_timer, dry_run, badges, badge_current)
+        ui.timers.card_farming_timer(dry_run, badges)
+        GLib.timeout_add_seconds(40, ui.timers.card_farming_timer, dry_run, badges)
 
         ui.main_window.stop.set_sensitive(True)
     else:
@@ -202,6 +201,7 @@ def on_card_farming_stop():
 
     ui.application.update_status_bar("Waiting to card farming terminate.")
     ui.card_farming_is_running = False
+    stlib.card_farming.current_badge = 0
     stlib.libsteam.stop_wrapper()
     ui.fake_app_is_running = False
     ui.fake_app_id = None

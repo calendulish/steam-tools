@@ -18,6 +18,7 @@
 
 import stlib
 
+current_badge = 0
 
 def remove_completed_badges(badges):
     stlib.logger.info('Ignoring already completed badges')
