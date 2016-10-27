@@ -20,7 +20,7 @@ from stlib import (logging,
                    libsteam,
                    logins,
                    card_farming,
-                   steamgifts_bump)
+                   steamtrades_bump)
 
 __all__ = ['logging',
            'config',
@@ -29,7 +29,7 @@ __all__ = ['logging',
            'libsteam',
            'logins',
            'card_farming',
-           'steamgifts_bump']
+           'steamtrades_bump']
 
 logger = logging.get_logger()
 wrapper_process = None
@@ -48,10 +48,13 @@ atexit.register(__safe_exit)
 steam_login_page = 'https://steamcommunity.com/login/checkstoredlogin'
 steam_check_page = '{}/?redirectURL=discussions'.format(steam_login_page)
 steamgifts_check_page = 'https://www.steamgifts.com/account/profile/sync'
+steamtrades_check_page = 'https://www.steamtrades.com/legal/privacy-policy'
+steamtrades_trade_page = 'https://www.steamtrades.com/trade/'
 steamcompanion_check_page = 'https://steamcompanion.com/settings'
 
 steam_user = None
 SG_user = None
+ST_user = None
 SC_user = None
 
 

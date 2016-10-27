@@ -168,41 +168,41 @@ class SteamTools:
 
         sys.exit(0)
 
-    def __steamgifts_bump(self):
-        stlib.logins.queue_connect('steamgifts', wait=True)
+    def __steamtrades_bump(self):
+        stlib.logins.queue_connect('steamtrades', wait=True)
 
-        if not stlib.SG_user:
+        if not stlib.ST_user:
             sys.exit(1)
 
-        stlib.logger.info('Hello {}'.format(stlib.SG_user))
+        stlib.logger.info('Hello {}'.format(stlib.ST_user))
 
         try:
-            TID_config = self.config_parser.get('SteamGiftsBump', 'tradeID')
+            TID_config = self.config_parser.get('SteamTrades', 'tradeID')
             trade_ids = [line.strip() for line in TID_config.split(',')]
             del TID_config
         except configparser.NoOptionError:
             trade_ids = ['EXAMPLEID1', 'EXAMPLEID2']
-            self.config_parser.set('SteamGiftsBump', 'tradeID', ', '.join(trade_ids))
+            self.config_parser.set('SteamTrades', 'tradeID', ', '.join(trade_ids))
             stlib.config.write()
             stlib.logger.error('No trade ID found in the config file. Using EXAMPLEID\'s')
             stlib.logger.error('Please, edit the auto-generated config file after this run')
             stlib.logger.error(stlib.config.config_file_path)
 
         while True:
-            MIN_wait_time = self.config_parser.getint('SteamGiftsBump', 'minWaitTime', fallback=3700)
-            MAX_wait_time = self.config_parser.getint('SteamGiftsBump', 'maxWaitTime', fallback=4100)
+            MIN_wait_time = self.config_parser.getint('SteamTrades', 'minWaitTime', fallback=3700)
+            MAX_wait_time = self.config_parser.getint('SteamTrades', 'maxWaitTime', fallback=4100)
             current_datetime = time.strftime('%B, %d, %Y - %H:%M:%S')
 
             stlib.logging.console_fixer('\r')
             stlib.logger.info('Bumping now! %s', current_datetime)
 
             for trade_id in trade_ids:
-                response = stlib.steamgifts_bump.get_trade_page(trade_id)
+                response = stlib.steamtrades_bump.get_trade_page(trade_id)
 
                 if not response:
                     continue
 
-                return_ = stlib.steamgifts_bump.bump(response)
+                return_ = stlib.steamtrades_bump.bump(response)
 
                 if type(return_) == int:
                     MIN_wait_time = return_ * 60

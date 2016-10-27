@@ -800,7 +800,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="SG_bump_box">
+                  <object class="GtkBox" id="ST_bump_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">20</property>
@@ -813,7 +813,7 @@
                         <property name="can_focus">False</property>
                         <property name="margin_top">20</property>
                         <property name="margin_bottom">10</property>
-                        <property name="label" translatable="yes">SteamGifts Bump</property>
+                        <property name="label" translatable="yes">SteamTrades Bump</property>
                         <attributes>
                           <attribute name="underline" value="True"/>
                         </attributes>
@@ -1010,10 +1010,10 @@
                   </packing>
                 </child>
                 <child type="tab">
-                  <object class="GtkLabel" id="SG_bump_tab">
+                  <object class="GtkLabel" id="ST_bump_tab">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">SG Bump</property>
+                    <property name="label" translatable="yes">ST Bump</property>
                   </object>
                   <packing>
                     <property name="position">2</property>
@@ -1583,6 +1583,19 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkImage" id="ST_login_status">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">SteamTrades login status: You are not logged in</property>
+                <property name="pixbuf">icons/steamtrades.png</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
               </packing>
             </child>
           </object>

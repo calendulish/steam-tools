@@ -164,7 +164,10 @@ def get_account_name(profile_path=None, profile_name=None):
 def get_domain_name(url):
     site = url.split('//', 1)[1].split('/', 1)[0].split('.')
     if len(site) > 2 and site[-3] == 'www':
-        return '.' + '.'.join(site[-2:])
+        if 'steamtrades' in site:
+            return '.' + '.'.join(site)
+        else:
+            return '.' + '.'.join(site[-2:])
     else:
         if len(site) > 2:
             return '.'.join(site[-3:])

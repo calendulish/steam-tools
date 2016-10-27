@@ -110,6 +110,10 @@ class SteamTools(Gtk.Application):
         self.SC_icon_busy = 'steamcompanion_yellow.png'
         self.SC_icon_unavailable = 'steamcompanion_red.png'
 
+        self.ST_icon_available = 'steamtrades_green.png'
+        self.ST_icon_busy = 'steamtrades_yellow.png'
+        self.ST_icon_unavailable = 'steamtrades_red.png'
+
     def do_activate(self):
         if not self.window:
             self.window = SteamToolsWindow(self)
@@ -128,7 +132,7 @@ class SteamTools(Gtk.Application):
         self.window.spinner.start()
         stlib.logins.queue_connect('steam', self.do_steam_login)
         stlib.logins.queue_connect('steamgifts', self.do_steamgifts_login)
-        # ui.logins.queue_connect('steamcompanion', self.do_steamcompanion_login)
+        stlib.logins.queue_connect('steamtrades', self.do_steamtrades_login)
         stlib.logins.wait_queue()
         self.window.spinner.stop()
 
@@ -184,6 +188,24 @@ class SteamTools(Gtk.Application):
             SG_connected = False
 
         self._check_start_depends([2, 3], SG_connected)
+
+    def do_steamtrades_login(self, greenlet):
+        stlib.logins.check_steamtrades_login(greenlet)
+
+        if stlib.ST_user:
+            ui.main_window.ST_login_status.set_from_file(os.path.join(self.icons_path, self.ST_icon_available))
+            ui.main_window.ST_login_status.set_tooltip_text("SteamTrades Login status:\n" +
+                                                            "Connected as {}".format(stlib.ST_user))
+            ST_connected = True
+        else:
+            ui.main_window.ST_login_status.set_from_file(os.path.join(self.icons_path, self.ST_icon_unavailable))
+            ui.main_window.ST_login_status.set_tooltip_text("SteamTrades Login status: Cookies not found" +
+                                                            "\nPlease, check if you are logged in on" +
+                                                            "\nwww.steamtrades.com")
+            ST_connected = False
+
+        # FIXME?
+        self._check_start_depends([2, 3], ST_connected)
 
     def do_steamcompanion_login(self, greenlet):
         stlib.logins.check_steamcompanion_login(greenlet)

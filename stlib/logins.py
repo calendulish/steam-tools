@@ -56,6 +56,24 @@ def check_steamgifts_login(greenlet):
                            '\nwww.steamgifts.com')
 
 
+def check_steamtrades_login(greenlet):
+    try:
+        html = bs4.BeautifulSoup(greenlet.value.content, 'html.parser')
+        avatar = html.find('a', class_='nav_avatar')
+
+        if not avatar:
+            raise AttributeError
+
+        user_id = avatar['href'].split('/')[2]
+        # FIXME: get username from steamapi
+        stlib.ST_user = user_id
+    except(AttributeError, IndexError):
+        stlib.ST_user = None
+        stlib.logger.error('SteamTrades login status: Cookies not found' +
+                           '\nPlease, check if you are logged in on' +
+                           '\nwww.steamtrades.com')
+
+
 def check_steamcompanion_login(greenlet):
     try:
         html = bs4.BeautifulSoup(greenlet.value.content, 'html.parser')
