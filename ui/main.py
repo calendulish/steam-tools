@@ -109,9 +109,19 @@ class SteamTools(Gtk.Application):
             stlib.logger.error('Already started.')
             return None
 
-        MVCF_config = self.config_parser.getboolean('CardFarming', 'mostValuableCardsFirst', fallback=True)
-        self.window.most_valuable_cards_first.set_active(MVCF_config)
-        del MVCF_config
+        config = self.config_parser.getboolean('CardFarming', 'mostValuableCardsFirst', fallback=True)
+        self.window.most_valuable_cards_first.set_active(config)
+
+        config = self.config_parser.get('SteamTrades', 'tradeID', fallback='EXAMPLEID1, EXAMPLEID2')
+        self.window.ST_bump_trade_id.set_text(config)
+
+        config = self.config_parser.getint('SteamTrades', 'minWaitTime', fallback=3700)
+        self.window.ST_bump_min_time.set_text(str(config))
+
+        config = self.config_parser.getint('SteamTrades', 'maxWaitTime', fallback=4100)
+        self.window.ST_bump_max_time.set_text(str(config))
+
+        stlib.config.write()
 
         self.window.present()
 
@@ -268,6 +278,11 @@ class SteamTools(Gtk.Application):
                 styles=('text', 'account', 'text', 'profile', 'text'),
                 params=('Cookies from', stlib.browser.get_account_name(), '(', stlib.browser.get_profile_name(), ')')
         )
+
+    def update_config(self, section, key, value):
+        stlib.config.read()
+        self.config_parser.set(section, key, value)
+        stlib.config.write()
 
     def _check_start_depends(self, pages, state):
         for page in pages:

@@ -135,9 +135,19 @@ def on_tabs_switch_page(tab, box, current_page):
 
 
 def on_most_valuable_cards_first_changed(switch, state):
-    config_parser = stlib.config.read()
-    config_parser.set('CardFarming', 'mostValuableCardsFirst', state)
-    stlib.config.write()
+    ui.application.update_config('CardFarming', 'mostValuableCardsFirst', state)
+
+
+def on_ST_bump_trade_id_changed(entry):
+    ui.application.update_config('SteamTrades', 'tradeID', entry.get_text())
+
+
+def on_ST_bump_min_time_changed(entry):
+    ui.application.update_config('SteamTrades', 'minWaitTime', entry.get_text())
+
+
+def on_ST_bump_max_time_changed(entry):
+    ui.application.update_config('SteamTrades', 'maxWaitTime', entry.get_text())
 
 
 def on_card_farming_start():
@@ -295,20 +305,11 @@ def on_steamtrades_bump_start():
     ui.main_window.spinner.start()
     ui.steamtrades_bump_is_running = True
 
-    try:
-        TID_config = config_parser.get('SteamTrades', 'tradeID')
-        trade_ids = [line.strip() for line in TID_config.split(',')]
-        del TID_config
-    except configparser.NoOptionError:
-        trade_ids = ['EXAMPLEID1', 'EXAMPLEID2']
-        config_parser.set('SteamTrades', 'tradeID', ', '.join(trade_ids))
-        stlib.config.write()
-        stlib.logger.error('No trade ID found in the config file. Using EXAMPLEID\'s')
-        stlib.logger.error('Please, edit the auto-generated config file after this run')
-        stlib.logger.error(stlib.config.config_file_path)
+    config = config_parser.get('SteamTrades', 'tradeID')
+    trade_ids = [line.strip() for line in config.split(',')]
 
-    MIN_wait_time = config_parser.getint('SteamTrades', 'minWaitTime', fallback=3700)
-    MAX_wait_time = config_parser.getint('SteamTrades', 'maxWaitTime', fallback=4100)
+    MIN_wait_time = config_parser.getint('SteamTrades', 'minWaitTime')
+    MAX_wait_time = config_parser.getint('SteamTrades', 'maxWaitTime')
 
     stlib.logger.warning('Ready to start.')
     ui.application.update_status_bar('Ready.')
@@ -329,7 +330,7 @@ def on_steamtrades_bump_stop():
     ui.steamtrades_bump_is_running = False
     ui.main_window.start.set_sensitive(True)
     ui.main_window.stop.set_sensitive(False)
-    ui.main_window.SG_bump_progress_bar.set_fraction(0)
+    ui.main_window.ST_bump_progress_bar.set_fraction(0)
     stlib.steamtrades_bump.current_trade = 0
 
 

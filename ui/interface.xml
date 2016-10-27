@@ -942,10 +942,11 @@
                                 <property name="spacing">3</property>
                                 <property name="homogeneous">True</property>
                                 <child>
-                                  <object class="GtkEntry" id="SG_bump_trade_id">
+                                  <object class="GtkEntry" id="ST_bump_trade_id">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">●</property>
+                                    <signal name="changed" handler="on_ST_bump_trade_id_changed" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -954,10 +955,11 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="SG_join_min_time1">
+                                  <object class="GtkEntry" id="ST_bump_min_time">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">●</property>
+                                    <signal name="changed" handler="on_ST_bump_min_time_changed" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -966,10 +968,11 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="SG_join_max_time1">
+                                  <object class="GtkEntry" id="ST_bump_max_time">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">●</property>
+                                    <signal name="changed" handler="on_ST_bump_max_time_changed" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
