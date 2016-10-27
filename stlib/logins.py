@@ -83,7 +83,10 @@ def queue_connect(service_name, callback=None, wait=False):
     greenlet.start()
 
     if wait:
-        greenlet.join()
+        try:
+            greenlet.join()
+        except KeyboardInterrupt:
+            sys.exit(0)
 
     return None
 
@@ -94,18 +97,25 @@ def wait_queue():
         if isinstance(object_, gevent.Greenlet):
             greenlets.append(object_)
 
-    while True:
-        if not ui.main_window:
-            sys.exit(0)
+    try:
+        while True:
+            # Kill all greenlets before exit
+            if not ui.main_window.get_window():
+                raise SystemExit
 
-        try:
-            if greenlets[-1].ready():
-                greenlets.pop()
-            else:
-                if stlib.gui_mode:
-                    while Gtk.events_pending():
-                        Gtk.main_iteration()
+            try:
+                if greenlets[-1].ready():
+                    greenlets.pop()
+                else:
+                    if stlib.gui_mode:
+                        while Gtk.events_pending():
+                            Gtk.main_iteration()
 
-                gevent.sleep(0.1)
-        except IndexError:
-            break
+                    gevent.sleep(0.1)
+            except IndexError:
+                break
+    except(KeyboardInterrupt, SystemExit):
+        for greenlet in greenlets:
+            greenlet.kill()
+
+        sys.exit(0)
