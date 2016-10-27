@@ -40,7 +40,7 @@ switch_stats = {
     0: [lambda: stlib.steam_user, lambda: ui.card_farming_is_running],
     1: [lambda: stlib.steam_user, lambda: ui.fake_app_is_running],
     2: [lambda: stlib.ST_user, lambda: ui.steamtrades_bump_is_running],
-    3: [lambda: None, lambda: None],
+    3: [lambda: stlib.SG_user, lambda: ui.steamgifts_join_is_running],
 }
 
 
@@ -92,7 +92,7 @@ def on_start_clicked(button):
     elif current_page == 2:
         on_steamtrades_bump_start()
     elif current_page == 3:
-        pass
+        on_steamgifts_join_start()
     elif current_page == 4:
         pass
 
@@ -106,7 +106,7 @@ def on_stop_clicked(button):
     elif current_page == 2:
         on_steamtrades_bump_stop()
     elif current_page == 3:
-        pass
+        on_steamgifts_join_stop()
     elif current_page == 4:
         pass
 
@@ -335,6 +335,11 @@ def on_steamtrades_bump_stop():
     ui.main_window.ST_bump_progress_bar.set_fraction(0)
     stlib.steamtrades_bump.current_trade = 0
 
+def on_steamgifts_join_start():
+    pass
+
+def on_steamgifts_join_stop():
+    pass
 
 def on_status_bar_text_pushed(status_bar, context, text):
     GLib.timeout_add_seconds(10, ui.timers.status_bar_text_pushed_timer, context)

@@ -213,3 +213,83 @@ class SteamTools:
             for past_time in range(random_time):
                 stlib.logging.console_msg("Waiting: {:4d} seconds".format(random_time - past_time), end='\r')
                 time.sleep(1)
+
+    def __steamgifts_join(self):
+        stlib.logins.queue_connect('steamgifts', wait=True)
+
+        if not stlib.SG_user:
+            sys.exit(1)
+
+        stlib.logger.info('Hello {}'.format(stlib.SG_user))
+
+        try:
+            config = self.config_parser.get('SteamGifts', 'typeList')
+            type_list = [line.strip() for line in config.split(',')]
+        except configparser.NoOptionError:
+            type_list = ['wishlist', 'main', 'new']
+            self.config_parser.set('SteamGifts', 'typeList', ', '.join(type_list))
+            stlib.logger.error('No type list found in the config file.')
+            stlib.logger.error('Using the default: wishlist, main, new.')
+            stlib.logger.error('You may edit the auto-generated config file after this run')
+            stlib.logger.error(stlib.config.config_file_path)
+
+        stlib.steamgifts_join.configure()
+
+        for type in type_list:
+            query_url = '{}?type='.format(stlib.steamgifts_query_page)
+
+            if type == 'wishlist':
+                query_url += 'wishlist'
+            elif type == 'new':
+                query_url += 'new'
+            elif type == 'main':
+                pass
+            else:
+                query_url += '&q={}'.format(type)
+
+            html = stlib.network.try_get_html('steamgifts', query_url)
+
+            # FIXME
+            #if 'suspensions' in response.url:
+            #    stlib.logger.critical('You are banned!')
+            #    stlib.logger.critical('Exiting...')
+            #    sys.exit(1)
+
+            user_points = stlib.steamgifts_join.get_user_points(html)
+            giveaways = stlib.steamgifts_join.get_giveaways(html)
+
+            if self.config_parser.getboolean('SteamGifts', 'developerGiveaways', fallback=True):
+                giveaways.extend(stlib.steamgifts_join.get_pinned_giveaways(html))
+
+            for giveaway in giveaways:
+                giveaway_points = stlib.steamgifts_join.get_giveaway_points(giveaway)
+
+                if giveaway.find('div', class_='is-faded'):
+                    continue
+
+                if user_points == 0:
+                    break
+
+                if user_points >= giveaway_points:
+                    points_spent = stlib.steamgifts_join.join(giveaway)
+                    user_points -= points_spent
+
+                    antiban_time = random.randint(1, 15)
+                    for past_time in range(antiban_time):
+                        stlib.logging.console_msg(
+                                '[ANTI-BAN TIMER] Waiting {:2d} seconds'.format(antiban_time - past_time),
+                                end='\r'
+                        )
+                        time.sleep(1)
+                else:
+                    stlib.logger.verbose('Ignoring %s', stlib.steamgifts_join.get_giveaway_name(giveaway))
+                    stlib.logger.verbose('because the account don\'t have the requirements to enter.')
+
+        MIN_wait_time = self.config_parser.getint('SteamGifts', 'minWaitTime', fallback=7000)
+        MAX_wait_time = self.config_parser.getint('SteamGifts', 'maxWaitTime', fallback=7300)
+
+        random_time = random.randint(MIN_wait_time, MAX_wait_time)
+
+        for past_time in range(random_time):
+            stlib.logging.console_msg("Waiting: {:4d} seconds".format(random_time - past_time), end='\r')
+            time.sleep(1)

@@ -44,6 +44,7 @@ if not os.path.isfile(config_file_path):
     config_parser.add_section('Debug')
     config_parser.add_section('CardFarming')
     config_parser.add_section('SteamTrades')
+    config_parser.add_section('SteamGifts')
 
     with open(config_file_path, 'w') as FP:
         config_parser.write(FP)
