@@ -92,16 +92,19 @@ def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, v
         except requests.exceptions.SSLError:
             stlib.logger.critical('INSECURE CONNECTION DETECTED!')
             stlib.logger.critical('Invalid SSL Certificates.')
+            return None
         except requests.exceptions.HTTPError:
-            stlib.logger.warning('Response with HTTP error. Continuing.')
+            stlib.logger.warning('Response with HTTP error.')
+            return None
         except requests.exceptions.TooManyRedirects:
-            stlib.logger.warning('Response with too many redirects. Continuing.')
+            stlib.logger.warning('Response with too many redirects.')
+            return None
         except(requests.exceptions.ConnectionError,
                requests.exceptions.RequestException,
                requests.exceptions.Timeout):
             stlib.logger.error('Unable to connect. Trying again... ({}/3)'.format(i))
             gevent.sleep(3)
-        finally:
+        else:
             return response
 
 
