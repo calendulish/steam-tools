@@ -143,10 +143,12 @@ def on_ST_bump_trade_id_changed(entry):
 
 
 def on_ST_bump_min_time_changed(entry):
+    entry.set_text(''.join([text for text in entry.get_text() if text.isdigit()]))
     ui.application.update_config('SteamTrades', 'minWaitTime', entry.get_text())
 
 
 def on_ST_bump_max_time_changed(entry):
+    entry.set_text(''.join([text for text in entry.get_text() if text.isdigit()]))
     ui.application.update_config('SteamTrades', 'maxWaitTime', entry.get_text())
 
 
