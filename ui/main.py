@@ -275,6 +275,138 @@ class SteamTools(Gtk.Application):
                 self.window.start.set_sensitive(state)
 
 
+class SettingsDialog(Gtk.Dialog):
+    log_levels_id = {
+        'verbose': 0,
+        'info': 1,
+        'warning': 2,
+        'error': 3,
+        'critical': 4,
+    }
+
+    log_levels_name = dict(enumerate(log_levels_id.keys()))
+
+    def __init__(self):
+        super().__init__()
+        self.set_default_size(300, 300)
+        self.set_title('Steam Tools Settings')
+        self.set_transient_for(ui.main_window)
+        self.set_modal(True)
+        self.set_destroy_with_parent(True)
+        self.set_resizable(False)
+        self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
+        self.add_button(button_text='_OK', response_id=Gtk.ResponseType.OK)
+        self.add_button(button_text='_Cancel', response_id=Gtk.ResponseType.CANCEL)
+
+        self.config_parser = stlib.config.read()
+
+        self.content_area = self.get_content_area()
+        self.content_area.set_orientation(Gtk.Orientation.VERTICAL)
+        self.content_area.set_spacing(5)
+        self.content_area.set_margin_left(10)
+        self.content_area.set_margin_right(10)
+        self.content_area.set_margin_top(10)
+        self.content_area.set_margin_bottom(10)
+
+        frame = Gtk.Frame(label='Global Settings')
+        frame.set_label_align(0.1, 0.5)
+        frame.set_margin_top(10)
+        frame.set_margin_bottom(5)
+        self.content_area.pack_start(frame, False, False, 0)
+
+        self.main_box = Gtk.Box()
+        self.main_box.set_orientation(Gtk.Orientation.HORIZONTAL)
+        self.main_box.set_homogeneous(True)
+        self.main_box.set_margin_left(10)
+        self.main_box.set_margin_right(10)
+        self.main_box.set_margin_top(10)
+        self.main_box.set_margin_bottom(10)
+        frame.add(self.main_box)
+
+        box = Gtk.Box()
+        box.set_orientation(Gtk.Orientation.VERTICAL)
+        box.set_homogeneous(True)
+        box.set_spacing(3)
+        self.main_box.pack_start(box, False, True, 0)
+
+        label = Gtk.Label()
+        label.set_text('Dry run:')
+        label.set_halign(Gtk.Align.START)
+        box.pack_start(label, False, False, 0)
+
+        label = Gtk.Label()
+        label.set_text('Console level:')
+        label.set_halign(Gtk.Align.START)
+        box.pack_start(label, False, False, 0)
+
+        label = Gtk.Label()
+        label.set_text('Log file level:')
+        label.set_halign(Gtk.Align.START)
+        box.pack_start(label, False, False, 0)
+
+        box = Gtk.Box()
+        box.set_orientation(Gtk.Orientation.VERTICAL)
+        box.set_homogeneous(True)
+        box.set_spacing(3)
+        self.main_box.pack_start(box, False, True, 0)
+
+        self.dry_run = Gtk.ComboBoxText()
+        box.pack_start(self.dry_run, False, False, 0)
+
+        self.console_log_level = Gtk.ComboBoxText()
+        box.pack_start(self.console_log_level, False, False, 0)
+
+        self.log_file_level = Gtk.ComboBoxText()
+        box.pack_start(self.log_file_level, False, False, 0)
+
+        self.connect('response', self.on_response)
+
+        self.get_options()
+
+    def on_response(self, dialog, response):
+        if response == Gtk.ResponseType.OK:
+            self.set_options()
+
+        dialog.destroy()
+
+    def set_options(self):
+        selected = bool(self.dry_run.get_active())
+        self.config_parser.set('Debug', 'dryRun', selected)
+
+        selected = self.log_levels_name[self.console_log_level.get_active()]
+        self.config_parser.set('Debug', 'consoleLevel', selected)
+
+        selected = self.log_levels_name[self.log_file_level.get_active()]
+        self.config_parser.set('Debug', 'logFileLevel', selected)
+
+        stlib.config.write()
+
+    def get_options(self):
+        self.dry_run.append_text('False')
+        self.dry_run.append_text('True')
+
+        config = self.config_parser.getboolean('Debug', 'dryRun', fallback=False)
+        self.dry_run.set_active(int(config))
+
+        self.console_log_level.append_text('verbose')
+        self.console_log_level.append_text('info')
+        self.console_log_level.append_text('warning')
+        self.console_log_level.append_text('error')
+        self.console_log_level.append_text('critical')
+
+        config = self.config_parser.get('Debug', 'consoleLevel', fallback='info')
+        self.console_log_level.set_active(self.log_levels_id[config])
+
+        self.log_file_level.append_text('verbose')
+        self.log_file_level.append_text('info')
+        self.log_file_level.append_text('warning')
+        self.log_file_level.append_text('error')
+        self.log_file_level.append_text('critical')
+
+        config = self.config_parser.get('Debug', 'logFileLevel', fallback='verbose')
+        self.log_file_level.set_active(self.log_levels_id[config])
+
+
 class MessageDialog(Gtk.MessageDialog):
     def __init__(self, message_type, title, markup, secondary_markup=None):
         super().__init__(buttons=Gtk.ButtonsType.OK, type=message_type)

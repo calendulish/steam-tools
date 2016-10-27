@@ -41,6 +41,7 @@ if not os.path.isfile(config_file_path):
     logger.warn("Creating a new at %s", config_file_path)
 
     config_parser.add_section('Config')
+    config_parser.add_section('Debug')
     config_parser.add_section('CardFarming')
     config_parser.add_section('SteamTrades')
 

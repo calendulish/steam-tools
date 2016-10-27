@@ -72,8 +72,10 @@ def on_browser_profile_activate(action, parameters):
 
 
 def on_settings_activate(action, parameters):
-    # TODO
-    pass
+    dialog = ui.main.SettingsDialog()
+    dialog.show_all()
+    dialog.run()
+    dialog.destroy()
 
 
 def on_about_activate(action, parameters):
