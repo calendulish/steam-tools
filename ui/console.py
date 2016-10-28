@@ -249,12 +249,6 @@ class SteamTools:
 
             html = stlib.network.try_get_html('steamgifts', query_url)
 
-            # FIXME
-            #if 'suspensions' in response.url:
-            #    stlib.logger.critical('You are banned!')
-            #    stlib.logger.critical('Exiting...')
-            #    sys.exit(1)
-
             user_points = stlib.steamgifts_join.get_user_points(html)
             giveaways = stlib.steamgifts_join.get_giveaways(html)
 

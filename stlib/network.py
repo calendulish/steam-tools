@@ -16,6 +16,7 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
+import sys
 import threading
 
 import bs4
@@ -122,11 +123,18 @@ def try_get_response(service_name, url, data=None):
 
             response = get_response(url, data, cookies)
 
-            if response and service_name is 'steam':
+            if not response:
+                return None
+
+            if 'suspensions' in response.url:
+                stlib.logger.critical('You are banned!')
+                stlib.logger.critical('Exiting...')
+                sys.exit(1)
+
+            if service_name is 'steam':
                 if any(page in str(response.content) for page in STEAM_LOGIN_PAGES):
                     raise requests.exceptions.TooManyRedirects
-
-            if response and service_name is 'steamtrades':
+            elif service_name is 'steamtrades':
                 if '?login&redirect=' in str(response.content):
                     raise requests.exceptions.TooManyRedirects
         except(requests.exceptions.TooManyRedirects, KeyError):
