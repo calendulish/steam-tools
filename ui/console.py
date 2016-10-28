@@ -228,6 +228,7 @@ class SteamTools:
         except configparser.NoOptionError:
             type_list = ['wishlist', 'main', 'new']
             self.config_parser.set('SteamGifts', 'typeList', ', '.join(type_list))
+            stlib.config.write()
             stlib.logger.error('No type list found in the config file.')
             stlib.logger.error('Using the default: wishlist, main, new.')
             stlib.logger.error('You may edit the auto-generated config file after this run')
