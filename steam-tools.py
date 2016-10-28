@@ -71,8 +71,11 @@ if __name__ == "__main__":
     aParser.add_argument('-c', '--cli', nargs='+')
     cParams = aParser.parse_args()
 
-    if cParams.cli:
-        ST = ui.console.SteamTools(cParams)
-    else:
-        ST = ui.main.SteamTools()
-        ST.run()
+    try:
+        if cParams.cli:
+            ST = ui.console.SteamTools(cParams)
+        else:
+            ST = ui.main.SteamTools()
+            ST.run()
+    except KeyboardInterrupt:
+        sys.exit(0)
