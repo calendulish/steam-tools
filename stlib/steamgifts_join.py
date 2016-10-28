@@ -44,7 +44,7 @@ def get_user_level(html):
     level = html.find('span', class_=None)
     return int(''.join(filter(str.isdigit, level)))
 
-# FIXME
+
 def get_pinned_giveaways(html):
     container = html.find('div', class_='widget-container')
     pinned_giveaways = []
@@ -63,8 +63,8 @@ def get_pinned_giveaways(html):
 
 def get_giveaways(html):
     container = html.find('div', class_='widget-container')
-    container.find('div', class_='pinned-giveaways__outer-wrap').decompose()
-    giveaways = container.findAll('div', class_='giveaway__row-outer-wrap')
+    head = container.find('div', class_='page__heading')
+    giveaways = head.findAllNext('div', class_='giveaway__row-outer-wrap')
 
     return giveaways
 
