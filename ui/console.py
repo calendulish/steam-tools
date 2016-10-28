@@ -177,9 +177,8 @@ class SteamTools:
         stlib.logger.info('Hello {}'.format(stlib.ST_user))
 
         try:
-            TID_config = self.config_parser.get('SteamTrades', 'tradeID')
-            trade_ids = [line.strip() for line in TID_config.split(',')]
-            del TID_config
+            config = self.config_parser.get('SteamTrades', 'tradeID')
+            trade_ids = [line.strip() for line in config.split(',')]
         except configparser.NoOptionError:
             trade_ids = ['EXAMPLEID1', 'EXAMPLEID2']
             self.config_parser.set('SteamTrades', 'tradeID', ', '.join(trade_ids))
