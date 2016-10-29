@@ -116,6 +116,18 @@ class SteamTools(Gtk.Application):
         config = self.config_parser.getint('SteamTrades', 'maxWaitTime', fallback=4100)
         self.window.ST_bump_max_time.set_text(str(config))
 
+        config = self.config_parser.get('SteamGifts', 'typeList', fallback='wishlist, main, new')
+        self.window.SG_join_type_list.set_text(str(config))
+
+        config = self.config_parser.getboolean('SteamGifts', 'developerGiveaways', fallback=True)
+        self.window.SG_join_developer_giveaways.set_active(config)
+
+        config = self.config_parser.getint('SteamGifts', 'minWaitTime', fallback=7000)
+        self.window.SG_join_min_time.set_text(str(config))
+
+        config = self.config_parser.getint('SteamGifts', 'maxWaitTime', fallback=7300)
+        self.window.SG_join_max_time.set_text(str(config))
+
         stlib.config.write()
 
         self.window.present()

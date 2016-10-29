@@ -152,6 +152,24 @@ def on_ST_bump_max_time_changed(entry):
     ui.application.update_config('SteamTrades', 'maxWaitTime', entry.get_text())
 
 
+def on_SG_join_type_list_changed(entry):
+    ui.application.update_config('SteamGifts', 'typeList', entry.get_text())
+
+
+def on_SG_join_developer_giveaways_changed(switch, state):
+    ui.application.update_config('SteamGifts', 'developerGiveaways', state)
+
+
+def on_SG_join_min_time_changed(entry):
+    entry.set_text(''.join([text for text in entry.get_text() if text.isdigit()]))
+    ui.application.update_config('SteamGifts', 'minWaitTime', entry.get_text())
+
+
+def on_SG_join_max_time_changed(entry):
+    entry.set_text(''.join([text for text in entry.get_text() if text.isdigit()]))
+    ui.application.update_config('SteamGifts', 'maxWaitTime', entry.get_text())
+
+
 def on_card_farming_start():
     ui.main_window.start.set_sensitive(False)
     ui.main_window.stop.set_sensitive(False)
