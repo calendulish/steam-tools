@@ -18,6 +18,11 @@
 
 import stlib
 
+current_type = 0
+current_giveaway = 0
+query_html = None
+giveaways = []
+
 
 def configure():
     config_url = 'https://www.steamgifts.com/account/settings/giveaways'

@@ -335,11 +335,44 @@ def on_steamtrades_bump_stop():
     ui.main_window.ST_bump_progress_bar.set_fraction(0)
     stlib.steamtrades_bump.current_trade = 0
 
+
 def on_steamgifts_join_start():
-    pass
+    config_parser = stlib.config.read()
+
+    ui.main_window.start.set_sensitive(False)
+    ui.main_window.stop.set_sensitive(False)
+
+    ui.application.update_status_bar('Preparing. Please wait...')
+    ui.main_window.spinner.start()
+    ui.steamgifts_join_is_running = True
+
+    config = config_parser.get('SteamGifts', 'typeList')
+    type_list = [line.strip() for line in config.split(',')]
+
+    MIN_wait_time = config_parser.getint('SteamGifts', 'minWaitTime')
+    MAX_wait_time = config_parser.getint('SteamGifts', 'maxWaitTime')
+
+    stlib.logger.warning('Ready to start.')
+    ui.application.update_status_bar('Ready.')
+    ui.main_window.spinner.stop()
+
+    GLib.timeout_add(
+            100,
+            ui.timers.steamgifts_join_timer,
+            type_list,
+            MIN_wait_time,
+            MAX_wait_time
+    )
+
+    ui.main_window.stop.set_sensitive(True)
+
 
 def on_steamgifts_join_stop():
-    pass
+    ui.steamgifts_join_is_running = False
+    ui.main_window.start.set_sensitive(True)
+    ui.main_window.stop.set_sensitive(False)
+    ui.main_window.SG_join_progress_bar.set_fraction(0)
+
 
 def on_status_bar_text_pushed(status_bar, context, text):
     GLib.timeout_add_seconds(10, ui.timers.status_bar_text_pushed_timer, context)
