@@ -195,6 +195,16 @@
           </packing>
         </child>
         <child>
+          <object class="GtkLabel" id="info_label">
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkFrame" id="main_container">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -800,6 +810,68 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child type="tab">
+                  <object class="GtkLabel" id="auto_trade_tab">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Auto trade</property>
+                  </object>
+                  <packing>
+                    <property name="position">2</property>
+                    <property name="tab_fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child type="tab">
+                  <object class="GtkLabel" id="authenticator_tab">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Authenticator</property>
+                  </object>
+                  <packing>
+                    <property name="position">3</property>
+                    <property name="tab_fill">False</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkBox" id="ST_bump_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -1008,7 +1080,7 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="position">2</property>
+                    <property name="position">4</property>
                     <property name="tab_fill">False</property>
                   </packing>
                 </child>
@@ -1019,7 +1091,7 @@
                     <property name="label" translatable="yes">ST Bump</property>
                   </object>
                   <packing>
-                    <property name="position">2</property>
+                    <property name="position">4</property>
                     <property name="tab_fill">False</property>
                   </packing>
                 </child>
@@ -1436,7 +1508,7 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="position">3</property>
+                    <property name="position">5</property>
                     <property name="tab_fill">False</property>
                   </packing>
                 </child>
@@ -1447,7 +1519,7 @@
                     <property name="label" translatable="yes">SG Join</property>
                   </object>
                   <packing>
-                    <property name="position">3</property>
+                    <property name="position">5</property>
                     <property name="tab_fill">False</property>
                   </packing>
                 </child>
@@ -1683,7 +1755,7 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="position">4</property>
+                    <property name="position">6</property>
                     <property name="tab_fill">False</property>
                   </packing>
                 </child>
@@ -1694,7 +1766,7 @@
                     <property name="label" translatable="yes">SC Join</property>
                   </object>
                   <packing>
-                    <property name="position">4</property>
+                    <property name="position">6</property>
                     <property name="tab_fill">False</property>
                   </packing>
                 </child>
@@ -1710,7 +1782,7 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -1775,7 +1847,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>

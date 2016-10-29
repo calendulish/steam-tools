@@ -35,6 +35,9 @@ def status_bar_text_pushed_timer(context):
     ui.main_window.status_bar.pop(context)
     return False
 
+def hide_info_label():
+    ui.main_window.info_label.hide()
+    return False
 
 def card_farming_time_timer(start_time):
     if not ui.card_farming_is_running:

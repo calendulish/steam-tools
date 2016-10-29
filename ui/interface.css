@@ -1,5 +1,9 @@
 entry { color: darkslategrey; }
 
+#auto_trade_tab { color: darkgrey; }
+#authenticator_tab { color: darkgrey; }
+
+#info_label { color: white; background: darkblue; }
 #warning_label { color: white; background: darkred; }
 
 #version_label { font-size: x-small; }

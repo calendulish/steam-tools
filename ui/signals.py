@@ -39,8 +39,8 @@ import ui
 switch_stats = {
     0: [lambda: stlib.steam_user, lambda: ui.card_farming_is_running],
     1: [lambda: stlib.steam_user, lambda: ui.fake_app_is_running],
-    2: [lambda: stlib.ST_user, lambda: ui.steamtrades_bump_is_running],
-    3: [lambda: stlib.SG_user, lambda: ui.steamgifts_join_is_running],
+    4: [lambda: stlib.ST_user, lambda: ui.steamtrades_bump_is_running],
+    5: [lambda: stlib.SG_user, lambda: ui.steamgifts_join_is_running],
 }
 
 
@@ -89,12 +89,10 @@ def on_start_clicked(button):
         on_card_farming_start()
     elif current_page == 1:
         on_fake_app_start()
-    elif current_page == 2:
-        on_steamtrades_bump_start()
-    elif current_page == 3:
-        on_steamgifts_join_start()
     elif current_page == 4:
-        pass
+        on_steamtrades_bump_start()
+    elif current_page == 5:
+        on_steamgifts_join_start()
 
 
 def on_stop_clicked(button):
@@ -103,16 +101,24 @@ def on_stop_clicked(button):
         on_card_farming_stop()
     elif current_page == 1:
         on_fake_app_stop()
-    elif current_page == 2:
-        on_steamtrades_bump_stop()
-    elif current_page == 3:
-        on_steamgifts_join_stop()
     elif current_page == 4:
-        pass
+        on_steamtrades_bump_stop()
+    elif current_page == 5:
+        on_steamgifts_join_stop()
 
 
 def on_tabs_switch_page(tab, box, current_page):
-    if current_page == 4:
+    current_page_label = tab.get_tab_label(box)
+
+    if not Gtk.Widget.is_sensitive(current_page_label):
+        GLib.idle_add(ui.main_window.tabs.set_current_page, 0)
+        ui.main_window.info_label.set_text('Cooming Soon...')
+        ui.main_window.info_label.show()
+        GLib.timeout_add_seconds(5, ui.timers.hide_info_label)
+
+        return None
+
+    if current_page == 6:
         GLib.idle_add(ui.main_window.tabs.set_current_page, 0)
         message = ui.main.MessageDialog(Gtk.MessageType.INFO,
                                         'SteamCompanion is down.',
