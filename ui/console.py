@@ -17,6 +17,7 @@
 #
 
 import configparser
+import itertools
 import random
 import sys
 import time
@@ -250,12 +251,14 @@ class SteamTools:
             html = stlib.network.try_get_html('steamgifts', query_url)
 
             user_points = stlib.steamgifts_join.get_user_points(html)
-            giveaways = stlib.steamgifts_join.get_giveaways(html)
+            giveaway_generator = stlib.steamgifts_join.get_giveaways(html)
+
 
             if self.config_parser.getboolean('SteamGifts', 'developerGiveaways', fallback=True):
-                giveaways.extend(stlib.steamgifts_join.get_pinned_giveaways(html))
+                pinned_generator = stlib.steamgifts_join.get_pinned_giveaways(html)
+                giveaway_generator = itertools.chain(giveaway_generator, pinned_generator)
 
-            for giveaway in giveaways:
+            for giveaway in giveaway_generator:
                 giveaway_points = stlib.steamgifts_join.get_giveaway_points(giveaway)
 
                 if giveaway.find('div', class_='is-faded'):

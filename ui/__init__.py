@@ -32,3 +32,4 @@ steamtrades_bump_is_running = False
 steamtrades_bump_waiting = False
 steamgifts_join_is_running = False
 steamgifts_join_waiting = False
+steamgifts_join_giveaway_waiting = False

@@ -17,6 +17,7 @@
 #
 
 import datetime
+import itertools
 import random
 import time
 
@@ -137,7 +138,7 @@ def progress_bar_pulse(type_, progress_bar, start_time, maximum_time):
 
     if fraction >= 1.0:
         progress_bar.set_text('0:00:00')
-        setattr(ui, type_ + '_join_waiting', False)
+        setattr(ui, type_ + '_waiting', False)
         return False
     else:
         return True
@@ -156,7 +157,6 @@ def steamtrades_bump_timer(trade_ids, MIN_wait_time, MAX_wait_time):
         stlib.logger.warning('There\'s nothing else to do. Stopping.')
         ui.signals.on_steamtrades_bump_stop()
         return False
-
 
     current_datetime = time.strftime('%B, %d, %Y - %H:%M:%S')
     stlib.logger.info('Bumping now! %s', current_datetime)
@@ -179,7 +179,7 @@ def steamtrades_bump_timer(trade_ids, MIN_wait_time, MAX_wait_time):
 
     GLib.timeout_add_seconds(1,
                              progress_bar_pulse,
-                             'steamtrades',
+                             'steamtrades_bump',
                              ui.main_window.ST_bump_progress_bar,
                              start_time,
                              random_time)
@@ -189,8 +189,56 @@ def steamtrades_bump_timer(trade_ids, MIN_wait_time, MAX_wait_time):
     return True
 
 
-# FIXME: Very ugly and slow! please, use yields.
-def steamgifts_join_timer(type_list, MIN_wait_time, MAX_wait_time):
+def steamgifts_join_giveaway_timer(giveaway, user_points):
+    if not ui.steamgifts_join_is_running:
+        return False
+
+    if ui.steamgifts_join_giveaway_waiting:
+        return True
+
+    try:
+        giveaway = next(giveaway)
+    except StopIteration:
+        # FIXME
+        stlib.logger.verbose('There\'s nothing else for type **TYPE**')
+        ui.steamgifts_join_waiting = False
+        return False
+
+    giveaway_points = stlib.steamgifts_join.get_giveaway_points(giveaway)
+    giveaway_name = stlib.steamgifts_join.get_giveaway_name(giveaway)
+
+    if giveaway.find('div', class_='is-faded'):
+        stlib.logger.verbose('Ignoring %s because you already joined.', giveaway_name)
+        return True
+
+    if user_points == 0:
+        stlib.logger.verbose('You don\'t have more points. Waiting.')
+        ui.steamgifts_join_waiting = False
+        return False
+
+    if user_points >= giveaway_points:
+        points_spent = stlib.steamgifts_join.join(giveaway)
+        user_points -= points_spent
+
+        antiban_time = random.randint(1, 15)
+        start_time = time.time()
+
+        GLib.timeout_add_seconds(1,
+                                 progress_bar_pulse,
+                                 'steamgifts_join_giveaway',
+                                 ui.main_window.SG_join_progress_bar,
+                                 start_time,
+                                 antiban_time)
+
+        ui.steamgifts_join_giveaway_waiting = True
+    else:
+        stlib.logger.verbose('Ignoring %s', stlib.steamgifts_join.get_giveaway_name(giveaway))
+        stlib.logger.verbose('because the account don\'t have the requirements to enter.')
+
+    return True
+
+
+def steamgifts_join_timer(type, MIN_wait_time, MAX_wait_time):
     if not ui.steamgifts_join_is_running:
         return False
 
@@ -200,21 +248,20 @@ def steamgifts_join_timer(type_list, MIN_wait_time, MAX_wait_time):
     config_parser = stlib.config.read()
 
     try:
-        type = type_list[stlib.steamgifts_join.current_type]
-    except IndexError:
+        type = next(type)
+    except StopIteration:
         random_time = random.randint(MIN_wait_time, MAX_wait_time)
 
         start_time = time.time()
 
         GLib.timeout_add_seconds(1,
                                  progress_bar_pulse,
-                                 'steamgifts',
+                                 'steamgifts_join',
                                  ui.main_window.SG_join_progress_bar,
                                  start_time,
                                  random_time)
 
         ui.steamgifts_join_waiting = True
-        stlib.steamgifts_join.current_type = 0
 
         return True
 
@@ -229,63 +276,20 @@ def steamgifts_join_timer(type_list, MIN_wait_time, MAX_wait_time):
     else:
         query_url += '&q={}'.format(type)
 
-    # FIXME
-    if stlib.steamgifts_join.current_giveaway == 0:
-        stlib.steamgifts_join.query_html = stlib.network.try_get_html('steamgifts', query_url)
+    html = stlib.network.try_get_html('steamgifts', query_url)
+    giveaway_generator = stlib.steamgifts_join.get_giveaways(html)
 
-        giveaways = stlib.steamgifts_join.get_giveaways(stlib.steamgifts_join.query_html)
+    if config_parser.getboolean('SteamGifts', 'developerGiveaways', fallback=True):
+        pinned_generator = stlib.steamgifts_join.get_pinned_giveaways(html)
+        giveaway_generator = itertools.chain(giveaway_generator, pinned_generator)
 
-        if config_parser.getboolean('SteamGifts', 'developerGiveaways', fallback=True):
-            giveaways.extend(stlib.steamgifts_join.get_pinned_giveaways(stlib.steamgifts_join.query_html))
+        user_points = stlib.steamgifts_join.get_user_points(html)
 
-        stlib.steamgifts_join.giveaways = giveaways
-    else:
-        giveaways = stlib.steamgifts_join.giveaways
-
-    user_points = stlib.steamgifts_join.get_user_points(stlib.steamgifts_join.query_html)
-
-    try:
-        giveaway = giveaways[stlib.steamgifts_join.current_giveaway]
-    except IndexError:
-        stlib.logger.verbose('There\'s nothing else for type `%s.\'', type)
-        stlib.steamgifts_join.current_type += 1
-        stlib.steamgifts_join.current_giveaway = 0
-        return True
-
-    giveaway_points = stlib.steamgifts_join.get_giveaway_points(giveaway)
-    giveaway_name = stlib.steamgifts_join.get_giveaway_name(giveaway)
-
-    if giveaway.find('div', class_='is-faded'):
-        stlib.logger.verbose('Ignoring %s because you already joined.', giveaway_name)
-        stlib.steamgifts_join.current_giveaway += 1
-        return True
-
-    if user_points == 0:
-        stlib.logger.verbose('You don\'t have more points. Waiting.')
-        # Force global timer to be enabled
-        stlib.steamgifts_join.current_type = 99
-        return True
-
-    if user_points >= giveaway_points:
-        points_spent = stlib.steamgifts_join.join(giveaway)
-        user_points -= points_spent
-
-        antiban_time = random.randint(1, 15)
-        start_time = time.time()
-
-        GLib.timeout_add_seconds(1,
-                                 progress_bar_pulse,
-                                 'steamgifts',
-                                 ui.main_window.SG_join_progress_bar,
-                                 start_time,
-                                 antiban_time)
+        GLib.timeout_add(50,
+                         steamgifts_join_giveaway_timer,
+                         giveaway_generator,
+                         user_points)
 
         ui.steamgifts_join_waiting = True
-
-    else:
-        stlib.logger.verbose('Ignoring %s', stlib.steamgifts_join.get_giveaway_name(giveaway))
-        stlib.logger.verbose('because the account don\'t have the requirements to enter.')
-
-    stlib.steamgifts_join.current_giveaway += 1
 
     return True

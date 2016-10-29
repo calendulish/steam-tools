@@ -18,11 +18,6 @@
 
 import stlib
 
-current_type = 0
-current_giveaway = 0
-query_html = None
-giveaways = []
-
 
 def configure():
     config_url = 'https://www.steamgifts.com/account/settings/giveaways'
@@ -63,7 +58,8 @@ def get_pinned_giveaways(html):
     except AttributeError:
         stlib.logger.error('Cannot found any developer giveaways. Ignoring.')
 
-    return pinned_giveaways
+    for pinned_giveaway in pinned_giveaways:
+        yield pinned_giveaway
 
 
 def get_giveaways(html):
@@ -71,7 +67,8 @@ def get_giveaways(html):
     head = container.find('div', class_='page__heading')
     giveaways = head.findAllNext('div', class_='giveaway__row-outer-wrap')
 
-    return giveaways
+    for giveaway in giveaways:
+        yield giveaway
 
 
 def get_giveaway_name(giveaway):
