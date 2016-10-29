@@ -226,7 +226,7 @@ def steamgifts_join_giveaway_timer(giveaway, user_points):
         GLib.timeout_add_seconds(1,
                                  progress_bar_pulse,
                                  'steamgifts_join_giveaway',
-                                 ui.main_window.SG_join_progress_bar,
+                                 ui.main_window.SG_join_antiban_progress_bar,
                                  start_time,
                                  antiban_time)
 
