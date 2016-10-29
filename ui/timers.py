@@ -253,6 +253,9 @@ def steamgifts_join_timer(type, MIN_wait_time, MAX_wait_time):
 
     config_parser = stlib.config.read()
 
+    ui.main_window.SG_join_last_giveaway.set_text('Gathering...')
+    ui.main_window.SG_join_current_points.set_text('Gathering...')
+
     try:
         type = next(type)
     except StopIteration:
