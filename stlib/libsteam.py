@@ -81,7 +81,11 @@ def run_wrapper(app_id):
 def stop_wrapper():
     stlib.logger.verbose('Closing wrapper subprocess...')
 
-    stlib.wrapper_process.terminate()
+    try:
+        stlib.wrapper_process.terminate()
+    except ProcessLookupError:
+        stlib.logger.verbose('subprocess is already terminated.')
+        return 1
 
     try:
         stlib.logger.verbose("Waiting to wrapper subprocess terminate.")
