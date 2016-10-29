@@ -396,6 +396,7 @@ def on_steamgifts_join_stop():
     ui.main_window.start.set_sensitive(True)
     ui.main_window.stop.set_sensitive(False)
     ui.main_window.SG_join_progress_bar.set_fraction(0)
+    ui.main_window.SG_join_antiban_progress_bar.set_fraction(0)
 
 
 def on_status_bar_text_pushed(status_bar, context, text):
