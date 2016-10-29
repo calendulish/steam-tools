@@ -1830,8 +1830,5 @@ Fernando Manfredi</property>
     <property name="has_tooltip">True</property>
     <property name="tooltip_text" translatable="yes">Steam tools &lt;dev@lara.click&gt;</property>
     <property name="title" translatable="yes">Steam Tools</property>
-    <signal name="activate" handler="on_tray_activate" swapped="no"/>
-    <signal name="button-press-event" handler="on_tray_button_press_event" swapped="no"/>
-    <signal name="popup-menu" handler="on_tray_popup_menu" swapped="no"/>
   </object>
 </interface>
