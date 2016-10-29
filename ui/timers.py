@@ -220,6 +220,9 @@ def steamgifts_join_giveaway_timer(giveaway, user_points):
         points_spent = stlib.steamgifts_join.join(giveaway)
         user_points -= points_spent
 
+        ui.main_window.SG_join_last_giveaway.set_text('{} ({}P)'.format(giveaway_name, points_spent))
+        ui.main_window.SG_join_current_points.set_text('{} points'.format(user_points))
+
         antiban_time = random.randint(1, 15)
         start_time = time.time()
 
