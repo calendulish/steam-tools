@@ -289,13 +289,13 @@ def steamgifts_join_timer(type, MIN_wait_time, MAX_wait_time):
         pinned_generator = stlib.steamgifts_join.get_pinned_giveaways(html)
         giveaway_generator = itertools.chain(giveaway_generator, pinned_generator)
 
-        user_points = stlib.steamgifts_join.get_user_points(html)
+    user_points = stlib.steamgifts_join.get_user_points(html)
 
-        GLib.timeout_add(50,
-                         steamgifts_join_giveaway_timer,
-                         giveaway_generator,
-                         user_points)
+    GLib.timeout_add(50,
+                     steamgifts_join_giveaway_timer,
+                     giveaway_generator,
+                     user_points)
 
-        ui.steamgifts_join_waiting = True
+    ui.steamgifts_join_waiting = True
 
     return True
