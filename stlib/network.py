@@ -61,7 +61,7 @@ def async_wait(function):
             if stlib.gui_mode:
                 while (Gtk.events_pending()):
                     Gtk.main_iteration()
-            gevent.idle()
+            gevent.sleep(0.01)
         else:
             return thread.return_
 
