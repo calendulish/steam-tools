@@ -52,6 +52,8 @@ def what():
             ret = 'cyg'
         else:
             ret = 'win'
+    elif sys.platform == 'cygwin':
+        ret = 'cyg'
     else:
         ret = 'lin'
 
@@ -80,6 +82,16 @@ def arch():
 
 
 if what() == 'win' or what() == 'cyg':
+    if 'build' in sys.argv or 'install' in sys.argv:
+        print("You cannot use build/install command with {}".format(what()))
+        sys.exit(1)
+
+    if os.name == 'posix':
+        print("You cannot build for cygwin using linux python")
+        print("Use `make' command instead of setup.py")
+        print("E.g.: make PYTHONPATH=/cygdrive/c/Python34")
+        sys.exit(1)
+
     import site
     import atexit
     import textwrap
