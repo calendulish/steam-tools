@@ -118,21 +118,33 @@ class Winpty(build):
         build.run(self)
 
 
-data_files = [('lib64', [os.path.join('lib64', 'libsteam_api.dll'),
-                         os.path.join('lib64', 'libsteam_api.so')]),
-              ('lib32', [os.path.join('lib32', 'libsteam_api.dll'),
-                         os.path.join('lib32', 'libsteam_api.so')]),
-              ('ui', ['ui/interface.xml'])]
+if what() == 'win' or what() == 'cyg':
+    if arch() == 64:
+        data_files = [('lib64', [os.path.join('lib64', 'libsteam_api.dll')])]
+    else:
+        data_files = [('lib32', [os.path.join('lib32', 'libsteam_api.dll')])]
+else:
+    if arch() == 64:
+        data_files = [('', [os.path.join('lib64', 'libsteam_api.so')])]
+    else:
+        data_files = [('', [os.path.join('lib32', 'libsteam_api.so')])]
+
+data_files.append(('ui', [os.path.join('ui', 'interface.xml'),
+                          os.path.join('ui', 'interface.css'),
+                          os.path.join('ui', 'menu.xml')]))
 
 # Include icons
 icons_path = os.path.join('ui', 'icons')
 for icon in os.listdir(icons_path):
-    data_files.append((icons_path, [os.path.join(icons_path, icon)]))
+    if os.path.isfile(os.path.join(icons_path, icon)):
+        data_files.append((icons_path, [os.path.join(icons_path, icon)]))
 
-winpty_build_path = os.path.join('winpty', 'build')
-winpty_files = [os.path.join(winpty_build_path, 'console.exe'),
-                os.path.join(winpty_build_path, 'winpty.dll'),
-                os.path.join(winpty_build_path, 'winpty-agent.exe')]
+# Include winpty files
+if what() == 'cyg':
+    winpty_build_path = os.path.join('winpty', 'build')
+    data_files.append(('winpty', [os.path.join(winpty_build_path, 'console.exe'),
+                                  os.path.join(winpty_build_path, 'winpty.dll'),
+                                  os.path.join(winpty_build_path, 'winpty-agent.exe')]))
 
 console_programs = ['steam-tools.py']
 
@@ -145,12 +157,13 @@ def py2exe_options():
                               'packages': ['pygobject',
                                            'psutil',
                                            'requests',
+                                           'gevent',
                                            'beautifulsoup4']}}
 
         return {'console': [{'script': 'steam-tools.py',
-                             # 'icon_resources': [(1, 'steam-tools.ico')]
+                             'icon_resources': [(1, os.path.join('ui', 'icons', 'steam-tools.ico'))]
                              },
-                            {'script': 'libsteam_wrapper.py'}],
+                            {'script': os.path.join('stlib', 'libsteam_wrapper.py')}],
                 'options': options}
     else:
         return {}
@@ -185,9 +198,6 @@ def fix_cacert():
 
     data_files.append(('', [cacert_file]))
 
-    if what() == 'cyg':
-        data_files.append(('winpty', winpty_files))
-
 
 def fix_gtk():
     if arch() == 64:
@@ -195,25 +205,22 @@ def fix_gtk():
     else:
         gnome_dir = os.path.join('lib32', 'gnome')
 
-    gtk_dirs = [os.path.join('lib', 'girepository-1.0'),
-                os.path.join('share', 'icons')]
+    gtk_dirs = [os.path.join('gi_repository'),
+                os.path.join('ui', 'icons')]
 
-    for _file in os.listdir(gnome_dir):
-        if _file.endswith('.dll'):
-            data_files.append(('', [os.path.join(gnome_dir, _file)]))
+    for file_ in os.listdir(gnome_dir):
+        if file_.endswith('.dll'):
+            data_files.append(('', [os.path.join(gnome_dir, file_)]))
 
-    for _dir in gtk_dirs:
-        for root, dirs, files in os.walk(os.path.join(gnome_dir, _dir)):
-            for _file in files:
-                data_files.append((root[len(gnome_dir) + 1:], [os.path.join(root, _file)]))
+    for dir_ in gtk_dirs:
+        for root, dirs, files in os.walk(dir_):
+            for file_ in files:
+                data_files.append((root[len(gnome_dir) + 1:], [os.path.join(root, file_)]))
 
 
 if what() == 'cyg' or what() == 'win':
     fix_cacert()
     fix_gtk()
-
-if what() == 'cyg':
-    data_files.append(('winpty', winpty_files))
 
 setup(name='Steam Tools',
       version='GIT',
@@ -224,11 +231,13 @@ setup(name='Steam Tools',
       license='GPL',
       data_files=data_files,
       scripts=console_programs,
-      packages=['stlib'],
+      packages=['stlib',
+                'ui'],
       cmdclass={'build': Winpty,
                 'install_scripts': CheckExtension},
       requires=['pygobject',
                 'requests',
+                'gevent',
                 'beautifulsoup4',
                 'pycrypto'],
       **py2exe_options())
