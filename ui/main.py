@@ -157,10 +157,13 @@ class SteamTools(Gtk.Application):
 
     def do_login_check(self):
         self.window.spinner.start()
-        stlib.logins.queue_connect('steam', self.do_steam_login)
-        stlib.logins.queue_connect('steamgifts', self.do_steamgifts_login)
-        stlib.logins.queue_connect('steamtrades', self.do_steamtrades_login)
-        stlib.logins.wait_queue()
+
+        greenlets = [stlib.logins.queue_connect('steam', self.do_steam_login),
+                     stlib.logins.queue_connect('steamgifts', self.do_steamgifts_login),
+                     stlib.logins.queue_connect('steamtrades', self.do_steamtrades_login)]
+
+        stlib.logins.wait_queue(greenlets)
+
         self.window.spinner.stop()
 
     def do_steam_login(self, greenlet):

@@ -106,14 +106,22 @@ def queue_connect(service_name, callback=None, wait=False):
         except KeyboardInterrupt:
             sys.exit(0)
 
-    return None
+    return greenlet
 
 
-def wait_queue():
+def get_queue():
     greenlets = []
+
     for object_ in gc.get_objects():
         if isinstance(object_, gevent.Greenlet):
             greenlets.append(object_)
+
+    return greenlets
+
+
+def wait_queue(greenlets=None):
+    if not greenlets:
+        greenlets = get_queue()
 
     try:
         while True:
