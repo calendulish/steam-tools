@@ -58,7 +58,8 @@ def _find_wrapper():
     paths = [os.path.join(current_directory, 'stlib')]
 
     if os.name is 'posix':
-        paths.append(os.path.join(site.getsitepackages()[1], 'stlib'))
+        for directory in site.getsitepackages():
+            paths.append(os.path.join(directory, 'stlib'))
 
     for path in paths:
         for ext in ['', '.exe', '.py']:
