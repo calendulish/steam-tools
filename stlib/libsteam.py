@@ -43,10 +43,10 @@ def _find_libsteam():
             return False
         else:
             lib_dir = 'share/steam-tools'
-            if os.path.isfile(os.path.join('/usr/local', lib_dir, libsteam_path)):
-                libsteam_path = os.path.join('/usr/local', lib_dir, libsteam_path)
-            elif os.path.isfile(os.path.join('/usr', lib_dir, libsteam_path)):
-                libsteam_path = os.path.join('/usr', lib_dir, libsteam_path)
+            if os.path.isfile(os.path.join('/usr/local', lib_dir, 'libsteam_api' + ext)):
+                libsteam_path = os.path.join('/usr/local', lib_dir, 'libsteam_api' + ext)
+            elif os.path.isfile(os.path.join('/usr', lib_dir, 'libsteam_api' + ext)):
+                libsteam_path = os.path.join('/usr', lib_dir, 'libsteam_api' + ext)
             else:
                 return False
 
@@ -70,6 +70,11 @@ def _find_wrapper():
 
 def run_wrapper(app_id):
     wrapper_path = _find_wrapper()
+
+    if not wrapper_path:
+        stlib.logger.critical('Unable to find libsteam wrapper!')
+        return None
+
     wrapper_exec = [wrapper_path, app_id, _find_libsteam()]
 
     if wrapper_path[-3:] != 'exe':
@@ -113,7 +118,8 @@ def is_steam_running():
 
 
 def is_wrapper_running():
-    if stlib.wrapper_process.poll():
+    if not stlib.wrapper_process or \
+            stlib.wrapper_process.poll():
         return False
     else:
         return True
