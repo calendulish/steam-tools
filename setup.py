@@ -181,6 +181,14 @@ def py2exe_options():
         return {}
 
 
+def fix_gevent():
+    for site_ in site.getsitepackages():
+        full_path = os.path.join(site_, 'gevent')
+        if os.path.isdir(full_path):
+            for file_ in os.listdir(full_path):
+                if file_ == '_util_py2.py':
+                    os.remove(os.path.join(full_path, file_))
+
 def fix_cacert():
     requests_path = os.path.dirname(requests.__file__)
     cacert_file = os.path.join(requests_path, 'cacert.pem')
@@ -233,6 +241,7 @@ def fix_gtk():
 if what() == 'cyg' or what() == 'win':
     fix_cacert()
     fix_gtk()
+    fix_gevent()
 
 setup(name='Steam Tools',
       version='GIT',
