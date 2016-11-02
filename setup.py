@@ -164,11 +164,11 @@ def py2exe_options():
         options = {'py2exe': {'bundle_files': 3,
                               'optimize': 1,
                               'compressed': 0,
-                              'packages': ['pygobject',
+                              'packages': ['gi',
                                            'psutil',
                                            'requests',
                                            'gevent',
-                                           'beautifulsoup4']}}
+                                           'bs4']}}
 
         return {'console': [{'script': 'steam-tools.py',
                              'icon_resources': [(1, os.path.join('ui', 'icons', 'steam-tools.ico'))]
