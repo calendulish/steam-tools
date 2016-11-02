@@ -81,7 +81,7 @@ def arch():
     return ret
 
 
-libdir='lib' + str(arch)
+libdir='lib' + str(arch())
 
 
 if what() == 'win' or what() == 'cyg':
@@ -218,22 +218,22 @@ def fix_cacert():
 
 
 def fix_gtk():
-    if arch() == 64:
-        gnome_dir = os.path.join('lib64', 'gnome')
-    else:
-        gnome_dir = os.path.join('lib32', 'gnome')
-
-    gtk_dirs = [os.path.join('gi_repository'),
-                os.path.join('ui', 'icons')]
-
-    for file_ in os.listdir(gnome_dir):
+    # Add dlls
+    for file_ in os.listdir(libdir):
         if file_.endswith('.dll'):
-            data_files.append(('', [os.path.join(gnome_dir, file_)]))
+            data_files.append(('', [os.path.join(libdir, file_)]))
 
-    for dir_ in gtk_dirs:
-        for root, dirs, files in os.walk(dir_):
-            for file_ in files:
-                data_files.append((root[len(gnome_dir) + 1:], [os.path.join(root, file_)]))
+    # Add typelib
+    typelib_directory = os.path.join(libdir, 'girepository-1.0')
+    for file_ in os.listdir(typelib_directory):
+        if file_.endswith('.typelib'):
+            data_files.append(('girepository-1.0', [os.path.join(typelib_directory, file_)]))
+
+    # Add icons
+    for root, dirs, files in os.walk(os.path.join('ui', 'icons', 'Adwaita')):
+        icons_path = os.path.join('share', 'icons', 'Adwaita', root[17:])
+        for file_ in files:
+            data_files.append((icons_path, [os.path.join(root, file_)]))
 
 
 if what() == 'cyg' or what() == 'win':
