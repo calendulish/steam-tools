@@ -29,28 +29,26 @@ if os.name is 'posix':
 
 def _find_libsteam():
     if os.name == 'nt':
-        ext = '.dll'
-    else:
-        ext = '.so'
+        libsteam = 'libsteam_api.dll'
 
-    if sys.maxsize > 2 ** 32:
-        libsteam_path = os.path.join('lib64', 'libsteam_api' + ext)
-    else:
-        libsteam_path = os.path.join('lib32', 'libsteam_api' + ext)
-
-    if not os.path.isfile(libsteam_path):
-        if os.name == 'nt':
-            return False
+        if os.path.isfile(libsteam):
+            return libsteam
         else:
-            lib_dir = 'share/steam-tools'
-            if os.path.isfile(os.path.join('/usr/local', lib_dir, 'libsteam_api' + ext)):
-                libsteam_path = os.path.join('/usr/local', lib_dir, 'libsteam_api' + ext)
-            elif os.path.isfile(os.path.join('/usr', lib_dir, 'libsteam_api' + ext)):
-                libsteam_path = os.path.join('/usr', lib_dir, 'libsteam_api' + ext)
-            else:
-                return False
+            return False
+    else:
+        paths = [
+            '/usr/share/steam-tools',
+            '/usr/local/share/steam-tools',
+            '/opt/steam-tools',
+            ''
+        ]
 
-    return libsteam_path
+        for path in paths:
+            libsteam_path = os.path.join(path, 'libsteam_api.so')
+            if os.path.isfile(libsteam_path):
+                return libsteam_path
+
+        return False
 
 
 def _find_wrapper():
