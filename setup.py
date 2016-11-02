@@ -183,7 +183,9 @@ def py2exe_options():
                                            'bs4']}}
 
         return {'console': [{'script': 'steam-tools.py',
-                             'icon_resources': [(1, os.path.join('ui', 'icons', 'steam-tools.ico'))]
+                             'icon_resources': [(1, os.path.join('ui', 'icons', 'steam-tools.ico'))],
+                             'copyright': 'Copyright (C) 2016 Lara Maia',
+                             'version': '{}.{}'.format(version_major, version_minor),
                              },
                             {'script': os.path.join('stlib', 'libsteam_wrapper.py')}],
                 'options': options}
