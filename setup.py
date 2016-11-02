@@ -83,6 +83,18 @@ def arch():
 
 libdir='lib' + str(arch())
 
+with open(os.path.join('ui', '__init__.py'), 'r') as file_:
+    temporary = file_.read()
+    major = temporary.find('__VERSION_MAJOR__')
+    minor = temporary.find('__VERSION_MINOR__')
+    version_major = temporary[major+21:major+22]
+    version_minor = temporary[minor+21:minor+22]
+    version_extra = what().upper()
+    version = '{}.{} {}'.format(version_major,
+                                version_minor,
+                                version_extra)
+    del temporary
+
 
 if what() == 'win' or what() == 'cyg':
     if 'build' in sys.argv or 'install' in sys.argv:
@@ -242,7 +254,7 @@ if what() == 'cyg' or what() == 'win':
     fix_gevent()
 
 setup(name='Steam Tools',
-      version='GIT',
+      version=version,
       description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
       author='Lara Maia',
       author_email='dev@lara.click',
