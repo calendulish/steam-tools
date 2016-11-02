@@ -117,9 +117,9 @@ if what() == 'win' or what() == 'cyg':
     import requests.certs
     from compileall import compile_file
 
-    temporary_directory = tempfile.mktemp()
-    shutil.copytree('gi_repository', os.path.join(temporary_directory, 'gi'))
-    site.addsitedir(temporary_directory)
+    temporary_site = tempfile.mktemp()
+    shutil.copytree('gi_repository', os.path.join(temporary_site, 'gi'))
+    site.addsitedir(temporary_site)
 elif 'py2exe' in sys.argv:
     print("You cannot use py2exe without a Windows Python")
     print("Rerun with the correct python version")
@@ -234,6 +234,9 @@ def fix_gtk():
     for file_ in os.listdir(libdir):
         if file_.endswith('.dll'):
             data_files.append(('', [os.path.join(libdir, file_)]))
+        elif file_.endswith('.pyd'):
+            shutil.copy(os.path.join(libdir, file_),
+                        os.path.join(temporary_site, 'gi'))
 
     # Add typelib
     typelib_directory = os.path.join(libdir, 'girepository-1.0')
