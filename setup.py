@@ -94,16 +94,17 @@ if what() == 'win' or what() == 'cyg':
 
     import site
     import atexit
+    import shutil
+    import tempfile
     import textwrap
     # noinspection PyUnresolvedReferences
     import py2exe
     import requests.certs
     from compileall import compile_file
 
-    if sys.maxsize > 2 ** 32:
-        site.addsitedir('lib64')
-    else:
-        site.addsitedir('lib32')
+    temporary_directory = tempfile.mktemp()
+    shutil.copytree('gi_repository', os.path.join(temporary_directory, 'gi'))
+    site.addsitedir(temporary_directory)
 elif 'py2exe' in sys.argv:
     print("You cannot use py2exe without a Windows Python")
     print("Rerun with the correct python version")
