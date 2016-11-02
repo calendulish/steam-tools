@@ -239,7 +239,8 @@ def fix_gtk():
     typelib_directory = os.path.join(libdir, 'girepository-1.0')
     for file_ in os.listdir(typelib_directory):
         if file_.endswith('.typelib'):
-            data_files.append(('girepository-1.0', [os.path.join(typelib_directory, file_)]))
+            data_files.append((os.path.join('lib', 'girepository-1.0'),
+                               [os.path.join(typelib_directory, file_)]))
 
     # Add icons
     for root, dirs, files in os.walk(os.path.join('ui', 'icons', 'Adwaita')):
