@@ -81,6 +81,9 @@ def arch():
     return ret
 
 
+libdir='lib' + str(arch)
+
+
 if what() == 'win' or what() == 'cyg':
     if 'build' in sys.argv or 'install' in sys.argv:
         print("You cannot use build/install command with {}".format(what()))
@@ -132,15 +135,9 @@ class Winpty(build):
 
 
 if what() == 'win' or what() == 'cyg':
-    if arch() == 64:
-        data_files = [('lib64', [os.path.join('lib64', 'libsteam_api.dll')])]
-    else:
-        data_files = [('lib32', [os.path.join('lib32', 'libsteam_api.dll')])]
+    data_files = [('', [os.path.join(libdir, 'libsteam_api.dll')])]
 else:
-    if arch() == 64:
-        data_files = [('', [os.path.join('lib64', 'libsteam_api.so')])]
-    else:
-        data_files = [('', [os.path.join('lib32', 'libsteam_api.so')])]
+    data_files = [('', [os.path.join(libdir, 'libsteam_api.so')])]
 
 data_files.append(('ui', [os.path.join('ui', 'interface.xml'),
                           os.path.join('ui', 'interface.css'),
