@@ -67,6 +67,9 @@ if os.name is 'nt' and os.getenv('PWD'):
         sys.exit(return_code)
 
 if __name__ == "__main__":
+    print('Steam Tools version {}'.format(ui.version.__VERSION__))
+    print('Copyright (C) 2016 Lara Maia - <dev@lara.click>\n')
+
     aParser = argparse.ArgumentParser()
     aParser.add_argument('-c', '--cli', nargs='+')
     cParams = aParser.parse_args()

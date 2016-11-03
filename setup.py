@@ -16,11 +16,17 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
+import compileall
+import importlib.machinery
 import os
 import sys
 from distutils.command.build import build
 from distutils.command.install_scripts import install_scripts
 from distutils.core import setup
+
+__version_module_path__ =  os.path.join('ui', 'version.py')
+__version_class__ = importlib.machinery.SourceFileLoader('version', __version_module_path__)
+version = __version_class__.load_module()
 
 CMK, FORCELIN, FORCEWIN, FORCECYG, FORCE64, FORCE32 = [0 for _ in range(6)]
 
@@ -82,18 +88,6 @@ def arch():
 
 
 libdir='lib' + str(arch())
-
-with open(os.path.join('ui', '__init__.py'), 'r') as file_:
-    temporary = file_.read()
-    major = temporary.find('__VERSION_MAJOR__')
-    minor = temporary.find('__VERSION_MINOR__')
-    version_major = temporary[major+21:major+22]
-    version_minor = temporary[minor+21:minor+22]
-    version_extra = what().upper()
-    version = '{}.{} {}'.format(version_major,
-                                version_minor,
-                                version_extra)
-    del temporary
 
 
 if what() == 'win' or what() == 'cyg':
@@ -185,7 +179,9 @@ def py2exe_options():
         return {'console': [{'script': 'steam-tools.py',
                              'icon_resources': [(1, os.path.join('ui', 'icons', 'steam-tools.ico'))],
                              'copyright': 'Copyright (C) 2016 Lara Maia',
-                             'version': '{}.{}'.format(version_major, version_minor),
+                             'version': '{}.{}.{}'.format(version.__VERSION_MAJOR__,
+                                                          version.__VERSION_MINOR__,
+                                                          version.__VERSION_REVISION__),
                              },
                             {'script': os.path.join('stlib', 'libsteam_wrapper.py')}],
                 'options': options}
@@ -259,8 +255,20 @@ if what() == 'cyg' or what() == 'win':
     fix_gtk()
     fix_gevent()
 
+version_extra = what().upper() + str(arch())
+
+with open('version.py', 'w') as file_:
+    file_.write('__VERSION_EXTRA__ = "{}"'.format(version_extra))
+
+compileall.compile_file('version.py', legacy=True)
+os.remove('version.py')
+data_files.append(('', ['version.pyc']))
+
 setup(name='Steam Tools',
-      version=version,
+      version='{}.{}.{}-{}'.format(version.__VERSION_MAJOR__,
+                                   version.__VERSION_MINOR__,
+                                   version.__VERSION_REVISION__,
+                                   version_extra),
       description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
       author='Lara Maia',
       author_email='dev@lara.click',

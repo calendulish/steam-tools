@@ -64,7 +64,7 @@ class SteamToolsWindow(Gtk.ApplicationWindow):
         ui.gtk_markup_substring.set_from_css(
                 self.version_label,
                 styles=('text', 'version'),
-                params=('Steam Tools', ui.__VERSION__)
+                params=('Steam Tools', ui.version.__VERSION__)
         )
 
         del self.main_window
