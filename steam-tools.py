@@ -16,6 +16,9 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
+# MUST be ALWAYS the first import
+import ui.fix_std
+
 import argparse
 import logging
 import os
