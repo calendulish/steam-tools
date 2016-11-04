@@ -309,7 +309,7 @@ class SettingsDialog(Gtk.Dialog):
         'critical': 4,
     }
 
-    log_levels_name = dict(enumerate(log_levels_id.keys()))
+    log_levels_name = { value: key for key, value, in log_levels_id.items() }
 
     def __init__(self):
         super().__init__()
