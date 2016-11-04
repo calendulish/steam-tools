@@ -120,9 +120,4 @@ def get_logger():
     requests.addHandler(httpfile)
     # --- ~ --- ~ --- ~ --- ~ --- ~ --- #
 
-    # -- stlib --- #
-    stlib = logging.getLogger('stlib')
-    stlib.setLevel(logging.DEBUG)
-    stlib.addHandler(console)
-
     return logger
