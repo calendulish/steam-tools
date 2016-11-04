@@ -9,12 +9,38 @@ Steam Tools
 
 Some useful tools for use with steam client or compatible programs, websites.
 
-- **steamgifts-bump:** Automatically bumps your trades at steamgifts.com/trades
-- **steamgifts-join:** Automatically join on giveaways at steamgifts.com
-- **steamcompanion-join:** Automatically join on giveaways at steamcompanion.com
-- **steam-card-farming:** Checks if you have cards remaining to drop. Automatically starts a fake app and waits until all cards drop.
-- **fake-steam-app.py:** Create a fake steam app with the gameID param.
-- **steam-tools:** *A Gtk+3 GUI for all tools above* (**Coming Soon**)
+NOW WITH GUI! =D
+=====
+
+![Steam Tools](http://downloads.lara.click/tmp/st20.png)
+
+You can run the follow modules from steam-tools:
+
+- **Card Farming:** Will check for card drops and automatically start a fake app for drop the cards.
+
+- **Fake App:** Create a fake steam app using the Game ID
+
+- **Auto Trade:** Auto accept/decline item trades from steam. (**Coming Soon**)
+
+- **Authenticator:** A steam mobile authenticator clone. (**Coming Soon**)
+
+- **ST Bump:** Automatically bump your trades at steamtrades.com
+
+- **SG Join:** Automatically join in giveaways at steamgifts.com
+
+- **SC Join:** Automatically join in giveaways at steamcompanion.com
+
+I want the old console mode :(
+------------------------------
+
+**YOU ALREADY HAVE!**
+
+You can use steam-tools with params to access the console mode. For example, for use the ST join module:
+
+   $ steam-tools -c steamtrades-join
+
+You can use all modules above. (I'll update the wiki when I have time.)
+
 
 How to install?
 ---------------
