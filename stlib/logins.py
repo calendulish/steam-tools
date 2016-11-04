@@ -137,7 +137,7 @@ def wait_queue(greenlets=None):
                         while Gtk.events_pending():
                             Gtk.main_iteration()
 
-                    gevent.sleep(0.1)
+                gevent.sleep(0.01)
             except IndexError:
                 break
     except(KeyboardInterrupt, SystemExit):
