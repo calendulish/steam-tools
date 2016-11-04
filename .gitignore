@@ -1,4 +1,9 @@
 __pycache__
+*.pyc
 build/
 dist/
 *.zip
+*~*
+ui/#*
+.idea/*
+cacert.pem

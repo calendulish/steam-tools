@@ -79,7 +79,12 @@ steam-tools: winpty
 	then \
 		echo "Nothing to be done for $@"; \
 	else \
-		$(PYTHONPATH)/python.exe -u setup.py py2exe CMK FORCECYG; \
+		if [ "$(FORCE32BITS)" == "1" ]; \
+		then \
+			$(PYTHONPATH)/python.exe -u setup.py py2exe CMK FORCECYG FORCE32; \
+		else \
+		    $(PYTHONPATH)/python.exe -u setup.py py2exe CMK FORCECYG; \
+		fi; \
 	fi;
 
 clean:

@@ -16,27 +16,41 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import os, sys
-
-from distutils.core import setup
+import compileall
+import importlib.machinery
+import os
+import sys
 from distutils.command.build import build
 from distutils.command.install_scripts import install_scripts
+from distutils.core import setup
 
-CMK, FORCELIN, FORCEWIN, FORCECYG = [ 0 for _ in range(4) ]
+__version_module_path__ =  os.path.join('ui', 'version.py')
+__version_class__ = importlib.machinery.SourceFileLoader('version', __version_module_path__)
+version = __version_class__.load_module()
+
+CMK, FORCELIN, FORCEWIN, FORCECYG, FORCE64, FORCE32 = [0 for _ in range(6)]
 
 if 'CMK' in sys.argv:
-    CMK=1
+    CMK = 1
     sys.argv.remove('CMK')
 
 if 'FORCELIN' in sys.argv:
-    FORCELIN=1
+    FORCELIN = 1
     sys.argv.remove('FORCELIN')
 elif 'FORCEWIN' in sys.argv:
-    FORCEWIN=1
+    FORCEWIN = 1
     sys.argv.remove('FORCEWIN')
 elif 'FORCECYG' in sys.argv:
-    FORCECYG=1
+    FORCECYG = 1
     sys.argv.remove('FORCECYG')
+
+if 'FORCE64' in sys.argv:
+    FORCE64 = 1
+    sys.argv.remove('FORCE64')
+elif 'FORCE32' in sys.argv:
+    FORCE32 = 1
+    sys.argv.remove('FORCE32')
+
 
 def what():
     if os.name == 'nt':
@@ -44,6 +58,8 @@ def what():
             ret = 'cyg'
         else:
             ret = 'win'
+    elif sys.platform == 'cygwin':
+        ret = 'cyg'
     else:
         ret = 'lin'
 
@@ -56,25 +72,63 @@ def what():
 
     return ret
 
+
+def arch():
+    if sys.maxsize > 2 ** 32:
+        ret = 64
+    else:
+        ret = 32
+
+    if FORCE64:
+        ret = 64
+    elif FORCE32:
+        ret = 32
+
+    return ret
+
+
+libdir='lib' + str(arch())
+
+
 if what() == 'win' or what() == 'cyg':
+    if 'build' in sys.argv or 'install' in sys.argv:
+        print("You cannot use build/install command with {}".format(what()))
+        sys.exit(1)
+
+    if os.name == 'posix':
+        print("You cannot build for cygwin using linux python")
+        print("Use `make' command instead of setup.py")
+        print("E.g.: make PYTHONPATH=/cygdrive/c/Python34")
+        sys.exit(1)
+
+    import site
     import atexit
+    import shutil
+    import tempfile
     import textwrap
+    # noinspection PyUnresolvedReferences
     import py2exe
     import requests.certs
     from compileall import compile_file
+
+    temporary_site = tempfile.mktemp()
+    shutil.copytree('gi_repository', os.path.join(temporary_site, 'gi'))
+    site.addsitedir(temporary_site)
 elif 'py2exe' in sys.argv:
     print("You cannot use py2exe without a Windows Python")
     print("Rerun with the correct python version")
     sys.exit(1)
 
-class check_ext(install_scripts):
+
+class CheckExtension(install_scripts):
     def run(self):
         install_scripts.run(self)
         for script in self.get_outputs():
             if script.endswith('.py') and os.name != 'nt':
                 os.rename(script, script[:-3])
 
-class winpty(build):
+
+class Winpty(build):
     def run(self):
         if what() == 'cyg':
             if not CMK:
@@ -85,46 +139,78 @@ class winpty(build):
 
         build.run(self)
 
-data_files=[('lib64', ['lib64/libsteam_api.dll',
-                       'lib64/libsteam_api.so']),
-            ('lib32', ['lib32/libsteam_api.dll',
-                       'lib32/libsteam_api.so'])]
 
-winpty_files = [ 'winpty/build/console.exe',
-                 'winpty/build/winpty.dll',
-                 'winpty/build/winpty-agent.exe']
+if what() == 'win' or what() == 'cyg':
+    data_files = [('', [os.path.join(libdir, 'libsteam_api.dll')])]
+else:
+    data_files = [('', [os.path.join(libdir, 'libsteam_api.so')])]
 
-console_programs=['fake-steam-app.py',
-                  'steam-card-farming.py',
-                  'steamgifts-bump.py',
-                  'steamgifts-join.py',
-                  'steamcompanion-join.py']
+data_files.append(('ui', [os.path.join('ui', 'interface.xml'),
+                          os.path.join('ui', 'interface.css'),
+                          os.path.join('ui', 'menu.xml')]))
+
+# Include icons
+icons_path = os.path.join('ui', 'icons')
+for icon in os.listdir(icons_path):
+    if os.path.isfile(os.path.join(icons_path, icon)):
+        data_files.append((icons_path, [os.path.join(icons_path, icon)]))
+
+# Include winpty files
+if what() == 'cyg':
+    winpty_build_path = os.path.join('winpty', 'build')
+    data_files.append(('winpty', [os.path.join(winpty_build_path, 'console.exe'),
+                                  os.path.join(winpty_build_path, 'winpty.dll'),
+                                  os.path.join(winpty_build_path, 'winpty-agent.exe')]))
+
+console_programs = ['steam-tools.py']
+
 
 def py2exe_options():
     if what() == 'win' or what() == 'cyg':
         options = {'py2exe': {'bundle_files': 3,
                               'optimize': 1,
-                              'compressed': 0}}
+                              'compressed': 0,
+                              'packages': ['gi',
+                                           'psutil',
+                                           'requests',
+                                           'gevent',
+                                           'bs4']}}
 
-        return {'console': console_programs,
+        return {'console': [{'script': 'steam-tools.py',
+                             'icon_resources': [(1, os.path.join('ui', 'icons', 'steam-tools.ico'))],
+                             'copyright': 'Copyright (C) 2016 Lara Maia',
+                             'version': '{}.{}.{}'.format(version.__VERSION_MAJOR__,
+                                                          version.__VERSION_MINOR__,
+                                                          version.__VERSION_REVISION__),
+                             },
+                            {'script': os.path.join('stlib', 'libsteam_wrapper.py')}],
                 'options': options}
     else:
         return {}
 
-if what() == 'cyg' or what() == 'win':
+
+def fix_gevent():
+    for site_ in site.getsitepackages():
+        full_path = os.path.join(site_, 'gevent')
+        if os.path.isdir(full_path):
+            for file_ in os.listdir(full_path):
+                if file_ == '_util_py2.py':
+                    os.remove(os.path.join(full_path, file_))
+
+def fix_cacert():
     requests_path = os.path.dirname(requests.__file__)
     cacert_file = os.path.join(requests_path, 'cacert.pem')
     certs_wrapper = os.path.join(requests_path, 'certs.py')
 
-    if os.path.isfile(certs_wrapper+'.bak'):
-        os.remove(certs_wrapper+'.bak')
+    if os.path.isfile(certs_wrapper + '.bak'):
+        os.remove(certs_wrapper + '.bak')
 
-    os.rename(certs_wrapper, certs_wrapper+'.bak')
+    os.rename(certs_wrapper, certs_wrapper + '.bak')
 
     def fallback():
         os.remove(certs_wrapper)
-        os.rename(certs_wrapper+'.bak', certs_wrapper)
-        compile_file(certs_wrapper, force=True)
+        os.rename(certs_wrapper + '.bak', certs_wrapper)
+        compile_file(certs_wrapper, force=True, quiet=1)
 
     atexit.register(fallback)
 
@@ -136,25 +222,67 @@ if what() == 'cyg' or what() == 'win':
                 return os.path.join(os.path.dirname(sys.executable), 'cacert.pem')
         """))
 
-    compile_file(certs_wrapper, force=True)
+    compile_file(certs_wrapper, force=True, quiet=1)
 
-    data_files.append(('', [ cacert_file ]))
+    data_files.append(('', [cacert_file]))
 
-    if what() == 'cyg':
-        data_files.append(('winpty', winpty_files))
 
-setup(
-    name='Steam Tools',
-    version='0.8.4',
-    description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
-    author='Lara Maia',
-    author_email='dev@lara.click',
-    url='http://github.com/ShyPixie/steam-tools',
-    license='GPL',
-    data_files=data_files,
-    scripts=console_programs,
-    packages=['stlib'],
-    cmdclass = {'build': winpty,
-                'install_scripts': check_ext},
-    **py2exe_options()
-    )
+def fix_gtk():
+    # Add dlls
+    for file_ in os.listdir(libdir):
+        if file_.endswith('.dll'):
+            data_files.append(('', [os.path.join(libdir, file_)]))
+        elif file_.endswith('.pyd'):
+            shutil.copy(os.path.join(libdir, file_),
+                        os.path.join(temporary_site, 'gi'))
+
+    # Add typelib
+    typelib_directory = os.path.join(libdir, 'girepository-1.0')
+    for file_ in os.listdir(typelib_directory):
+        if file_.endswith('.typelib'):
+            data_files.append((os.path.join('lib', 'girepository-1.0'),
+                               [os.path.join(typelib_directory, file_)]))
+
+    # Add icons
+    for root, dirs, files in os.walk(os.path.join('ui', 'icons', 'Adwaita')):
+        icons_path = os.path.join('share', 'icons', 'Adwaita', root[17:])
+        for file_ in files:
+            data_files.append((icons_path, [os.path.join(root, file_)]))
+
+
+if what() == 'cyg' or what() == 'win':
+    fix_cacert()
+    fix_gtk()
+    fix_gevent()
+
+version_extra = what().upper() + str(arch())
+
+with open('version.py', 'w') as file_:
+    file_.write('__VERSION_EXTRA__ = "{}"'.format(version_extra))
+
+compileall.compile_file('version.py', legacy=True)
+os.remove('version.py')
+data_files.append(('', ['version.pyc']))
+
+setup(name='Steam Tools',
+      version='{}.{}.{}-{}'.format(version.__VERSION_MAJOR__,
+                                   version.__VERSION_MINOR__,
+                                   version.__VERSION_REVISION__,
+                                   version_extra),
+      description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
+      author='Lara Maia',
+      author_email='dev@lara.click',
+      url='http://github.com/ShyPixie/steam-tools',
+      license='GPL',
+      data_files=data_files,
+      scripts=console_programs,
+      packages=['stlib',
+                'ui'],
+      cmdclass={'build': Winpty,
+                'install_scripts': CheckExtension},
+      requires=['pygobject',
+                'requests',
+                'gevent',
+                'beautifulsoup4',
+                'pycrypto'],
+      **py2exe_options())

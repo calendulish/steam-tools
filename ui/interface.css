@@ -1,0 +1,20 @@
+entry { color: darkslategrey; }
+
+#auto_trade_tab { color: darkgrey; }
+#authenticator_tab { color: darkgrey; }
+
+#info_label { color: white; background: darkblue; }
+#warning_label { color: white; background: darkred; }
+
+#version_label { font-size: x-small; }
+#version_label.text { color: darkblue; }
+#version_label.version { color: darkgreen; }
+
+#browser_label { font-size: x-small; }
+#browser_label.text { color: darkblue; }
+#browser_label.browser { color: darkgreen; }
+
+#browser_profile { font-size: x-small; }
+#browser_profile.text { color: darkblue; }
+#browser_profile.account { color: darkgreen; }
+#browser_profile.profile { color: gray; }

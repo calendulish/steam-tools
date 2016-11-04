@@ -16,127 +16,168 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #
 
-import os, sys
+import glob
+import importlib.machinery
+import os
 import shutil
-from time import sleep
-from subprocess import check_call, CalledProcessError
+import subprocess
+import sys
+import tempfile
+import time
 
-WIN32 = 'C:\\Python34\\python.exe'
-WIN64 = 'C:\\Python34-x64\\python.exe'
-CYG32 = '/cygdrive/c/Python34/python.exe'
-CYG64 = '/cygdrive/c/Python34-x64/python.exe'
-LINALL = '/usr/bin/python3'
-CMAKE = '/usr/bin/make'
+__version_module_path__ =  os.path.join('ui', 'version.py')
+__version_class__ = importlib.machinery.SourceFileLoader('version', __version_module_path__)
+version = __version_class__.load_module()
 
-if os.name == 'nt' and os.getenv('PWD') \
-   or 'cygwin' in sys.platform:
-    WCOM = [ '/cygdrive/c/Windows/System32/cmd.exe' ]
-    CCOM = []
-    CCOMPARAMS = []
-else:
-    WCOM = [ 'C:\\Windows\\System32\\cmd.exe' ]
-    CCOM = [ 'C:\\cygwin64\\bin\\mintty.exe' ]
-    CCOMPARAMS = [ '-w', 'hide', '-l', '-', '-e' ]
+script_path = os.path.dirname(os.path.abspath(sys.argv[0]))
+build_path = os.path.join(script_path, 'dist')
+release_path = os.path.join(script_path, 'release')
+temporary_path = tempfile.mktemp(prefix='steam_tools_release_')
 
-WCOMPARAMS = [ '/C' ]
 
-def safeCall(call):
-    program = [ p for p in call if p is not '' ]
+def update_version():
+    global version
+    __version_module_path__ = os.path.join(build_path, 'version.pyc')
+    __version_class__ = importlib.machinery.SourcelessFileLoader('version', __version_module_path__)
 
     try:
-        print('\n\nCalling {}\n\n'.format(program))
-        check_call(program)
-    except CalledProcessError as e:
-        print("command: {}\nrcode: {}".format(program, e.returncode))
+        __version_module__ = __version_class__.load_module()
+
+        for var in dir(__version_module__):
+            setattr(version, var, eval('__version_module__.' + var))
+    except FileNotFoundError:
+        setattr(version, '__VERSION_EXTRA__', 'LIN ALL')
+
+    version.__VERSION__ = '{}.{}.{} {}'.format(version.__VERSION_MAJOR__,
+                                               version.__VERSION_MINOR__,
+                                               version.__VERSION_REVISION__,
+                                               version.__VERSION_EXTRA__)
+
+def safe_call(call):
+    try:
+        print('Calling:', ' '.join(call))
+        subprocess.check_call(call)
+    except subprocess.CalledProcessError as e:
+        print("command: {}\nrcode: {}".format(call, e.returncode))
         sys.exit(1)
     except FileNotFoundError as e:
         print("Something is missing in your system for make an complete release")
-        print("command: {}".format(program))
+        print("command: {}".format(call))
         print(e)
         sys.exit(1)
 
-def build(version, system, arch):
-    try:
-        interpreter = eval(system+str(arch))
-    except NameError:
-        return
 
+def build(system, arch):
     print("\n--------------------------------------------")
     print("Build Configuration:")
-    print(" - ST Version: {}".format(version))
     print(" - System: {}".format(system))
+    print(" - Version: {}.{}.{} {}".format(version.__VERSION_MAJOR__,
+                                           version.__VERSION_MINOR__,
+                                           version.__VERSION_REVISION__,
+                                           system + str(arch)))
     print(" - Architecture: {} bits\n".format(arch))
-    sleep(3)
 
-    if system == 'LIN':
-        com = CCOM+CCOMPARAMS
-        startDir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        setup_options = [ 'build',
-                          'install',
-                          '--root', os.path.join(startDir, 'dist'),
-                          '--install-data', '.',
-                          '--install-scripts', '.',
-                          '--install-lib', '.',
-                          'FORCELIN' ]
-    elif system == 'WIN':
-        com = WCOM+WCOMPARAMS
-        setup_options = [ 'py2exe', 'FORCEWIN' ]
+    for timer in range(5, 0, -1):
+        print('Starting in', timer, end='\r')
+        time.sleep(1)
+    print('\n')
+
+    if system == 'lin':
+        console = ['/cygdrive/c/cygwin64/bin/mintty.exe']
+        params = ['-w', 'hide', '-l', '-', '-e']
+        interpreter = ['/usr/bin/python3', '-u', 'setup.py']
+
+        setup_options = ['build',
+                         'install',
+                         '--root', build_path,
+                         '--install-data', '.',
+                         '--install-scripts', '.',
+                         '--install-lib', '.',
+                         'FORCELIN']
+    elif system == 'win':
+        console = ['/cygdrive/c/Windows/System32/cmd.exe']
+        params = ['/C']
+
+        if arch == 64:
+            interpreter = ['C:\\Python34-x64\\python', '-u', 'setup.py']
+        else:
+            interpreter = ['C:\\Python34\\python', '-u', 'setup.py', 'FORCE32']
+
+
+        setup_options = ['py2exe',
+                         'FORCEWIN']
     else:
-        com = CCOM+CCOMPARAMS
-        mkcall = [ CMAKE, 'PYTHONPATH='+os.path.dirname(interpreter) ]
-        if arch == 32:
-            mkcall += [ 'FORCE32BITS=1' ]
+        console = ['/cygdrive/c/cygwin64/bin/mintty.exe']
+        params = ['-w', 'hide', '-l', '-', '-e']
+        interpreter = ['/usr/bin/make']
 
-        print("Building...")
-        safeCall(com+mkcall+['clean'])
-        safeCall(com+mkcall)
-        return
+        if arch is 64:
+            setup_options = ['PYTHONPATH=/cygdrive/c/Python34-x64']
+        else:
+            setup_options = ['PYTHONPATH=/cygdrive/c/Python34', 'FORCE32BITS=1']
 
-    print("Building...")
-    pycall = [interpreter, '-u', 'setup.py']
-    safeCall(com+pycall+setup_options)
+        safe_call(console + params + interpreter + setup_options + ['clean'])
 
-def archive(version, system, arch):
-    startDir = os.path.dirname(os.path.abspath(sys.argv[0]))
-    outDir = os.path.join(startDir, 'dist')
-    archiveName = 'steam_tools_'+version+'_'+system+'_'+str(arch)
-    archiveDir = os.path.join(startDir, archiveName)
+    print('Building...')
+    safe_call(console + params + interpreter + setup_options)
 
-    if not os.path.isdir(outDir):
-        return
+    # The linux build in the zip file is not an real package.
+    # It's just an portable version for easy access.
+    # For real packages, use distribution packages.
+    if system == 'lin':
+        os.remove(glob.glob(os.path.join('dist', '*.egg-info'))[0])
+        os.remove(os.path.join('dist', 'version.pyc'))
+        shutil.rmtree(os.path.join('dist', 'ui', '__pycache__'))
+        shutil.rmtree(os.path.join('dist', 'stlib', '__pycache__'))
+        shutil.move(os.path.join('dist', 'steam-tools'),
+                    os.path.join('dist', 'steam-tools.py'))
 
-    print('Preparing for archive')
 
-    if os.path.isfile(archiveDir+'.zip'):
-        os.remove(archiveDir+'.zip')
+def archive(name):
+    print('Creating archiving for', name)
 
-    if os.path.isdir(archiveDir):
-        shutil.rmtree(archiveDir)
+    zip_file_name = name + '.zip'
+    output_path = os.path.join(script_path, zip_file_name)
 
-    os.rename(outDir, archiveDir)
-    shutil.make_archive(archiveName, 'zip', startDir, os.path.basename(archiveDir))
-    shutil.rmtree(archiveDir)
-    print('Archiving complete: {}'.format(archiveDir+'.zip'))
+    if not os.path.isdir(temporary_path):
+        os.makedirs(temporary_path)
 
-if __name__ == "__main__":
-    if sys.version_info[0] < 3:
-        print("You must execute in python 3+")
+    shutil.move(build_path, name)
+    shutil.make_archive(name, 'zip', script_path, name)
+    shutil.move(output_path, temporary_path)
+    os.remove(os.path.join(script_path, name))
+
+    return os.path.join(temporary_path, zip_file_name)
+
+
+if __name__ == '__main__':
+    if not sys.platform == 'cygwin':
+        print('Please, run through cygiwn')
         sys.exit(1)
 
-    if len(sys.argv) < 2:
-        print("Please, define the version")
-        sys.exit(1)
+    builds = { 'win': [ 32, 64 ],
+               'cyg': [ 32, 64 ],
+               'lin': [ 'all' ]}
 
-    if sys.argv[1] == 'clean':
-        for file in os.listdir(os.path.dirname(os.path.abspath(sys.argv[0]))):
-            if '.zip' in file:
-                os.remove(file)
-        print("Done!")
-        sys.exit(0)
+    zip_file_paths = []
 
-    for system in [ 'WIN', 'CYG', 'LIN' ]:
-        for arch in [ 32, 64, 'ALL' ]:
-            shutil.rmtree('dist', ignore_errors=True)
-            shutil.rmtree('build', ignore_errors=True)
-            build(sys.argv[1], system, arch)
-            archive(sys.argv[1], system, arch)
+    if os.path.isdir(release_path):
+        shutil.rmtree(release_path)
+
+    for system, archs in builds.items():
+        for arch in archs:
+            os.system('git clean -fdx')
+            build(system, arch)
+            update_version()
+            archive_name =  'Steam Tools {}'.format(version.__VERSION__)
+            zip_file_paths.append(archive(archive_name))
+
+    print('Releasing...')
+
+    if not os.path.isdir(release_path):
+        os.makedirs(release_path)
+
+    for path in zip_file_paths:
+        shutil.move(path, release_path)
+
+    print('Done.')
