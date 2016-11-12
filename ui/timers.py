@@ -140,6 +140,7 @@ def progress_bar_pulse(type_, progress_bar, start_time, maximum_time):
     progress_bar.set_text(str(time_left))
 
     if fraction >= 1.0:
+        progress_bar.set_fraction(0)
         progress_bar.set_text('0:00:00')
         setattr(ui, type_ + '_waiting', False)
         return False
