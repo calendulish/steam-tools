@@ -215,6 +215,7 @@ def steamgifts_join_giveaway_timer(giveaway):
         return True
 
     user_points = stlib.steamgifts_join.get_user_points()
+    ui.main_window.SG_join_current_points.set_text('{} points'.format(str(user_points)))
 
     if user_points == 0:
         stlib.logger.verbose('You don\'t have more points. Waiting.')
@@ -254,9 +255,6 @@ def steamgifts_join_timer(type, MIN_wait_time, MAX_wait_time):
 
     config_parser = stlib.config.read()
 
-    ui.main_window.SG_join_last_giveaway.set_text('Gathering...')
-    ui.main_window.SG_join_current_points.set_text('Gathering...')
-
     try:
         type = next(type)
     except StopIteration:
@@ -274,6 +272,8 @@ def steamgifts_join_timer(type, MIN_wait_time, MAX_wait_time):
         ui.steamgifts_join_waiting = True
 
         return True
+
+    ui.application.update_status_bar('Gathering...')
 
     query_url = '{}?type='.format(stlib.steamgifts_query_page)
 
