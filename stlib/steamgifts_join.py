@@ -120,7 +120,8 @@ def join(giveaway):
     giveaway_copies = get_giveaway_copies(giveaway)
     query_url = 'https://steamgifts.com' + get_giveaway_query(giveaway)
     html = stlib.network.try_get_html('steamgifts', query_url)
-    form = html.find('form')
+    sidebar = html.find('div', class_='sidebar')
+    form = sidebar.find('form')
     data = dict([(inputs['name'], inputs['value']) for inputs in form.findAll('input')])
     points_spent = 0
 
