@@ -124,7 +124,7 @@ def try_get_response(service_name, url, data=None):
             response = get_response(url, data, cookies)
 
             if not response:
-                return None
+                raise KeyError
 
             if 'suspensions' in response.url:
                 stlib.logger.critical('You are banned!')
