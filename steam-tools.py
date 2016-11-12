@@ -17,57 +17,14 @@
 #
 
 # MUST be ALWAYS the first import
+# noinspection PyUnresolvedReferences
 import ui.fix_std
 
 import argparse
-import logging
 import os
-import subprocess
 import sys
 
 import stlib
-import ui
-
-if os.name is 'posix':
-    if not os.getenv('DISPLAY'):
-        stlib.logger.warning('The DISPLAY is not set!')
-        stlib.logger.warning('Use --cli <module> for the command line interface.')
-        sys.exit(1)
-
-
-def safe_call(call):
-    try:
-        return subprocess.check_call(call)
-    except subprocess.CalledProcessError as e:
-        return e.returncode
-    except FileNotFoundError as e:
-        stlib.logger.critical("I cannot find winpty. Please, check your installation.")
-        stlib.logger.critical(e)
-        return 1
-
-
-# if is executing from a Cygwin console:
-if os.name is 'nt' and os.getenv('PWD'):
-    # noinspection PyUnresolvedReferences
-    import psutil
-
-    interpreter = psutil.Process(os.getppid())
-    shell = interpreter.parent()
-
-    if shell.name() != 'console.exe':
-        logging.shutdown()
-
-        wrapper = ['winpty/console.exe', sys.executable]
-
-        # If is not a compiled version
-        if sys.executable != sys.argv[0]:
-            wrapper.append(sys.argv[0])
-
-        if len(sys.argv) != 1:
-            wrapper.extend(sys.argv[1:])
-
-        return_code = safe_call(wrapper)
-        sys.exit(return_code)
 
 if __name__ == "__main__":
     print('Steam Tools version {}'.format(ui.version.__VERSION__))
@@ -79,8 +36,17 @@ if __name__ == "__main__":
 
     try:
         if cParams.cli:
+            if os.name is 'nt' and os.getenv('PWD'):
+                stlib.logger.warning('Running steam tools from custom console is not supported.')
+                stlib.logger.warning('Some problems may occur.')
+
             ST = ui.console.SteamTools(cParams)
         else:
+            if os.name is 'posix' and not os.getenv('DISPLAY'):
+                stlib.logger.error('The DISPLAY is not set!')
+                stlib.logger.error('Use -c / --cli <module> for the command line interface.')
+                sys.exit(1)
+
             ST = ui.main.SteamTools()
             ST.run()
     except KeyboardInterrupt:

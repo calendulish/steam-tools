@@ -20,19 +20,14 @@ import compileall
 import importlib.machinery
 import os
 import sys
-from distutils.command.build import build
 from distutils.command.install_scripts import install_scripts
 from distutils.core import setup
 
-__version_module_path__ =  os.path.join('ui', 'version.py')
+__version_module_path__ = os.path.join('ui', 'version.py')
 __version_class__ = importlib.machinery.SourceFileLoader('version', __version_module_path__)
 version = __version_class__.load_module()
 
-CMK, FORCELIN, FORCEWIN, FORCECYG, FORCE64, FORCE32 = [0 for _ in range(6)]
-
-if 'CMK' in sys.argv:
-    CMK = 1
-    sys.argv.remove('CMK')
+FORCELIN, FORCEWIN, FORCE64, FORCE32 = [0 for _ in range(4)]
 
 if 'FORCELIN' in sys.argv:
     FORCELIN = 1
@@ -40,9 +35,6 @@ if 'FORCELIN' in sys.argv:
 elif 'FORCEWIN' in sys.argv:
     FORCEWIN = 1
     sys.argv.remove('FORCEWIN')
-elif 'FORCECYG' in sys.argv:
-    FORCECYG = 1
-    sys.argv.remove('FORCECYG')
 
 if 'FORCE64' in sys.argv:
     FORCE64 = 1
@@ -53,52 +45,24 @@ elif 'FORCE32' in sys.argv:
 
 
 def what():
-    if os.name == 'nt':
-        if os.getenv('PWD'):
-            ret = 'cyg'
-        else:
-            ret = 'win'
-    elif sys.platform == 'cygwin':
-        ret = 'cyg'
+    if FORCEWIN or (os.name == 'nt' and not FORCELIN):
+        return 'win'
     else:
-        ret = 'lin'
-
-    if FORCELIN:
-        ret = 'lin'
-    elif FORCEWIN:
-        ret = 'win'
-    elif FORCECYG:
-        ret = 'cyg'
-
-    return ret
+        return 'lin'
 
 
 def arch():
-    if sys.maxsize > 2 ** 32:
-        ret = 64
+    if FORCE64 or (sys.maxsize > 2 ** 32 and not FORCE32):
+        return 64
     else:
-        ret = 32
-
-    if FORCE64:
-        ret = 64
-    elif FORCE32:
-        ret = 32
-
-    return ret
+        return 32
 
 
-libdir='lib' + str(arch())
+libdir = 'lib' + str(arch())
 
-
-if what() == 'win' or what() == 'cyg':
+if what() == 'win':
     if 'build' in sys.argv or 'install' in sys.argv:
         print("You cannot use build/install command with {}".format(what()))
-        sys.exit(1)
-
-    if os.name == 'posix':
-        print("You cannot build for cygwin using linux python")
-        print("Use `make' command instead of setup.py")
-        print("E.g.: make PYTHONPATH=/cygdrive/c/Python34")
         sys.exit(1)
 
     import site
@@ -111,6 +75,7 @@ if what() == 'win' or what() == 'cyg':
     import requests.certs
     from compileall import compile_file
 
+    # Fix site for gi.repository
     temporary_site = tempfile.mktemp()
     shutil.copytree('gi_repository', os.path.join(temporary_site, 'gi'))
     site.addsitedir(temporary_site)
@@ -128,19 +93,7 @@ class CheckExtension(install_scripts):
                 os.rename(script, script[:-3])
 
 
-class Winpty(build):
-    def run(self):
-        if what() == 'cyg':
-            if not CMK:
-                print("You are using Cygwin")
-                print("Use `make' command instead of setup.py")
-                print("E.g.: make PYTHONPATH=/cygdrive/c/Python34")
-                sys.exit(1)
-
-        build.run(self)
-
-
-if what() == 'win' or what() == 'cyg':
+if what() == 'win':
     data_files = [('', [os.path.join(libdir, 'libsteam_api.dll')])]
 else:
     data_files = [('', [os.path.join(libdir, 'libsteam_api.so')])]
@@ -155,35 +108,35 @@ for icon in os.listdir(icons_path):
     if os.path.isfile(os.path.join(icons_path, icon)):
         data_files.append((icons_path, [os.path.join(icons_path, icon)]))
 
-# Include winpty files
-if what() == 'cyg':
-    winpty_build_path = os.path.join('winpty', 'build')
-    data_files.append(('winpty', [os.path.join(winpty_build_path, 'console.exe'),
-                                  os.path.join(winpty_build_path, 'winpty.dll'),
-                                  os.path.join(winpty_build_path, 'winpty-agent.exe')]))
-
-console_programs = ['steam-tools.py']
-
 
 def py2exe_options():
-    if what() == 'win' or what() == 'cyg':
-        options = {'py2exe': {'bundle_files': 3,
-                              'optimize': 1,
-                              'compressed': 0,
-                              'packages': ['gi',
-                                           'psutil',
-                                           'requests',
-                                           'gevent',
-                                           'bs4']}}
+    if what() == 'win':
+        packages = ['gi',
+                    'psutil',
+                    'requests',
+                    'gevent',
+                    'bs4']
 
-        return {'console': [{'script': 'steam-tools.py',
-                             'icon_resources': [(1, os.path.join('ui', 'icons', 'steam-tools.ico'))],
-                             'copyright': 'Copyright (C) 2016 Lara Maia',
-                             'version': '{}.{}.{}'.format(version.__VERSION_MAJOR__,
-                                                          version.__VERSION_MINOR__,
-                                                          version.__VERSION_REVISION__),
-                             },
-                            {'script': os.path.join('stlib', 'libsteam_wrapper.py')}],
+        py2exe_options_ = {'bundle_files': 3,
+                           'optimize': 1,
+                           'compressed': 0,
+                           'packages': packages}
+
+        program_icon = os.path.join('ui', 'icons', 'steam-tools.ico')
+
+        main_script = {'script': 'steam-tools.py',
+                       'icon_resources': [(1, program_icon)],
+                       'copyright': 'Copyright (C) 2016 Lara Maia',
+                       'version': '{}.{}.{}'.format(version.__VERSION_MAJOR__,
+                                                    version.__VERSION_MINOR__,
+                                                    version.__VERSION_REVISION__),
+                       }
+
+        libsteam_script = {'script': os.path.join('stlib', 'libsteam_wrapper.py')}
+
+        options = {'py2exe': py2exe_options_}
+
+        return {'console': [main_script, libsteam_script],
                 'options': options}
     else:
         return {}
@@ -196,6 +149,7 @@ def fix_gevent():
             for file_ in os.listdir(full_path):
                 if file_ == '_util_py2.py':
                     os.remove(os.path.join(full_path, file_))
+
 
 def fix_cacert():
     requests_path = os.path.dirname(requests.__file__)
@@ -250,7 +204,7 @@ def fix_gtk():
             data_files.append((icons_path, [os.path.join(root, file_)]))
 
 
-if what() == 'cyg' or what() == 'win':
+if what() == 'win':
     fix_cacert()
     fix_gtk()
     fix_gevent()
@@ -264,25 +218,33 @@ compileall.compile_file('version.py', legacy=True)
 os.remove('version.py')
 data_files.append(('', ['version.pyc']))
 
-setup(name='Steam Tools',
-      version='{}.{}.{}-{}'.format(version.__VERSION_MAJOR__,
-                                   version.__VERSION_MINOR__,
-                                   version.__VERSION_REVISION__,
-                                   version_extra),
-      description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
-      author='Lara Maia',
-      author_email='dev@lara.click',
-      url='http://github.com/ShyPixie/steam-tools',
-      license='GPL',
-      data_files=data_files,
-      scripts=console_programs,
-      packages=['stlib',
-                'ui'],
-      cmdclass={'build': Winpty,
-                'install_scripts': CheckExtension},
-      requires=['pygobject',
-                'requests',
-                'gevent',
-                'beautifulsoup4',
-                'pycrypto'],
-      **py2exe_options())
+setup(
+        name='Steam Tools',
+
+        version='{}.{}.{}-{}'.format(version.__VERSION_MAJOR__,
+                                     version.__VERSION_MINOR__,
+                                     version.__VERSION_REVISION__,
+                                     version_extra),
+
+        description="Some useful tools for use with steam client or compatible programs, websites. (Windows & Linux)",
+        author='Lara Maia',
+        author_email='dev@lara.click',
+        url='http://github.com/ShyPixie/steam-tools',
+        license='GPL',
+        data_files=data_files,
+
+        scripts=['steam-tools.py'],
+
+        packages=['stlib',
+                  'ui'],
+
+        cmdclass={'install_scripts': CheckExtension},
+
+        requires=['pygobject',
+                  'requests',
+                  'gevent',
+                  'beautifulsoup4',
+                  'pycrypto'],
+
+        **py2exe_options()
+)

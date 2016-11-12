@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 #
 # Lara Maia <dev@lara.click> 2015 ~ 2016
 #
@@ -25,7 +25,7 @@ import sys
 import tempfile
 import time
 
-__version_module_path__ =  os.path.join('ui', 'version.py')
+__version_module_path__ = os.path.join('ui', 'version.py')
 __version_class__ = importlib.machinery.SourceFileLoader('version', __version_module_path__)
 version = __version_class__.load_module()
 
@@ -35,6 +35,7 @@ release_path = os.path.join(script_path, 'release')
 temporary_path = tempfile.mktemp(prefix='steam_tools_release_')
 
 
+# noinspection PyShadowingNames
 def update_version():
     global version
     __version_module_path__ = os.path.join(build_path, 'version.pyc')
@@ -53,6 +54,7 @@ def update_version():
                                                version.__VERSION_REVISION__,
                                                version.__VERSION_EXTRA__)
 
+
 def safe_call(call):
     try:
         print('Calling:', ' '.join(call))
@@ -67,22 +69,22 @@ def safe_call(call):
         sys.exit(1)
 
 
-def build(system, arch):
+def build(current_system, current_arch):
     print("\n--------------------------------------------")
     print("Build Configuration:")
-    print(" - System: {}".format(system))
+    print(" - System: {}".format(current_system))
     print(" - Version: {}.{}.{} {}".format(version.__VERSION_MAJOR__,
                                            version.__VERSION_MINOR__,
                                            version.__VERSION_REVISION__,
-                                           system + str(arch)))
-    print(" - Architecture: {} bits\n".format(arch))
+                                           current_system + str(current_arch)))
+    print(" - Architecture: {} bits\n".format(current_arch))
 
     for timer in range(5, 0, -1):
         print('Starting in', timer, end='\r')
         time.sleep(1)
     print('\n')
 
-    if system == 'lin':
+    if current_system == 'lin':
         console = ['/cygdrive/c/cygwin64/bin/mintty.exe']
         params = ['-w', 'hide', '-l', '-', '-e']
         interpreter = ['/usr/bin/python3', '-u', 'setup.py']
@@ -94,29 +96,17 @@ def build(system, arch):
                          '--install-scripts', '.',
                          '--install-lib', '.',
                          'FORCELIN']
-    elif system == 'win':
+    else:
         console = ['/cygdrive/c/Windows/System32/cmd.exe']
         params = ['/C']
 
-        if arch == 64:
+        if current_arch == 64:
             interpreter = ['C:\\Python34-x64\\python', '-u', 'setup.py']
         else:
             interpreter = ['C:\\Python34\\python', '-u', 'setup.py', 'FORCE32']
 
-
         setup_options = ['py2exe',
                          'FORCEWIN']
-    else:
-        console = ['/cygdrive/c/cygwin64/bin/mintty.exe']
-        params = ['-w', 'hide', '-l', '-', '-e']
-        interpreter = ['/usr/bin/make']
-
-        if arch is 64:
-            setup_options = ['PYTHONPATH=/cygdrive/c/Python34-x64']
-        else:
-            setup_options = ['PYTHONPATH=/cygdrive/c/Python34', 'FORCE32BITS=1']
-
-        safe_call(console + params + interpreter + setup_options + ['clean'])
 
     print('Building...')
     safe_call(console + params + interpreter + setup_options)
@@ -124,7 +114,7 @@ def build(system, arch):
     # The linux build in the zip file is not an real package.
     # It's just an portable version for easy access.
     # For real packages, use distribution packages.
-    if system == 'lin':
+    if current_system == 'lin':
         os.remove(glob.glob(os.path.join('dist', '*.egg-info'))[0])
         os.remove(os.path.join('dist', 'version.pyc'))
         shutil.rmtree(os.path.join('dist', 'ui', '__pycache__'))
@@ -168,7 +158,7 @@ if __name__ == '__main__':
             os.system('git clean -fdx')
             build(system, arch)
             update_version()
-            archive_name =  'Steam Tools {}'.format(version.__VERSION__)
+            archive_name = 'Steam Tools {}'.format(version.__VERSION__)
             zip_file_paths.append(archive(archive_name))
 
     print('Releasing...')
