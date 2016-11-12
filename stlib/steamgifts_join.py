@@ -35,7 +35,10 @@ def configure():
     return None
 
 
-def get_user_points(html):
+def get_user_points(html=None):
+    if not html:
+        html = stlib.network.try_get_html('steamgifts', stlib.steamgifts_check_page)
+
     points = html.find('span', class_="nav__points")
     return int(points.text)
 

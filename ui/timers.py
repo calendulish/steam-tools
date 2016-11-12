@@ -192,7 +192,7 @@ def steamtrades_bump_timer(trade_ids, MIN_wait_time, MAX_wait_time):
     return True
 
 
-def steamgifts_join_giveaway_timer(giveaway, user_points):
+def steamgifts_join_giveaway_timer(giveaway):
     if not ui.steamgifts_join_is_running:
         return False
 
@@ -214,6 +214,8 @@ def steamgifts_join_giveaway_timer(giveaway, user_points):
         stlib.logger.verbose('Ignoring %s because you already joined.', giveaway_name)
         return True
 
+    user_points = stlib.steamgifts_join.get_user_points()
+
     if user_points == 0:
         stlib.logger.verbose('You don\'t have more points. Waiting.')
         ui.steamgifts_join_waiting = False
@@ -221,10 +223,9 @@ def steamgifts_join_giveaway_timer(giveaway, user_points):
 
     if user_points >= giveaway_points:
         points_spent = stlib.steamgifts_join.join(giveaway)
-        user_points -= points_spent
 
         ui.main_window.SG_join_last_giveaway.set_text('{} ({}P)'.format(giveaway_name, points_spent))
-        ui.main_window.SG_join_current_points.set_text('{} points'.format(user_points))
+        ui.main_window.SG_join_current_points.set_text('{} points'.format(user_points - points_spent))
 
         antiban_time = random.randint(1, 15)
         start_time = time.time()
@@ -292,12 +293,9 @@ def steamgifts_join_timer(type, MIN_wait_time, MAX_wait_time):
         pinned_generator = stlib.steamgifts_join.get_pinned_giveaways(html)
         giveaway_generator = itertools.chain(giveaway_generator, pinned_generator)
 
-    user_points = stlib.steamgifts_join.get_user_points(html)
-
     GLib.timeout_add(50,
                      steamgifts_join_giveaway_timer,
-                     giveaway_generator,
-                     user_points)
+                     giveaway_generator)
 
     ui.steamgifts_join_waiting = True
 
