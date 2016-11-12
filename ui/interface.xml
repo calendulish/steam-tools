@@ -1870,8 +1870,7 @@
 Steam Client and some related websites.</property>
     <property name="website">mailto:dev@lara.click</property>
     <property name="website_label">dev@lara.click</property>
-    <property name="authors">Lara Maia
-Fernando Manfredi</property>
+    <property name="authors">Lara Maia</property>
     <property name="logo">icons/steam-tools.png</property>
     <property name="license_type">gpl-3-0</property>
     <child internal-child="vbox">

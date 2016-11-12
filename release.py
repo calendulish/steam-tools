@@ -145,7 +145,7 @@ def archive(name):
     shutil.move(build_path, name)
     shutil.make_archive(name, 'zip', script_path, name)
     shutil.move(output_path, temporary_path)
-    os.remove(os.path.join(script_path, name))
+    shutil.rmtree(os.path.join(script_path, name))
 
     return os.path.join(temporary_path, zip_file_name)
 
@@ -156,7 +156,6 @@ if __name__ == '__main__':
         sys.exit(1)
 
     builds = { 'win': [ 32, 64 ],
-               'cyg': [ 32, 64 ],
                'lin': [ 'all' ]}
 
     zip_file_paths = []
