@@ -69,7 +69,7 @@ def async_wait(function):
 
 
 @async_wait
-def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, verify='cacert.pem', stream=False):
+def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, verify=True, stream=False):
     response = None
 
     if headers:
