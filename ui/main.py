@@ -198,7 +198,7 @@ class SteamTools(Gtk.Application):
                                                             "\nwww.steamgifts.com")
             SG_connected = False
 
-        self._check_start_depends([3], SG_connected)
+        self._check_start_depends([5], SG_connected)
 
     def do_steamtrades_login(self, greenlet):
         stlib.logins.check_steamtrades_login(greenlet)
@@ -215,7 +215,7 @@ class SteamTools(Gtk.Application):
                                                             "\nwww.steamtrades.com")
             ST_connected = False
 
-        self._check_start_depends([2], ST_connected)
+        self._check_start_depends([4], ST_connected)
 
     def do_steamcompanion_login(self, greenlet):
         stlib.logins.check_steamcompanion_login(greenlet)
@@ -232,7 +232,7 @@ class SteamTools(Gtk.Application):
                                                             "\nsteamcompanion.com")
             SC_connected = False
 
-        self._check_start_depends([4], SC_connected)
+        self._check_start_depends([6], SC_connected)
 
     def select_profile(self, force=False):
         stlib.config.read()
