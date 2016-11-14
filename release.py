@@ -47,7 +47,7 @@ def update_version():
         for var in dir(__version_module__):
             setattr(version, var, eval('__version_module__.' + var))
     except FileNotFoundError:
-        setattr(version, '__VERSION_EXTRA__', 'LIN ALL')
+        setattr(version, '__VERSION_EXTRA__', 'Linux')
 
     version.__VERSION__ = '{}.{}.{} {}'.format(version.__VERSION_MAJOR__,
                                                version.__VERSION_MINOR__,
@@ -73,93 +73,81 @@ def build(current_system, current_arch):
     print("\n--------------------------------------------")
     print("Build Configuration:")
     print(" - System: {}".format(current_system))
-    print(" - Version: {}.{}.{} {}".format(version.__VERSION_MAJOR__,
-                                           version.__VERSION_MINOR__,
-                                           version.__VERSION_REVISION__,
-                                           current_system + str(current_arch)))
-    print(" - Architecture: {} bits\n".format(current_arch))
+    print(" - Architecture: {} bits".format(current_arch))
+    print(" - Version: {}.{}.{}\n".format(version.__VERSION_MAJOR__,
+                                          version.__VERSION_MINOR__,
+                                          version.__VERSION_REVISION__))
 
     for timer in range(5, 0, -1):
         print('Starting in', timer, end='\r')
         time.sleep(1)
     print('\n')
 
-    if current_system == 'lin':
-        console = ['/cygdrive/c/cygwin64/bin/mintty.exe']
-        params = ['-w', 'hide', '-l', '-', '-e']
-        interpreter = ['/usr/bin/python3', '-u', 'setup.py']
+    if current_system == 'Linux':
+        if os.name == 'nt' and not os.getenv('PWD'):
+            interpreter = ['C:\\msys64\\usr\\bin\\python3.4.exe', '-u']
+        else:
+            interpreter = ['/usr/bin/python3', '-u']
 
-        setup_options = ['build',
-                         'install',
-                         '--root', build_path,
-                         '--install-data', '.',
-                         '--install-scripts', '.',
-                         '--install-lib', '.',
-                         'FORCELIN']
+        params = ['setup.py', 'sdist']
+        archive_extension_ = '.tar.gz'
+
+        if not os.path.isfile(interpreter[0]):
+            print('Linux Python interpreter not found.')
+            print('Cannot build for Linux. Ignoring.')
+            return None
+
+        print('Building...')
+        safe_call(interpreter + params)
+
+        update_version()
     else:
-        console = ['/cygdrive/c/Windows/System32/cmd.exe']
-        params = ['/C']
+        if os.name == 'posix' and not sys.platform == 'cygwin':
+            print('You cannot build steam tools for Windows from Linux. Ignoring.')
+            return None
+
+        interpreter = [os.path.join('scripts', 'build.cmd')]
 
         if current_arch == 64:
-            interpreter = ['C:\\Python34-x64\\python', '-u', 'setup.py']
+            params = ['Python34-x64']
         else:
-            interpreter = ['C:\\Python34\\python', '-u', 'setup.py', 'FORCE32']
+            params = ['Python34']
 
-        setup_options = ['py2exe',
-                         'FORCEWIN']
+        archive_extension_ = '.zip'
 
-    print('Building...')
-    safe_call(console + params + interpreter + setup_options)
+        print('Building...')
+        safe_call(interpreter + params)
 
-    # The linux build in the zip file is not an real package.
-    # It's just an portable version for easy access.
-    # For real packages, use distribution packages.
-    if current_system == 'lin':
-        os.remove(glob.glob(os.path.join('dist', '*.egg-info'))[0])
-        os.remove(os.path.join('dist', 'version.pyc'))
-        shutil.rmtree(os.path.join('dist', 'ui', '__pycache__'))
-        shutil.rmtree(os.path.join('dist', 'stlib', '__pycache__'))
-        shutil.move(os.path.join('dist', 'steam-tools'),
-                    os.path.join('dist', 'steam-tools.py'))
+        update_version()
 
+        safe_call([os.path.join('scripts', 'package.cmd'),
+                   '-'.join(version.__VERSION__.split(' '))])
 
-def archive(name):
-    print('Creating archiving for', name)
+    archive_name_ = 'Steam Tools-{}'.format('-'.join(version.__VERSION__.split(' ')))
+    archive_in_path_ = os.path.join('dist', archive_name_ + archive_extension_)
+    archive_out_path_ = os.path.join(temporary_path, archive_name_ + archive_extension_)
+    shutil.move(archive_in_path_, archive_out_path_)
 
-    zip_file_name = name + '.zip'
-    output_path = os.path.join(script_path, zip_file_name)
-
-    if not os.path.isdir(temporary_path):
-        os.makedirs(temporary_path)
-
-    shutil.move(build_path, name)
-    shutil.make_archive(name, 'zip', script_path, name)
-    shutil.move(output_path, temporary_path)
-    shutil.rmtree(os.path.join(script_path, name))
-
-    return os.path.join(temporary_path, zip_file_name)
+    return archive_out_path_
 
 
 if __name__ == '__main__':
-    if not sys.platform == 'cygwin':
-        print('Please, run through cygiwn')
-        sys.exit(1)
-
-    builds = { 'win': [ 32, 64 ],
-               'lin': [ 'all' ]}
+    builds = {'Windows': [32, 64],
+              'Linux': ['all']}
 
     zip_file_paths = []
 
     if os.path.isdir(release_path):
         shutil.rmtree(release_path)
 
+    if not os.path.isdir(temporary_path):
+        os.makedirs(temporary_path)
+
     for system, archs in builds.items():
         for arch in archs:
             os.system('git clean -fdx')
-            build(system, arch)
-            update_version()
-            archive_name = 'Steam Tools {}'.format(version.__VERSION__)
-            zip_file_paths.append(archive(archive_name))
+            archive_path = build(system, arch)
+            zip_file_paths.append(archive_path)
 
     print('Releasing...')
 
@@ -167,6 +155,7 @@ if __name__ == '__main__':
         os.makedirs(release_path)
 
     for path in zip_file_paths:
-        shutil.move(path, release_path)
+        if path:
+            shutil.move(path, release_path)
 
     print('Done.')

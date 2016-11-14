@@ -27,32 +27,9 @@ __version_module_path__ = os.path.join('ui', 'version.py')
 __version_class__ = importlib.machinery.SourceFileLoader('version', __version_module_path__)
 version = __version_class__.load_module()
 
-FORCELIN, FORCEWIN, FORCE64, FORCE32 = [0 for _ in range(4)]
-
-if 'FORCELIN' in sys.argv:
-    FORCELIN = 1
-    sys.argv.remove('FORCELIN')
-elif 'FORCEWIN' in sys.argv:
-    FORCEWIN = 1
-    sys.argv.remove('FORCEWIN')
-
-if 'FORCE64' in sys.argv:
-    FORCE64 = 1
-    sys.argv.remove('FORCE64')
-elif 'FORCE32' in sys.argv:
-    FORCE32 = 1
-    sys.argv.remove('FORCE32')
-
-
-def what():
-    if FORCEWIN or (os.name == 'nt' and not FORCELIN):
-        return 'win'
-    else:
-        return 'lin'
-
 
 def arch():
-    if FORCE64 or (sys.maxsize > 2 ** 32 and not FORCE32):
+    if sys.maxsize > 2 ** 32:
         return 64
     else:
         return 32
@@ -60,9 +37,9 @@ def arch():
 
 libdir = 'lib' + str(arch())
 
-if what() == 'win':
+if os.name == 'nt':
     if 'build' in sys.argv or 'install' in sys.argv:
-        print("You cannot use build/install command with {}".format(what()))
+        print("You cannot use build/install command with Windows.")
         sys.exit(1)
 
     import site
@@ -93,7 +70,7 @@ class CheckExtension(install_scripts):
                 os.rename(script, script[:-3])
 
 
-if what() == 'win':
+if os.name == 'nt':
     data_files = [('', [os.path.join(libdir, 'libsteam_api.dll')])]
 else:
     data_files = [('', [os.path.join(libdir, 'libsteam_api.so')])]
@@ -110,7 +87,7 @@ for icon in os.listdir(icons_path):
 
 
 def py2exe_options():
-    if what() == 'win':
+    if os.name == 'nt':
         packages = ['gi',
                     'psutil',
                     'requests',
@@ -204,19 +181,23 @@ def fix_gtk():
             data_files.append((icons_path, [os.path.join(root, file_)]))
 
 
-if what() == 'win':
+if os.name == 'nt':
     fix_cacert()
     fix_gtk()
     fix_gevent()
 
-version_extra = what().upper() + str(arch())
+if os.name == 'nt':
+    version_extra = 'Win{}'.format(arch())
+else:
+    version_extra = 'Linux'
 
-with open('version.py', 'w') as file_:
-    file_.write('__VERSION_EXTRA__ = "{}"'.format(version_extra))
+if not 'sdist' in sys.argv:
+    with open('version.py', 'w') as file_:
+        file_.write('__VERSION_EXTRA__ = "{}"'.format(version_extra))
 
-compileall.compile_file('version.py', legacy=True)
-os.remove('version.py')
-data_files.append(('', ['version.pyc']))
+    compileall.compile_file('version.py', legacy=True)
+    os.remove('version.py')
+    data_files.append(('', ['version.pyc']))
 
 setup(
         name='Steam Tools',

@@ -1,39 +1,38 @@
 environment:
     global:
-        CYG_MIRROR: 'http://mirrors.kernel.org/sourceware/cygwin/'
-        CYG_CACHE: 'var\cache\setup'
-        CYG_BASH: 'bin\bash'
         PYTHON32: 'C:\Python34'
         PYTHON64: 'C:\Python34-x64'
         PYTHON_VERSION: 3.4.4
-        CYG_ROOT: 'C:\cygwin64'
-        CYG_UPDATER: 'setup-x86_64.exe'
-
-cache:
-    - '%CYG_ROOT%\%CYG_CACHE%'
+        UPX_URL: http://upx.sourceforge.net/download/upx391w.zip
 
 clone_depth: 1
       
 install:
-    - git submodule update --init --recursive
-
-    - call "%CYG_ROOT%\%CYG_UPDATER%" -qnOgf -R "%CYG_ROOT%" -s "%CYG_MIRROR%" -l "%CYG_ROOT%\%CYG_CACHE%" -P cygwin32-gcc-g++,gcc-g++,girepository-Gtk3.0,git,make,mingw64-i686-gcc-g++,mingw64-x86_64-gcc-g++,p7zip,pkg-config,python3,util-linux
+    - appveyor DownloadFile "%UPX_URL%" -FileName upx391w.zip
+    - md "C:\UPX\"
+    - 7z e -y upx391w.zip -o"C:\UPX\"
 
     - call "%PYTHON32%\python.exe" -m pip install --user --disable-pip-version-check --upgrade pip
     - call "%PYTHON32%\python.exe" -m pip install --user py2exe
     - call "%PYTHON32%\python.exe" -m pip install --user requests
     - call "%PYTHON32%\python.exe" -m pip install --user beautifulsoup4
-    
+    - call "%PYTHON32%\python.exe" -m pip install --user psutil
+    - call "%PYTHON32%\python.exe" -m pip install --user gevent
+
     - call "%PYTHON64%\python.exe" -m pip install --user --disable-pip-version-check --upgrade pip
     - call "%PYTHON64%\python.exe" -m pip install --user py2exe
     - call "%PYTHON64%\python.exe" -m pip install --user requests
     - call "%PYTHON64%\python.exe" -m pip install --user beautifulsoup4
+    - call "%PYTHON64%\python.exe" -m pip install --user psutil
+    - call "%PYTHON64%\python.exe" -m pip install --user gevent
+
+    - DEL /F "C:\Users\appveyor\AppData\Roaming\Python\Python34\site-packages\gevent\_util_py2.py"
 
 build_script:
-    - call "%CYG_ROOT%\%CYG_BASH%" -lc "cd $APPVEYOR_BUILD_FOLDER; /usr/bin/python3 -u ./release.py DEV"
+    - call %PYTHON64%\python.exe -u ./release.py"
 
 artifacts:
-    - path: '*.zip'
+    - path: 'release\*'
 
 deploy:
     release: steam-tools-v$(appveyor_build_version)
@@ -41,7 +40,7 @@ deploy:
     provider: GitHub
     auth_token:
         secure: 8vbiLkhZStfEM+L/0oLALqM6YVWcq9KAxwMLjB1N5lj5dSM/cWnNbyzy8QjNA1d2
-    artifact: '*.zip'
+    artifact: 'release\*'
     draft: true
     prerelease: false
     on:

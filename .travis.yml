@@ -1,0 +1,26 @@
+language: python
+
+python:
+    - "3.4"
+
+install:
+    - sudo apt-get update -q
+    - sudo apt-get install --no-install-recommends -y python3-gi python3-gi-cairo
+    - sudo pip install requests
+    - sudo pip install gevent
+    - sudo pip install beautifulsoup4
+    - sudo pip install pycrypto
+
+script:
+    - sudo rm -f /usr/bin/python3
+    - sudo ln -s $(which python3.4) /usr/bin/python3
+    - python3.4 ./release.py
+
+deploy:
+    provider: releases
+    api_key:
+        secure: 9SVldf63ssaVfw4Wd8Ouc+eak8S2MRC7r+y2DxcOQRkfgymZNc05u3gOB4UCULNa
+    file: release/*
+    skip_cleanup: true
+    on:
+        tags: true
