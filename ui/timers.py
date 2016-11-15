@@ -232,12 +232,12 @@ def steamgifts_join_giveaway_timer(giveaway):
         antiban_time = random.randint(1, 15)
         start_time = time.time()
 
-        GLib.timeout_add_seconds(1,
-                                 progress_bar_pulse,
-                                 'steamgifts_join_giveaway',
-                                 ui.main_window.SG_join_antiban_progress_bar,
-                                 start_time,
-                                 antiban_time)
+        GLib.timeout_add(50,
+                         progress_bar_pulse,
+                         'steamgifts_join_giveaway',
+                         ui.main_window.SG_join_antiban_progress_bar,
+                         start_time,
+                         antiban_time)
 
         ui.steamgifts_join_giveaway_waiting = True
     else:
