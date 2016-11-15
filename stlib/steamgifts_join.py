@@ -125,14 +125,15 @@ def join(giveaway):
     html = stlib.network.try_get_html('steamgifts', query_url)
     sidebar = html.find('div', class_='sidebar')
     form = sidebar.find('form')
-    data = dict([(inputs['name'], inputs['value']) for inputs in form.findAll('input')])
     points_spent = 0
 
     try:
+        data = dict([(inputs['name'], inputs['value']) for inputs in form.findAll('input')])
+
         post_data = {'xsrf_token': data['xsrf_token'],
                      'do': 'entry_insert',
                      'code': data['code']}
-    except KeyError:
+    except (KeyError, AttributeError):
         stlib.logger.error('%s has expired. Ignoring.', giveaway_name)
         return points_spent
 
