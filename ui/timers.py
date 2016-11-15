@@ -193,6 +193,15 @@ def steamtrades_bump_timer(trade_ids, MIN_wait_time, MAX_wait_time):
     return True
 
 
+def steamgifts_join_update_points():
+    if not ui.steamgifts_join_is_running or \
+            not ui.steamgifts_join_waiting:
+        return False
+
+    user_points = stlib.steamgifts_join.get_user_points()
+    ui.main_window.SG_join_current_points.set_text('{} points'.format(str(user_points)))
+
+
 def steamgifts_join_giveaway_timer(giveaway):
     if not ui.steamgifts_join_is_running:
         return False
@@ -269,6 +278,8 @@ def steamgifts_join_timer(type, MIN_wait_time, MAX_wait_time):
                                  ui.main_window.SG_join_progress_bar,
                                  start_time,
                                  random_time)
+
+        GLib.timeout_add_seconds(60 * 10, steamgifts_join_update_points)
 
         ui.steamgifts_join_waiting = True
 
