@@ -175,8 +175,8 @@ def fix_gtk():
                                [os.path.join(typelib_directory, file_)]))
 
     # Add icons
-    for root, dirs, files in os.walk(os.path.join('ui', 'icons', 'Adwaita')):
-        icons_path = os.path.join('share', 'icons', 'Adwaita', root[17:])
+    for root, dirs, files in os.walk(os.path.join('ui', 'icons', 'Default')):
+        icons_path = os.path.join('share', 'icons', 'Default', root[17:])
         for file_ in files:
             data_files.append((icons_path, [os.path.join(root, file_)]))
 
