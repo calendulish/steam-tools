@@ -180,6 +180,15 @@ def fix_gtk():
         for file_ in files:
             data_files.append((icons_path, [os.path.join(root, file_)]))
 
+    # Fix default icon theme
+    temporary_directory = tempfile.mktemp()
+    os.makedirs(temporary_directory)
+    settings_path = os.path.join(temporary_directory, 'settings.ini')
+    with open(settings_path , 'w') as file_:
+        file_.write('[Settings]\n')
+        file_.write('gtk-icon-theme-name = Default\n')
+    data_files.append((os.path.join('etc', 'gtk-3.0'), [settings_path]))
+
 
 if os.name == 'nt':
     fix_cacert()
