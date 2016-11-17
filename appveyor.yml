@@ -39,7 +39,7 @@ deploy:
     description: 'Steam Tools'
     provider: GitHub
     auth_token:
-        secure: 8vbiLkhZStfEM+L/0oLALqM6YVWcq9KAxwMLjB1N5lj5dSM/cWnNbyzy8QjNA1d2
+        secure: s9JXsQXUwIQLtip9BtKvEJQT24DqNDrbNwxMk39ixpq62lnDhE7cc3tq5cX3s85M
     artifact: 'release\*'
     draft: true
     prerelease: false
