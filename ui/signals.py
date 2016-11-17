@@ -245,6 +245,7 @@ def on_card_farming_stop():
     ui.main_window.fake_app_current_time.set_text('')
     ui.main_window.card_farming_current_game.set_text('')
     ui.main_window.card_farming_card_left.set_text('')
+    ui.main_window.card_farming_total_card_left.set_text('')
     ui.main_window.card_farming_current_game_time.set_text('')
     ui.main_window.card_farming_total_time.set_text('')
 
