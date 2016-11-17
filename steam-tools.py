@@ -27,8 +27,8 @@ import sys
 import stlib
 
 if __name__ == "__main__":
-    print('Steam Tools version {}'.format(ui.version.__VERSION__))
-    print('Copyright (C) 2016 Lara Maia - <dev@lara.click>\n')
+    stlib.logging.console_msg('Steam Tools version {}'.format(ui.version.__VERSION__))
+    stlib.logging.console_msg('Copyright (C) 2016 Lara Maia - <dev@lara.click>\n')
 
     aParser = argparse.ArgumentParser()
     aParser.add_argument('-c', '--cli', nargs='+')
