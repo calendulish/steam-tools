@@ -18,18 +18,13 @@
 
 import sys
 import threading
+import time
 
 import bs4
-import gevent
 import requests
 
 import stlib
-
-if stlib.gui_mode:
-    import gi
-
-    gi.require_version('Gtk', '3.0')
-    from gi.repository import Gtk
+import ui
 
 STEAM_LOGIN_PAGES = [
     'https://steamcommunity.com/login/home/',
@@ -58,14 +53,17 @@ def async_wait(function):
         thread.start()
 
         while thread.is_alive():
-            if stlib.gui_mode:
-                while (Gtk.events_pending()):
-                    Gtk.main_iteration()
-            gevent.sleep(0.01)
+            ui.update_main_loop()
         else:
             return thread.return_
 
     return async_call
+
+
+def nonblocking_wait(seconds):
+    for _ in range(seconds * 10):
+        time.sleep(0.1)
+        ui.update_main_loop()
 
 
 @async_wait
@@ -104,7 +102,7 @@ def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, v
                requests.exceptions.RequestException,
                requests.exceptions.Timeout):
             stlib.logger.error('Unable to connect. Trying again... ({}/3)'.format(i))
-            gevent.sleep(3)
+            nonblocking_wait(3)
         else:
             return response
 
