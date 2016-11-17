@@ -91,7 +91,7 @@ def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, v
         except requests.exceptions.SSLError:
             stlib.logger.critical('INSECURE CONNECTION DETECTED!')
             stlib.logger.critical('Invalid SSL Certificates.')
-            return None
+            return False
         except requests.exceptions.HTTPError:
             stlib.logger.warning('Response with HTTP error.')
             return None
@@ -106,6 +106,7 @@ def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, v
         else:
             return response
 
+    return False
 
 def try_get_response(service_name, url, data=None):
     config_parser = stlib.config.read()
@@ -121,8 +122,10 @@ def try_get_response(service_name, url, data=None):
 
             response = get_response(url, data, cookies)
 
-            if not response:
+            if response is None:
                 raise KeyError
+            elif response is False:
+                return None
 
             if 'suspensions' in response.url:
                 stlib.logger.critical('You are banned!')
