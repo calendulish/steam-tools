@@ -4,7 +4,7 @@ import importlib.machinery
 
 __VERSION_MAJOR__ = '2'
 __VERSION_MINOR__ = '0'
-__VERSION_REVISION__ = '1'
+__VERSION_REVISION__ = '2'
 __VERSION_EXTRA__ = 'GIT'
 
 try:
