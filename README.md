@@ -1,9 +1,9 @@
 Steam Tools
 -----------
 
-[![Linux Build Status](https://travis-ci.org/ShyPixie/steam-tools.svg?branch=master)](https://travis-ci.org/ShyPixie/steam-tools)
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/github/ShyPixie/steam-tools?svg=true)](https://ci.appveyor.com/project/ShyPixie/steam-tools)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/ShyPixie/steam-tools/badges/quality-score.png)](https://scrutinizer-ci.com/g/ShyPixie/steam-tools/)
+[![Linux Build Status](https://img.shields.io/travis/ShyPixie/steam-tools/master.svg?label=Linux%20build)](https://travis-ci.org/ShyPixie/steam-tools)
+[![Windows Build status](https://img.shields.io/appveyor/ci/ShyPixie/steam-tools/master.svg?label=Windows%20build)](https://ci.appveyor.com/project/ShyPixie/steam-tools)
+[![Scrutinizer Code Quality](https://img.shields.io/scrutinizer/g/ShyPixie/steam-tools.svg)](https://scrutinizer-ci.com/g/ShyPixie/steam-tools/)
 [![GitHub license](https://img.shields.io/badge/license-GPLv3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 [![GitHub release](https://img.shields.io/github/release/ShyPixie/steam-tools.svg)](https://github.com/ShyPixie/steam-tools/releases)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WVQ5XM935XNLN&item_name=Steam Tools)
