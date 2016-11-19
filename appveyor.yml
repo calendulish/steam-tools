@@ -1,9 +1,9 @@
 environment:
     matrix:
      - platform: x86
-     PYTHONPATH: 'C:\Python34'
+       PYTHONPATH: 'C:\Python34'
      - platform: x64 
-     PYTHONPATH: 'C:\Python34-x64'      
+       PYTHONPATH: 'C:\Python34-x64'      
     global:
         PYTHON_VERSION: 3.4.4
         UPX_URL: http://upx.sourceforge.net/download/upx391w.zip
