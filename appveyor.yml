@@ -23,7 +23,7 @@ install:
     - DEL /F "C:\Users\appveyor\AppData\Roaming\Python\Python34\site-packages\gevent\_util_py2.py"
 
 build_script:
-    - call C:\Python34-x64\python.exe -u ./release.py"
+    - call "%PYTHONPATH%\python.exe" -u ./release.py"
 
 artifacts:
     - path: 'release\*'
