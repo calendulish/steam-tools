@@ -23,6 +23,7 @@ install:
     - call "%PYTHONPATH%\python.exe" -m pip install --user gevent
 
     - DEL /F "C:\Users\appveyor\AppData\Roaming\Python\Python34\site-packages\gevent\_util_py2.py"
+    - Write-Host "Current platform: $ENV:PROCESSOR_ARCHITECTURE"
 
 build_script:
     - call %PYTHONPATH%\python.exe -u ./release.py"
