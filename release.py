@@ -108,14 +108,18 @@ def build(current_system, current_arch):
 
         interpreter = [os.path.join('scripts', 'build.cmd')]
 
-        if current_arch == 64:
-            params = ['Python34-x64']
-            print(">>>>>>>>>> OS 64 --- Python34-x64:")
-            print (os.environ['PYTHONPATH'])
-        else:
-            print(">>>>>>>>>> OS 32 --- Python34:")
-            params = ['Python34']
-            print (os.environ['PYTHONPATH'])
+#        if current_arch == 64:
+#            params = ['Python34-x64']
+#            print(">>>>>>>>>> OS 64 --- Python34-x64:")
+#            print (os.environ['PYTHONPATH'])
+#        else:
+#            print(">>>>>>>>>> OS 32 --- Python34:")
+#            params = ['Python34']
+#            print (os.environ['PYTHONPATH'])
+
+            params = [os.environ['PYTHONPATH']][3:]
+            print(">>>>>>>>>> params:" %params)
+    
 
         archive_extension_ = '.zip'
 
