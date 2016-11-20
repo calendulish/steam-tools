@@ -1,7 +1,7 @@
 environment:
     matrix:
-     - PYTHONPATH: 'C:\Python34'
-     - PYTHONPATH: 'C:\Python34-x64'      
+     - PYTHONVER: 'Python34'
+     - PYTHONVER: 'Python34-x64'      
     global:
         PYTHON_VERSION: 3.4.4
         UPX_URL: http://upx.sourceforge.net/download/upx391w.zip
@@ -13,6 +13,7 @@ install:
     - md "C:\UPX\"
     - 7z e -y upx391w.zip -o"C:\UPX\"
 
+    - SET PYTHONPATH=C:\%PYTHONVER%
     - call "%PYTHONPATH%\python.exe" -m pip install --user --disable-pip-version-check --upgrade pip
     - call "%PYTHONPATH%\python.exe" -m pip install --user py2exe
     - call "%PYTHONPATH%\python.exe" -m pip install --user requests
