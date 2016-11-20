@@ -117,7 +117,7 @@ def build(current_system, current_arch):
 #            params = ['Python34']
 #            print (os.environ['PYTHONPATH'])
 
-        params = [os.environ['PYTHONPATH']]    
+        params = [os.environ['PYTHONVER']]    
         print(">>>>>>>>>> params: ",params)
         
         archive_extension_ = '.zip'
