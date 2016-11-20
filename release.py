@@ -111,9 +111,11 @@ def build(current_system, current_arch):
         if current_arch == 64:
             params = ['Python34-x64']
             print(">>>>>>>>>> OS 64 --- Python34-x64:")
+            print os.environ['PYTHONPATH']
         else:
             print(">>>>>>>>>> OS 32 --- Python34:")
             params = ['Python34']
+            print os.environ['PYTHONPATH']
 
         archive_extension_ = '.zip'
 
