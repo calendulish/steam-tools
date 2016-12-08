@@ -253,7 +253,6 @@ class SteamTools:
             user_points = stlib.steamgifts_join.get_user_points(html)
             giveaway_generator = stlib.steamgifts_join.get_giveaways(html)
 
-
             if self.config_parser.getboolean('SteamGifts', 'developerGiveaways', fallback=True):
                 pinned_generator = stlib.steamgifts_join.get_pinned_giveaways(html)
                 giveaway_generator = itertools.chain(giveaway_generator, pinned_generator)

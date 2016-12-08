@@ -18,6 +18,13 @@
 
 import stlib
 
+giveaway_type = None
+
+
+def type_generator(type_list):
+    for line in type_list.split(','):
+        yield line.strip()
+
 
 def configure():
     config_url = 'https://www.steamgifts.com/account/settings/giveaways'

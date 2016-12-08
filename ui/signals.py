@@ -370,9 +370,6 @@ def on_steamgifts_join_start():
     ui.main_window.spinner.start()
     ui.steamgifts_join_is_running = True
 
-    config = config_parser.get('SteamGifts', 'typeList')
-    type_generator = (line.strip() for line in config.split(','))
-
     MIN_wait_time = config_parser.getint('SteamGifts', 'minWaitTime')
     MAX_wait_time = config_parser.getint('SteamGifts', 'maxWaitTime')
 
@@ -383,7 +380,6 @@ def on_steamgifts_join_start():
     GLib.timeout_add(
             100,
             ui.timers.steamgifts_join_timer,
-            type_generator,
             MIN_wait_time,
             MAX_wait_time
     )

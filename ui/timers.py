@@ -256,7 +256,7 @@ def steamgifts_join_giveaway_timer(giveaway):
     return True
 
 
-def steamgifts_join_timer(type, MIN_wait_time, MAX_wait_time):
+def steamgifts_join_timer(MIN_wait_time, MAX_wait_time):
     if not ui.steamgifts_join_is_running:
         return False
 
@@ -264,10 +264,15 @@ def steamgifts_join_timer(type, MIN_wait_time, MAX_wait_time):
         return True
 
     config_parser = stlib.config.read()
+    type_list = config_parser.get('SteamGifts', 'typeList')
 
     try:
-        type = next(type)
+        if stlib.steamgifts_join.giveaway_type is None:
+            stlib.steamgifts_join.giveaway_type = stlib.steamgifts_join.type_generator(type_list)
+
+        giveaway_type = next(stlib.steamgifts_join.giveaway_type)
     except StopIteration:
+        stlib.steamgifts_join.giveaway_type = None
         random_time = random.randint(MIN_wait_time, MAX_wait_time)
 
         start_time = time.time()
@@ -289,14 +294,14 @@ def steamgifts_join_timer(type, MIN_wait_time, MAX_wait_time):
 
     query_url = '{}?type='.format(stlib.steamgifts_query_page)
 
-    if type == 'wishlist':
+    if giveaway_type == 'wishlist':
         query_url += 'wishlist'
-    elif type == 'new':
+    elif giveaway_type == 'new':
         query_url += 'new'
-    elif type == 'main':
+    elif giveaway_type == 'main':
         pass
     else:
-        query_url += '&q={}'.format(type)
+        query_url += '&q={}'.format(giveaway_type)
 
     html = stlib.network.try_get_html('steamgifts', query_url)
     giveaway_generator = stlib.steamgifts_join.get_giveaways(html)
