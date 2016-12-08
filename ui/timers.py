@@ -35,9 +35,11 @@ def status_bar_text_pushed_timer(context):
     ui.main_window.status_bar.pop(context)
     return False
 
+
 def hide_info_label():
     ui.main_window.info_label.hide()
     return False
+
 
 def card_farming_time_timer(start_time):
     if not ui.card_farming_is_running:
@@ -132,7 +134,7 @@ def fake_app_timer(start_time):
 
 
 def progress_bar_pulse(type_, progress_bar, start_time, maximum_time):
-    elapsed_seconds = int(time.time() - start_time)
+    elapsed_seconds = time.time() - start_time
     time_left = datetime.timedelta(seconds=maximum_time - elapsed_seconds)
 
     fraction = elapsed_seconds / maximum_time
