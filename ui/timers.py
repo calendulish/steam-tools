@@ -286,7 +286,7 @@ def steamgifts_join_timer(MIN_wait_time, MAX_wait_time):
                                  start_time,
                                  random_time)
 
-        GLib.timeout_add_seconds(60 * 10, steamgifts_join_update_points)
+        GLib.timeout_add_seconds(60 * 5, steamgifts_join_update_points)
 
         ui.steamgifts_join_waiting = True
 
