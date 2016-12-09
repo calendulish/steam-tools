@@ -29,19 +29,15 @@ import ui
 class SteamTools:
     def __init__(self, console_params):
         self.config_parser = stlib.config.read()
-        self.module = console_params.cli[0]
-        self.parameters = console_params
+        self.module = console_params.module[0]
+        self.options = console_params.options
 
         self.select_profile()
 
         class_name = self.__class__.__name__
         module_function = ''.join(['_', class_name, '__', self.module])
 
-        if module_function in dir(self):
-            eval(''.join(['self.', module_function, '()']))
-        else:
-            stlib.logger.critical("Please, check the command line.")
-            stlib.logger.critical("The module %s don't exist", self.module)
+        eval(''.join(['self.', module_function, '()']))
 
     def select_profile(self):
         if not self.config_parser.has_option('Config', 'browserProfile'):
@@ -142,7 +138,7 @@ class SteamTools:
 
     def __fakeapp(self):
         try:
-            ui.fake_app_id = self.parameters.cli[1]
+            ui.fake_app_id = self.options[0]
         except IndexError:
             stlib.logger.critical("Unable to locate the gameID.")
             stlib.logger.critical("Please, check the command line.")

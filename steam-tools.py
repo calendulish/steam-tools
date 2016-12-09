@@ -23,6 +23,7 @@ import ui.fix_std
 import argparse
 import os
 import sys
+import textwrap
 
 import stlib
 
@@ -30,17 +31,36 @@ if __name__ == "__main__":
     print('Steam Tools version {}'.format(ui.version.__VERSION__))
     print('Copyright (C) 2016 Lara Maia - <dev@lara.click>\n')
 
-    aParser = argparse.ArgumentParser()
-    aParser.add_argument('-c', '--cli', nargs='+')
-    cParams = aParser.parse_args()
+    command_parser = argparse.ArgumentParser(
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog=textwrap.dedent('''
+                Available modules for console mode:
+                    - cardfarming
+                    - fakeapp <game id>
+                    - steamtrades_bump
+                    - steamgifts_join
+                       '''))
+
+    command_parser.add_argument('-c', '--cli',
+                                choices=['cardfarming', 'fakeapp', 'steamtrades_bump', 'steamgifts_join'],
+                                metavar='module [options]',
+                                action='store',
+                                nargs=1,
+                                help='Start module without GUI (console mode)',
+                                dest='module')
+    command_parser.add_argument('options',
+                                nargs='*',
+                                help=argparse.SUPPRESS)
+
+    command_params = command_parser.parse_args()
 
     try:
-        if cParams.cli:
+        if command_params.module:
             if os.name is 'nt' and os.getenv('PWD'):
                 stlib.logger.warning('Running steam tools from custom console is not supported.')
                 stlib.logger.warning('Some problems may occur.')
 
-            ST = ui.console.SteamTools(cParams)
+            ST = ui.console.SteamTools(command_params)
         else:
             if os.name is 'posix' and not os.getenv('DISPLAY'):
                 stlib.logger.error('The DISPLAY is not set!')
