@@ -1,9 +1,14 @@
 [Icon Theme]
 Name=Steam Tools Minimal Icon Set
 Comment=A modern, professional icon theme for the GNOME Desktop Environment
-Directories=actions/48
+Directories=actions/22,animations/48
 
-[actions/48]
-Size=128
+[actions/22]
+Size=22
 Context=Actions
+Type=Scalable
+
+[animations/48]
+Size=48
+Context=Animations
 Type=Scalable

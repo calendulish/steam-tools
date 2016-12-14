@@ -146,6 +146,7 @@ class SteamTools(Gtk.Application):
 
         menu_items = ['quit',
                       'browser_profile',
+                      'recheck_logins',
                       'settings',
                       'about']
 

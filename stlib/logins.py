@@ -132,12 +132,8 @@ def wait_queue(greenlets=None):
             try:
                 if greenlets[-1].ready():
                     greenlets.pop()
-                else:
-                    if stlib.gui_mode:
-                        while Gtk.events_pending():
-                            Gtk.main_iteration()
 
-                gevent.sleep(0.01)
+                ui.update_main_loop()
             except IndexError:
                 break
     except(KeyboardInterrupt, SystemExit):

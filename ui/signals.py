@@ -25,6 +25,7 @@
 
 import configparser
 import locale
+import os
 import time
 
 import gi
@@ -69,6 +70,22 @@ def on_browser_profile_activate(action, parameters):
     # FIXME
     ui.main_window.warning_label.set_text('You must restart Steam tools to use new profile')
     ui.main_window.warning_label.show()
+
+
+def on_recheck_logins_activate(action, params):
+    icon_path = os.path.join(ui.application.icons_path, ui.application.steam_icon_busy)
+    ui.main_window.steam_login_status.set_from_file(icon_path)
+
+    icon_path = os.path.join(ui.application.icons_path, ui.application.SG_icon_busy)
+    ui.main_window.SG_login_status.set_from_file(icon_path)
+
+    icon_path = os.path.join(ui.application.icons_path, ui.application.ST_icon_busy)
+    ui.main_window.ST_login_status.set_from_file(icon_path)
+
+    icon_path = os.path.join(ui.application.icons_path, ui.application.SC_icon_busy)
+    ui.main_window.SC_login_status.set_from_file(icon_path)
+
+    ui.application.do_login_check()
 
 
 def on_settings_activate(action, parameters):
@@ -245,6 +262,7 @@ def on_card_farming_stop():
     ui.main_window.fake_app_current_time.set_text('')
     ui.main_window.card_farming_current_game.set_text('')
     ui.main_window.card_farming_card_left.set_text('')
+    ui.main_window.card_farming_total_card_left.set_text('')
     ui.main_window.card_farming_current_game_time.set_text('')
     ui.main_window.card_farming_total_time.set_text('')
 

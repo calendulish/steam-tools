@@ -21,6 +21,11 @@
                     <attribute name="action">app.browser_profile</attribute>
                 </item>
                 <item>
+                    <attribute name="icon">gtk-apply</attribute>
+                    <attribute name="label">Re-check logins</attribute>
+                    <attribute name="action">app.recheck_logins</attribute>
+                </item>
+                <item>
                     <attribute name="icon">gtk-properties</attribute>
                     <attribute name="label">Settings</attribute>
                     <attribute name="action">app.settings</attribute>

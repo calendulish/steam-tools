@@ -19,7 +19,7 @@ script:
 deploy:
     provider: releases
     api_key:
-        secure: 9SVldf63ssaVfw4Wd8Ouc+eak8S2MRC7r+y2DxcOQRkfgymZNc05u3gOB4UCULNa
+        secure: s9JXsQXUwIQLtip9BtKvEJQT24DqNDrbNwxMk39ixpq62lnDhE7cc3tq5cX3s85M
     file: release/*
     skip_cleanup: true
     on:

@@ -1,10 +1,19 @@
 import sys
 
+import gevent
+
+from stlib import gui_mode
 from ui import console, version
 
 __all__ = ['console', 'version']
 
 if len(sys.argv) == 1:
+    import gi
+
+    gi.require_version('Gtk', '3.0')
+
+    from gi.repository import Gtk
+
     from ui import (main,
                     signals,
                     timers)
@@ -12,6 +21,12 @@ if len(sys.argv) == 1:
     __all__.extend(['main',
                     'signals',
                     'timers'])
+
+def update_main_loop():
+    gevent.sleep(0.001)
+
+    if gui_mode:
+        Gtk.main_iteration()
 
 main_window = None
 application = None
