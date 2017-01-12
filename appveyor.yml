@@ -1,7 +1,8 @@
 environment:
+    matrix:
+     - PYTHONVER: 'Python34'
+     - PYTHONVER: 'Python34-x64'      
     global:
-        PYTHON32: 'C:\Python34'
-        PYTHON64: 'C:\Python34-x64'
         PYTHON_VERSION: 3.4.4
         UPX_URL: http://upx.sourceforge.net/download/upx391w.zip
 
@@ -12,24 +13,18 @@ install:
     - md "C:\UPX\"
     - 7z e -y upx391w.zip -o"C:\UPX\"
 
-    - call "%PYTHON32%\python.exe" -m pip install --user --disable-pip-version-check --upgrade pip
-    - call "%PYTHON32%\python.exe" -m pip install --user py2exe
-    - call "%PYTHON32%\python.exe" -m pip install --user requests
-    - call "%PYTHON32%\python.exe" -m pip install --user beautifulsoup4
-    - call "%PYTHON32%\python.exe" -m pip install --user psutil
-    - call "%PYTHON32%\python.exe" -m pip install --user gevent
-
-    - call "%PYTHON64%\python.exe" -m pip install --user --disable-pip-version-check --upgrade pip
-    - call "%PYTHON64%\python.exe" -m pip install --user py2exe
-    - call "%PYTHON64%\python.exe" -m pip install --user requests
-    - call "%PYTHON64%\python.exe" -m pip install --user beautifulsoup4
-    - call "%PYTHON64%\python.exe" -m pip install --user psutil
-    - call "%PYTHON64%\python.exe" -m pip install --user gevent
+    - SET PYTHONPATH=C:\%PYTHONVER%
+    - call "%PYTHONPATH%\python.exe" -m pip install --user --disable-pip-version-check --upgrade pip
+    - call "%PYTHONPATH%\python.exe" -m pip install --user py2exe
+    - call "%PYTHONPATH%\python.exe" -m pip install --user requests
+    - call "%PYTHONPATH%\python.exe" -m pip install --user beautifulsoup4
+    - call "%PYTHONPATH%\python.exe" -m pip install --user psutil
+    - call "%PYTHONPATH%\python.exe" -m pip install --user gevent
 
     - DEL /F "C:\Users\appveyor\AppData\Roaming\Python\Python34\site-packages\gevent\_util_py2.py"
 
 build_script:
-    - call %PYTHON64%\python.exe -u ./release.py"
+    - call "%PYTHONPATH%\python.exe" -u ./release.py"
 
 artifacts:
     - path: 'release\*'

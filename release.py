@@ -108,11 +108,9 @@ def build(current_system, current_arch):
 
         interpreter = [os.path.join('scripts', 'build.cmd')]
 
-        if current_arch == 64:
-            params = ['Python34-x64']
-        else:
-            params = ['Python34']
-
+        params = [os.environ['PYTHONVER']]    
+        print(">>>>>>>>>> params: ",params)
+        
         archive_extension_ = '.zip'
 
         print('Building...')
