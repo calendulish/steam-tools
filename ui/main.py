@@ -117,7 +117,7 @@ class SteamTools(Gtk.Application):
         self.window.ST_bump_max_time.set_text(str(config))
 
         config = self.config_parser.get('SteamGifts', 'typeList', fallback='wishlist, main, new')
-        self.window.SG_join_type_list.set_text(str(config))
+        self.window.SG_join_type_list.set_text(config)
 
         config = self.config_parser.getboolean('SteamGifts', 'developerGiveaways', fallback=True)
         self.window.SG_join_developer_giveaways.set_active(config)
