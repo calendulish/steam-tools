@@ -21,7 +21,8 @@ from stlib import (logging,
                    logins,
                    card_farming,
                    steamtrades_bump,
-                   steamgifts_join)
+                   steamgifts_join,
+                   authenticator)
 
 __all__ = ['logging',
            'config',
@@ -31,7 +32,8 @@ __all__ = ['logging',
            'logins',
            'card_farming',
            'steamtrades_bump',
-           'steamgifts_join']
+           'steamgifts_join',
+           'authenticator']
 
 logger = logging.get_logger()
 wrapper_process = None
@@ -47,6 +49,7 @@ def __safe_exit():
 
 atexit.register(__safe_exit)
 
+api_query_uri = 'http://query.lara.click'
 steam_login_page = 'https://steamcommunity.com/login/checkstoredlogin'
 steam_check_page = '{}/?redirectURL=discussions'.format(steam_login_page)
 steamgifts_check_page = 'https://www.steamgifts.com/account/profile/sync'
