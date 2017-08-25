@@ -67,7 +67,7 @@ def nonblocking_wait(seconds):
 
 
 @async_wait
-def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, verify=True, stream=False):
+def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, verify=True, stream=False, empty_post=False):
     response = None
 
     if headers:
@@ -82,7 +82,7 @@ def get_response(url, data=None, cookies=None, headers=USER_AGENT, timeout=10, v
 
     for i in range(1, 4):
         try:
-            if data:
+            if data or empty_post:
                 response = requests.post(url, **kwargs)
             else:
                 response = requests.get(url, **kwargs)
