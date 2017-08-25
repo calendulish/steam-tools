@@ -42,7 +42,7 @@ if __name__ == "__main__":
                        '''))
 
     command_parser.add_argument('-c', '--cli',
-                                choices=['cardfarming', 'fakeapp', 'steamtrades_bump', 'steamgifts_join'],
+                                choices=['cardfarming', 'fakeapp', 'steamtrades_bump', 'steamgifts_join', 'authenticator'],
                                 metavar='module [options]',
                                 action='store',
                                 nargs=1,
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     try:
         if command_params.module:
             if os.name is 'nt' and os.getenv('PWD'):
-                stlib.logger.warning('Running steam tools from custom console is not supported.')
+                stlib.logger.warning('Running steam tools from custom console is not supported on Windows.')
                 stlib.logger.warning('Some problems may occur.')
 
             ST = ui.console.SteamTools(command_params)

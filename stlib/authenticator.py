@@ -50,79 +50,56 @@ STEAM_ALPHABET = ['2', '3', '4', '5', '6', '7', '8', '9',
 
 
 def __run_adb(params):
-    try:
-        data = subprocess.check_output(
-            [ui.main_window.SA_adb_path.get_text() ] + params
-        )
+    data = subprocess.check_output(
+        [stlib.SA_adb_path ] + params,
+        stderr=subprocess.STDOUT
+    )
 
-        return data.decode(locale.getpreferredencoding())
-    except subprocess.CalledProcessError:
-        stlib.logger.verbose('Unable to find an android phone.')
-        return None
+    return data.decode(locale.getpreferredencoding())
 
 
 def __get_data_from_authenticator(path):
-    if not os.path.isfile(ui.main_window.SA_adb_path.get_text()):
-        stlib.logger.verbose('Unable to find the Android Bebug Bridge.')
-
-        # TODO: Show dialog again?
-
-        message = ui.main.MessageDialog(Gtk.MessageType.INFO,
-                                        'Authenticator',
-                                        'Unable to find the Android Debug Bridge.',
-                                        'I cannot found the Android Debug Bridge binary (adb)\n'+
-                                        'Set the correct adb path at authenticator tab to enable\n'+
-                                        'the authenticator. This message will not be shown again.')
-        message.show()
-        message.run()
-
-        return None
-
-    data = __run_adb(['shell', 'su', '-c', 'echo ok'])
-
-    if data.strip() != 'ok':
-        stlib.logger.verbose('The phone is not rooted.')
-        message = ui.main.MessageDialog(Gtk.MessageType.INFO,
-                                        'Authenticator',
-                                        'You phone is not rooted.',
-                                        'The authenticator cannot works without a rooted phone.\n'+
-                                        'The authenticator will be disabled now.')
-        message.show()
-        message.run()
-
-        # TODO: Disable authenticator
-
-        return None
-    else:
+    try:
         data = __run_adb([
             'shell',
-            'su', '-c',
-            'cat ' + os.path.join(ui.main_window.SA_auth_path.get_text(), path)
+            'su -c "cat {}"'.format(os.path.join(stlib.SA_auth_path, path))
         ])
+    except subprocess.CalledProcessError:
+        stlib.logger.error('Unable to get data from %s', path)
 
-        if 'No such file' in data:
-            stlib.logger.verbose('Something wrong with the Steam Mobile App.')
-            message = ui.main.MessageDialog(Gtk.MessageType.INFO,
-                                            'Authenticator',
-                                            'Something wrong with the Steam Mobile App',
-                                            'You need an cell phone with Steam Mobile App installed\n' +
-                                            'and already logged with an Steam Guard enabled account.')
-            message.show()
-            message.run()
+        return None
 
-            # TODO: Disable authenticator
+    if 'No such file' in data:
+        stlib.logger.critical('Something wrong with the Steam Mobile App.')
 
-            return None
+        return None
 
-        return data
+    return data
 
 
 def __get_server_time():
     query_time_url = 'https://api.steampowered.com/ITwoFactorService/QueryTime/v1'
-    #FIXME: post?
-    response = stlib.network.get_response(query_time_url)
+    response = stlib.network.get_response(query_time_url, empty_post=True)
     server_time = int(response.json()['response']['server_time'])
+
     return server_time + response.elapsed.seconds
+
+def phone_exists():
+    try:
+        __run_adb(['shell', 'true'])
+    except subprocess.CalledProcessError:
+        return False
+    else:
+        return True
+
+
+def phone_is_rooted():
+    try:
+        data = __run_adb(['shell', 'su', '-c', 'true'])
+    except subprocess.CalledProcessError:
+        return False
+    else:
+        return True
 
 
 def get_userid(nickname):
@@ -148,7 +125,7 @@ def get_code(secret):
         auth_code.append(STEAM_ALPHABET[int(auth_code_raw % len(STEAM_ALPHABET))])
         auth_code_raw /= len(STEAM_ALPHABET)
 
-    return ''.join(auth_code)
+    return ''.join(auth_code), server_time
 
 
 def get_secret(type_):
@@ -156,29 +133,22 @@ def get_secret(type_):
         try:
             data = __get_data_from_authenticator('files/Steamguard-*')
             return json.loads(data)[type_]
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, KeyError):
             stlib.logger.verbose('Unable to get {}. Trying again.'.format(type_))
             time.sleep(1)
 
     stlib.logger.verbose('Unable to get the {}.'.format(type_))
+
     return None
 
 
 def get_device_id():
-    data = __get_data_from_adb('shared_prefs/steam.uuid.xml')
-    return xml.etree.ElementTree.fromstring(data)[0].text
+    data = __get_data_from_authenticator('shared_prefs/steam.uuid.xml')
 
-
-def generate_device_id(username):
-    hex_digest = hashlib.sha1(username.encode()).hexdigest()
-    device_id = ['android:']
-
-    for (start, end) in ([0, 8], [9, 13], [14, 18], [19, 23], [24, 32]):
-        device_id.append(hex_digest[start:end])
-        device_id.append('-')
-
-    device_id.pop(-1)
-    return ''.join(device_id)
+    if data:
+        return xml.etree.ElementTree.fromstring(data)[0].text
+    else:
+        return None
 
 
 def create_time_hash(time, tag, secret):

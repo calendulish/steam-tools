@@ -57,6 +57,8 @@ steamgifts_query_page = 'https://www.steamgifts.com/giveaways/search'
 steamtrades_check_page = 'https://www.steamtrades.com/legal/privacy-policy'
 steamtrades_trade_page = 'https://www.steamtrades.com/trade/'
 steamcompanion_check_page = 'https://steamcompanion.com/settings'
+SA_adb_path = 'platform-tools/adb.exe'
+SA_auth_path = '/data/data/com.valvesoftware.android.steam.community/'
 
 steam_user = None
 SG_user = None
