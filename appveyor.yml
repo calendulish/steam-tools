@@ -1,35 +1,39 @@
 environment:
     global:
-        PYTHON32: 'C:\Python34'
-        PYTHON64: 'C:\Python34-x64'
-        PYTHON_VERSION: 3.4.4
         UPX_URL: http://upx.sourceforge.net/download/upx391w.zip
 
+    matrix:
+        - platform: x86
+          PYTHON: 'C:\Python34'
+          PYTHON_VERSION: "3.4.4"
+          PYTHON_ARCH: "32"
+
+        - platform: x64
+          PYTHON: 'C:\Python34-x64'
+          PYTHON_VERSION: "3.4.4"
+          PYTHON_ARCH: "64"
+
 clone_depth: 1
-      
+
+matrix:
+    fast_finish: true
+
 install:
     - appveyor DownloadFile "%UPX_URL%" -FileName upx391w.zip
     - md "C:\UPX\"
     - 7z e -y upx391w.zip -o"C:\UPX\"
 
-    - call "%PYTHON32%\python.exe" -m pip install --user --disable-pip-version-check --upgrade pip
-    - call "%PYTHON32%\python.exe" -m pip install --user py2exe
-    - call "%PYTHON32%\python.exe" -m pip install --user requests
-    - call "%PYTHON32%\python.exe" -m pip install --user beautifulsoup4
-    - call "%PYTHON32%\python.exe" -m pip install --user psutil
-    - call "%PYTHON32%\python.exe" -m pip install --user gevent
-
-    - call "%PYTHON64%\python.exe" -m pip install --user --disable-pip-version-check --upgrade pip
-    - call "%PYTHON64%\python.exe" -m pip install --user py2exe
-    - call "%PYTHON64%\python.exe" -m pip install --user requests
-    - call "%PYTHON64%\python.exe" -m pip install --user beautifulsoup4
-    - call "%PYTHON64%\python.exe" -m pip install --user psutil
-    - call "%PYTHON64%\python.exe" -m pip install --user gevent
+    - call "%PYTHON%\python.exe" -m pip install --user --disable-pip-version-check --upgrade pip
+    - call "%PYTHON%\python.exe" -m pip install --user py2exe
+    - call "%PYTHON%\python.exe" -m pip install --user requests
+    - call "%PYTHON%\python.exe" -m pip install --user beautifulsoup4
+    - call "%PYTHON%\python.exe" -m pip install --user psutil
+    - call "%PYTHON%\python.exe" -m pip install --user gevent
 
     - DEL /F "C:\Users\appveyor\AppData\Roaming\Python\Python34\site-packages\gevent\_util_py2.py"
 
 build_script:
-    - call %PYTHON64%\python.exe -u ./release.py"
+    - call %PYTHON%\python.exe -u ./release.py"
 
 artifacts:
     - path: 'release\*'

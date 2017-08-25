@@ -13,11 +13,12 @@ rename dist "Steam Tools-%1"
 mkdir dist
 move "Steam Tools-%1.zip" dist
 
-goto exit
+exit 0
 
 :noversion
 echo Please, specify a ST version
-goto exit
+goto error
 
-:exit
+:error
 popd
+exit 1

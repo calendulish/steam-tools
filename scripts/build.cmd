@@ -24,9 +24,12 @@ rd library /s /q
 
 call "C:\UPX\upx.exe" --best *.*
 
+exit 0
+
 :nopython
 echo Please, specify the python version.
-goto exit
+goto error
 
-:exit
+:error
 popd
+exit 1

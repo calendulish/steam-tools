@@ -36,7 +36,7 @@ temporary_path = tempfile.mktemp(prefix='steam_tools_release_')
 
 
 # noinspection PyShadowingNames
-def update_version():
+def update_version(current_system, current_arch):
     global version
     __version_module_path__ = os.path.join(build_path, 'version.pyc')
     __version_class__ = importlib.machinery.SourcelessFileLoader('version', __version_module_path__)
@@ -47,7 +47,7 @@ def update_version():
         for var in dir(__version_module__):
             setattr(version, var, eval('__version_module__.' + var))
     except FileNotFoundError:
-        setattr(version, '__VERSION_EXTRA__', 'Linux')
+        setattr(version, '__VERSION_EXTRA__', ''.join([str(current_system), str(current_arch)]))
 
     version.__VERSION__ = '{}.{}.{} {}'.format(version.__VERSION_MAJOR__,
                                                version.__VERSION_MINOR__,
@@ -69,7 +69,7 @@ def safe_call(call):
         sys.exit(1)
 
 
-def build(current_system, current_arch):
+def build(current_system, current_arch, force=False):
     print("\n--------------------------------------------")
     print("Build Configuration:")
     print(" - System: {}".format(current_system))
@@ -100,7 +100,7 @@ def build(current_system, current_arch):
         print('Building...')
         safe_call(interpreter + params)
 
-        update_version()
+        update_version(current_system, current_arch)
     else:
         if os.name == 'posix' and not sys.platform == 'cygwin':
             print('You cannot build steam tools for Windows from Linux. Ignoring.')
@@ -109,16 +109,24 @@ def build(current_system, current_arch):
         interpreter = [os.path.join('scripts', 'build.cmd')]
 
         if current_arch == 64:
-            params = ['Python34-x64']
+            if sys.maxsize > 2**32:
+                params = ['Python34-x64']
+            else:
+                print('You cannot build steam tools for Windows64 from Windows32. Ignoring.')
+                return None
         else:
-            params = ['Python34']
+            if sys.maxsize > 2**32 and not force:
+                print('Use `force\' param to build 32bits version from Windows64.')
+                return None
+            else:
+                params = ['Python34']
 
         archive_extension_ = '.zip'
 
         print('Building...')
         safe_call(interpreter + params)
 
-        update_version()
+        update_version(current_system, current_arch)
 
         safe_call([os.path.join('scripts', 'package.cmd'),
                    '-'.join(version.__VERSION__.split(' '))])
@@ -133,7 +141,7 @@ def build(current_system, current_arch):
 
 if __name__ == '__main__':
     builds = {'Windows': [32, 64],
-              'Linux': ['all']}
+              'Linux': ['All']}
 
     zip_file_paths = []
 
@@ -143,10 +151,15 @@ if __name__ == '__main__':
     if not os.path.isdir(temporary_path):
         os.makedirs(temporary_path)
 
+    if len(sys.argv) > 1 and sys.argv[1] == 'force':
+        force=True
+    else:
+        force=False
+
     for system, archs in builds.items():
         for arch in archs:
             os.system('git clean -fdx')
-            archive_path = build(system, arch)
+            archive_path = build(system, arch, force)
             zip_file_paths.append(archive_path)
 
     print('Releasing...')

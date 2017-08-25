@@ -6,14 +6,15 @@ Steam Tools
 [![Scrutinizer Code Quality](https://img.shields.io/scrutinizer/g/ShyPixie/steam-tools.svg)](https://scrutinizer-ci.com/g/ShyPixie/steam-tools/)
 [![GitHub license](https://img.shields.io/badge/license-GPLv3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 [![GitHub release](https://img.shields.io/github/release/ShyPixie/steam-tools.svg)](https://github.com/ShyPixie/steam-tools/releases)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WVQ5XM935XNLN&item_name=Steam Tools)
+[![GitHub Test release](https://img.shields.io/badge/testing-2.0.2-orange.svg)](https://github.com/ShyPixie/steam-tools/releases)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WVQ5XM935XNLN&item_name=Steam%20Tools)
 
 Some useful tools for use with steam client or compatible programs, websites.
 
 NOW WITH GUI! =D
 =====
 
-![Steam Tools](http://downloads.lara.click/tmp/st20.png)
+![Steam Tools](http://lara.click/downloads/tmp/st20.png)
 
 You can run the follow modules from steam-tools:
 
