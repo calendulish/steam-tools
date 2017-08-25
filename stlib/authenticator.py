@@ -79,10 +79,19 @@ def __get_data_from_authenticator(path):
 
 def __get_server_time():
     query_time_url = 'https://api.steampowered.com/ITwoFactorService/QueryTime/v1'
-    response = stlib.network.get_response(query_time_url, empty_post=True)
-    server_time = int(response.json()['response']['server_time'])
 
-    return server_time + response.elapsed.seconds
+    for i in range(2):
+        response = stlib.network.get_response(query_time_url, empty_post=True)
+
+        if response:
+            server_time = int(response.json()['response']['server_time'])
+            return server_time + response.elapsed.seconds
+        else:
+            stlib.logger.verbose('Unable to get server time. Trying again.')
+            time.sleep(1)
+
+    return None
+
 
 def phone_exists():
     try:
@@ -112,6 +121,10 @@ def get_userid(nickname):
 
 def get_code(secret):
     server_time = __get_server_time()
+
+    if not server_time:
+        return None, None
+
     msg = int(server_time / 30).to_bytes(8, 'big')
     key = base64.b64decode(secret)
     auth = hmac.new(key, msg, hashlib.sha1)
@@ -162,6 +175,9 @@ def create_time_hash(time, tag, secret):
 
 def get_trades(secret, cookies):
     server_time = __get_server_time()
+
+    if not server_time:
+        return None
 
     payload = {'p':get_device_id(),
                'a':get_key('steamid'),

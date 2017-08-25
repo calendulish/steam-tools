@@ -321,14 +321,15 @@ class SteamTools:
 
         while True:
             auth_code, epoch = stlib.authenticator.get_code(shared_secret)
+
+            if not auth_code:
+                stlib.logger.error('Unable to get authentication code.')
+                sys.exit(1)
+
             seconds = time.strftime('%S', time.gmtime(epoch))
             max = int(60 - int(seconds))
 
-            if auth_code:
-                for past_time in range(max):
-                    progress = '*' * int((past_time + 1) / max * 10)
-                    stlib.logging.console_msg('SteamGuard Code: {} [{:10}]'.format(str(auth_code), progress), end='\r')
-                    time.sleep(0.5)
-            else:
-                stlib.logger.critical('\nUnable to get auth_code')
-                sys.exit(1)
+            for past_time in range(max):
+                progress = '*' * int((past_time + 1) / max * 10)
+                stlib.logging.console_msg('SteamGuard Code: {} [{:10}]'.format(str(auth_code), progress), end='\r')
+                time.sleep(0.5)
