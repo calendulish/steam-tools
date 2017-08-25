@@ -23,5 +23,7 @@ deploy:
     file_glob: true
     file: release/*
     skip_cleanup: true
+    tag_name: $TRAVIS_TAG
+    draft: true
     on:
         tags: true
