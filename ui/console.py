@@ -285,3 +285,50 @@ class SteamTools:
         for past_time in range(random_time):
             stlib.logging.console_msg("Waiting: {:4d} seconds".format(random_time - past_time), end='\r')
             time.sleep(1)
+
+    def __authenticator(self):
+        import os
+
+        config = self.config_parser.get('Auth', 'adbPath', fallback=stlib.SA_adb_path)
+
+        if not os.path.isfile(config):
+            stlib.logger.critical('Unable to find Android Debug Bridge. Please, check your config.')
+            sys.exit(1)
+
+        config = self.config_parser.get('Auth', 'authenticatorPath', fallback=stlib.SA_auth_path)
+
+        stlib.config.write()
+
+        del config
+
+        if not stlib.authenticator.phone_exists():
+            stlib.logger.critical('\nNo android phone connected.')
+            sys.exit(1)
+
+        device_id = stlib.authenticator.get_device_id()
+
+        if not device_id:
+            stlib.logger.critical('\nUnable to get device_id. (Are you logged in on mobile app?)')
+            sys.exit(1)
+
+        shared_secret = stlib.authenticator.get_secret('shared_secret')
+
+        if not shared_secret:
+            stlib.logger.critical('\nUnable to get shared_secret.')
+            sys.exit(1)
+
+        stlib.logging.console_fixer()
+
+        while True:
+            auth_code, epoch = stlib.authenticator.get_code(shared_secret)
+            seconds = time.strftime('%S', time.gmtime(epoch))
+            max = int(60 - int(seconds))
+
+            if auth_code:
+                for past_time in range(max):
+                    progress = '*' * int((past_time + 1) / max * 10)
+                    stlib.logging.console_msg('SteamGuard Code: {} [{:10}]'.format(str(auth_code), progress), end='\r')
+                    time.sleep(0.5)
+            else:
+                stlib.logger.critical('\nUnable to get auth_code')
+                sys.exit(1)
