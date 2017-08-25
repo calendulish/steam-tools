@@ -196,9 +196,9 @@ if os.name == 'nt':
     fix_gevent()
 
 if os.name == 'nt':
-    version_extra = 'Win{}'.format(arch())
+    version_extra = 'Windows{}'.format(arch())
 else:
-    version_extra = 'Linux'
+    version_extra = 'LinuxAll'
 
 if not 'sdist' in sys.argv:
     with open('version.py', 'w') as file_:
