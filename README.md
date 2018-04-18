@@ -1,5 +1,19 @@
-Steam Tools
------------
+!!! DEPRECATED !!!
+------------------
+
+Steam Tools is deprecated. Steam Tools has been rewritten and split into two projects: [stlib](http://github.com/ShyPixie/stlib) and [Steam Tools NG](http://github.com/ShyPixie/steam-tools-ng)
+
+You can find them by clicking on these links:
+
+http://github.com/ShyPixie/stlib  
+http://github.com/ShyPixie/steam-tools-ng  
+
+
+This repository is officially obsolete
+
+
+___________________________________________________________________________________________
+
 
 [![Linux Build Status](https://img.shields.io/travis/ShyPixie/steam-tools/master.svg?label=Linux%20build)](https://travis-ci.org/ShyPixie/steam-tools)
 [![Windows Build status](https://img.shields.io/appveyor/ci/ShyPixie/steam-tools/master.svg?label=Windows%20build)](https://ci.appveyor.com/project/ShyPixie/steam-tools)
